@@ -1,0 +1,23 @@
+# Node & Expo
+node_modules/
+.expo/
+dist/
+npm-debug.log*
+
+# Android & iOS
+android/
+ios/
+*.apk
+*.aab
+
+# Hardware (ESP32/Arduino)
+.pio/
+build/
+*.hex
+*.bin
+hardware/libraries/
+
+# System
+.DS_Store
+Thumbs.db
+.env
