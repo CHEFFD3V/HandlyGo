@@ -22,11 +22,11 @@ Cada integrante del equipo debe crear una rama específica para la tarea que est
 
 ## 3. Flujo de Trabajo (Workflow)
 
-1.  Sincronizar localmente: `git checkout develop` seguido de `git pull origin develop`.
-2.  Crear rama de tarea: `git checkout -b feat/nombre-tarea`.
-3.  Realizar commits descriptivos: `git commit -m "feat: implementar interfaz de traductor"`.
-4.  Subir rama al servidor: `git push origin feat/nombre-tarea`.
-5.  Solicitar **Pull Request (PR)** hacia la rama `develop` para revisión del Líder Técnico.
+1. Sincronizar localmente: `git checkout develop` seguido de `git pull origin develop`.
+2. Crear rama de tarea: `git checkout -b feat/nombre-tarea`.
+3. Realizar commits descriptivos: `git commit -m "feat: implementar interfaz de traductor"`.
+4. Subir rama al servidor: `git push origin feat/nombre-tarea`.
+5. Solicitar **Pull Request (PR)** hacia la rama `develop` para revisión del Líder Técnico.
 
 ## 4. Reglas de Oro
 

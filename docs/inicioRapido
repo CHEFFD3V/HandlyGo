@@ -1,0 +1,72 @@
+# Guía de Inicio Rápido y Configuración del Entorno - HandlyGo
+
+Bienvenido al repositorio oficial de **HandlyGo**. Este documento contiene las instrucciones técnicas necesarias para que cualquier desarrollador del equipo configure su entorno local y comience a contribuir de manera estandarizada y segura.
+
+---
+
+## 1. Requisitos del Sistema (Previos)
+
+Antes de clonar el código, asegúrese de tener instaladas las siguientes herramientas en su computadora y dispositivo móvil:
+
+* **Node.js:** Versión LTS (recomendado v20 o superior).
+* **Git:** Instalado y configurado con su nombre y correo de GitHub.
+* **Editor de Código:** Visual Studio Code (VS Code).
+* **Dispositivo Móvil:** Aplicación **Expo Go** instalada (disponible en Play Store y App Store) para pruebas de hardware y UI en tiempo real.
+
+---
+
+## 2. Configuración Inicial del Repositorio
+
+Siga exactamente esta secuencia de comandos en su terminal para obtener una copia funcional del proyecto en su máquina local:
+
+### A. Clonar el proyecto base
+
+```bash
+git clone [https://github.com/CHEFFD3V/HandlyGo.git](https://github.com/CHEFFD3V/HandlyGo.git)
+cd HandlyGo
+```
+
+### B. Instalar dependencias de la app
+
+```bash
+cd app
+npm install
+```
+
+### C. Sincronizar con la rama de desarrollo
+
+```bash
+git checkout develop
+git pull origin develop
+```
+
+## 3. Ejecucion del entorno de desarrollo
+
+Para levantar el servidor de Expo y previsualizar la aplicación:
+
+```bash
+npx expo start
+```
+
+**Móvil**: Escanee el código QR con la app Expo Go.
+**Web**: Presione la tecla w en la terminal.
+
+## 4. Estándares de Instalación de Paquetes
+
+**REGLA CRITICA**: No utilice *npm install* para agregar nuevas librerías de React Native. Utilice siempre el comando de Expo para garantizar compatibilidad de versiones:
+
+```bash
+npx expo install [nombre-del-paquete]
+```
+
+## 5. Flujo de trabajo
+
+No realice cambios directamente en *main* ni en *develop*.
+
+1. Cree una rama para su tarea(siguiendo el estandar descrito en: git_flow.md): git checkout -b feat/nombre-tarea.
+2. Al terminar, suba su rama: git push origin feat/nombre-tarea.
+3. Abra un Pull Request en GitHub hacia la rama develop para revisión.
+
+## 6. Contacto Técnico
+
+Cualquier error de configuración o duda sobre la arquitectura, contactar al Líder Técnico: Francisco Lora.
