@@ -2,40 +2,32 @@
 
 Este entregable consiste en el diseño UX de una aplicación móvil para la traducción y el aprendizaje del lenguaje de señas mediante un guante inteligente.
 
-El flujo de usuario inicia con la apertura de la aplicación, donde se verifica la sesión del usuario. En caso de no estar autenticado, se presenta el proceso de inicio de sesión o registro. Una vez dentro, el usuario accede al menú principal (Home), desde donde puede seleccionar entre cuatro módulos principales: Traductor, Emparejamiento, Aprendizaje
-y Configuración.
+El flujo de usuario inicia con la apertura de la aplicación, accediendo directamente al menú principal (Home). Desde allí, el usuario puede navegar entre los módulos principales de la aplicación: Traductor, Aprendizaje y Configuración.
 
 El módulo Traductor (pantalla principal) permite:
 
-- Observar el estado de conexión del guante traductor.
+- Observar el estado de conexión del guante traductor.  
+- Visualizar la traducción en tiempo real de los gestos realizados.  
+- Acceder al historial o visualización completa del texto traducido.  
 
-- Ver el nivel de detección del gesto realizado con el guante.
+El módulo de Aprendizaje permite al usuario avanzar progresivamente a través de lecciones estructuradas, donde se presentan contenidos como letras, números u otros gestos, organizados por niveles que se desbloquean según el progreso del usuario.
 
-- Consultar los gestos recientes realizados a través del traductor.
-
-- Visualizar la racha actual en el módulo de aprendizaje.
-
-- Recibir sugerencias o demostraciones breves de los gestoscorrespondientes a la siguiente lección del modo aprendizaje ("Gestos de hoy").
+El módulo de Configuración está enfocado en la calibración de los sensores del guante, permitiendo ajustar su funcionamiento para mejorar la precisión en la detección de gestos. 
 
 El módulo de Emparejamiento permite:
 
 - Conectar el guante en caso de que se encuentre desconectado.
 
-- Observar el nivel de batería de ambos guantes.
+- Observar el nivel de batería del guante.
 
 El módulo de Aprendizaje permite:
 
 - Un sistema por niveles para enseñar lenguaje de señas mediante ejercicios interactivos.
 
-- Durante las lecciones, obtener feedback detallado sobre errores comunes en los gestos y cómo realizarlos correctamente (mediante un
-signo de interrogación ubicado en la esquina superior izquierda de la pantalla).
+- Durante las lecciones, el usuario tendrá la opción de repetir si gusta.
 
-- Recibir feedback al final de cada lección con los gestos en los que se cometieronerrores.
-
-- Contar con un sistema de experiencia (XP) y conteo de racha del usuario.
+- Contar con un sistema de experiencia (XP) y conteo de racha del usuario. (OJO PREGUNTAR A FRANCISCO)
 
 El módulo de Configuración permite:
 
-- Personalizar la experiencia del usuario en aspectos como: cambio de cuenta, cambio de tema de la aplicación (claro u oscuro) y cambio del idioma de la app.
-
-El prototipo incluye navegación funcional entre las principales pantallas, simulando la experiencia real de uso de la aplicación.
+El módulo de Configuración está enfocado en la calibración de los sensores flex del guante inteligente, con el objetivo de optimizar la precisión en la detección e interpretación de los gestos. A través de esta funcionalidad, el sistema ajusta los valores de los sensores según la posición de la mano del usuario, permitiendo una experiencia más precisa y personalizada en el uso del dispositivo.
