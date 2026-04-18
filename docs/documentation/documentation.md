@@ -17,7 +17,7 @@ Además, incorpora elementos de gamificación como el sistema de XP para motivar
 
 **1. Módulo de Pantalla de Bienvenida (Conversión y Propósito)**
 
-![01_splash_.screen](assets/images/documentation/documentation/01_splash_.screen.svg)
+![splash_.screen](assets/images/documentation/documentation/01_splash_.screen.svg)
 
 Esta pantalla funciona como punto de entrada a la aplicación, presentando una interfaz limpia y directa.
 
@@ -31,11 +31,11 @@ Esta pantalla funciona como punto de entrada a la aplicación, presentando una i
 
 - Botón "Continuar": permite acceder al Home
 
-[02_onboarding_bienvenida](assets/images/documentation/documentation/02_onboarding_bienvenida.svg)
+[onboarding_bienvenida](assets/images/documentation/documentation/02_onboarding_bienvenida.svg)
 
 **2. Módulo Home (Dashboard Principal): Componentes internos:**
 
-![03_home_traductor](assets/images/documentation/documentation/03_home_traductor.svg)
+![home_traductor](assets/images/documentation/documentation/03_home_traductor.svg)
 
 Esta pantalla corresponde al módulo principal de la aplicación, donde el usuario puede visualizar información general y acceder a la función de traducción.
 
@@ -77,7 +77,7 @@ Permitir al usuario acceder rápidamente a la función de traducción y visualiz
 
 **3. Módulo: Estado del Guante**
 
-[04_emparejamiento_dispositivo](assets/images/documentation/documentation/04_emparejamiento_dispositivo.svg)
+[emparejamiento_dispositivo](assets/images/documentation/documentation/04_emparejamiento_dispositivo_1.svg)
 
 Esta pantalla permite al usuario visualizar el estado actual del guante inteligente, incluyendo su conexión y nivel de batería.
 
@@ -114,6 +114,10 @@ Mostrar si el guante está conectado o no, así como el nivel de batería dispon
 - **Función:** Reflejar el estado actual del dispositivo  
 
 **6. Indicador de batería**
+[emparejamiento_dispositivo](assets/images/documentation/documentation/05_emparejamiento_dispositivo_2.svg)
+
+[emparejamiento_dispositivo](assets/images/documentation/documentation/06_emparejamiento_dispositivo_3.svg)
+
 - Muestra el porcentaje de batería del guante   
 - **Función:** Informar al usuario sobre el nivel de energía disponible  
 
@@ -125,144 +129,217 @@ Permitir al usuario conocer en todo momento el estado del guante y su nivel de b
 
 **4. Módulo: Aprendizaje:**
 
+[aprendizaje_menu](assets/images/documentation/documentation/07_aprendizaje_menu.svg)
+
 Este módulo permite al usuario acceder al contenido educativo de la aplicación, organizado por niveles, donde puede aprender y practicar el lenguaje de señas de forma progresiva.
 
-**Funcionalidad principal:**
+Además, el módulo fue diseñado considerando dos modos de visualización:
+
+* Modo claro
+* Modo oscuro
+
+Ambos modos están completamente soportados y se trabajará con ambas versiones para garantizar una buena experiencia visual en diferentes condiciones de uso.
+
+**Funcionalidad principal**
+
 Guiar al usuario a través de diferentes niveles de aprendizaje, permitiéndole visualizar, practicar y repetir gestos según el contenido de cada lección.
 
-![aprendizaje_menu](assets/images/documentation/documentation/05_aprendizaje_menu.svg)
+**El sistema está estructurado en:**
 
-**1. Mensaje de bienvenida**
-- Introduce al usuario a la zona de aprendizaje. 
-- Explica brevemente el propósito del módulo.
+* 3 niveles de aprendizaje.
+* Cada nivel contiene 3 lecciones.
+* Total: 9 lecciones.
 
-**2. Indicadores de progreso**
-- XP ganado: representa la experiencia acumulada  
-- Días estudiando: muestra cuántos días ha practicado  
-- Racha: indica la cantidad de días consecutivos de estudio  
+[aprendizaje_nivel_1](assets/images/documentation/documentation/08_aprendizaje_nivel_1.svg)
 
-**3. Niveles de aprendizaje**
-- Nivel 1  
-- Nivel 2  
-- Nivel 3  
-- Tipo: Botones interactivos  
-- Función: Permitir acceder a cada nivel  
+[aprendizaje_nivel_2](assets/images/documentation/documentation/09_aprendizaje_nivel_2.svg)
 
-### 4. Pantalla de niveles (mapa de lecciones)
+[aprendizaje_nivel_3](assets/images/documentation/documentation/10_aprendizaje_nivel_3.svg)
 
-![aprendizaje_niveles](assets/images/documentation/documentation/06_aprendizaje_niveles.svg)
+**Cada lección incluye:**
+
+* Una breve descripción del contenido.
+* Visualización del gesto.
+* Interacción mediante botones.
+
+1. Pantalla principal de aprendizaje
+
+aprendizaje_menu
+
+**Elementos visibles:**
+
+1. Mensaje de bienvenida
+
+Introduce al usuario a la zona de aprendizaje
+Explica brevemente el propósito del módulo
+
+2. Indicadores de progreso
+
+XP ganado: representa la experiencia acumulada
+Días estudiando: muestra cuántos días ha practicado
+Racha: indica la cantidad de días consecutivos de estudio
+
+3. Niveles de aprendizaje
+
+Nivel 1
+Nivel 2
+Nivel 3
+
+**Tipo:** Botones interactivos
+
+**Función:** Permitir acceder a cada nivel.
+
+2. Pantalla de niveles (mapa de lecciones)
+
+08_aprendizaje_niveles1
+09_aprendizaje_nivel_2
+10_aprendizaje_nivel_3
 
 **Funcionalidad:**
-Mostrar las lecciones disponibles dentro de cada nivel.
+
+* Mostrar las lecciones disponibles dentro de cada nivel.
 
 **Elementos:**
 
-**1. Mapa de lecciones**
-- Contiene las diferentes lecciones organizadas visualmente  
-- Ejemplo de contenido:
-- Abecedario  
-- Prácticas  
-- Números  
+1. Mapa de lecciones
 
-**2. Botón "Continuar"**
-- Tipo: Botón interactivo  
-- Función: Permitir avanzar en el progreso del nivel  
+* Contiene las diferentes lecciones organizadas visualmente.
+* Cada nivel incluye 3 lecciones.
+* Cada lección muestra su nombre y una breve descripción.
 
-**3. Barra superior del nivel**
-- Ejemplo: “Nivel 1 – Letras y abecedario”  
-- Función: Identificar en qué nivel se encuentra el usuario  
-- Comportamiento: Permite regresar a la pantalla anterior  
+**Distribución de lecciones:**
 
-##### 4. Pantallas de lección (práctica)
+Nivel 1:
+Lección 1
+Lección 2
+Lección 3
 
-#### Nivel 1 – Letras y abecedario
+Nivel 2:
+Lección 1
+Lección 2
+Lección 3
 
-![aprendizaje_leccion](assets/images/documentation/documentation/07_aprendizaje_leccion.svg)
+Nivel 3:
+Lección 1
+Lección 2
+Lección 3
+
+2. Botón "Continuar"
+
+Tipo: Botón interactivo
+Función: Permitir avanzar en el progreso del nivel
+
+3. Barra superior del nivel
+
+Ejemplo: “Nivel 1 – Letras y abecedario”
+Función: Identificar en qué nivel se encuentra el usuario
+Comportamiento: Permite regresar a la pantalla anterior
+3. Pantallas de lección (práctica)
+
+**Cada lección cuenta con:**
+
+* Imagen representativa del gesto
+* Descripción breve de lo que se va a aprender
+* Elementos visuales de apoyo
+* Botones de interacción
+* Nivel 1 – Letras y abecedario
+
+[leccion1_nivel_1](assets/images/documentation/documentation/11_leccion1_nivel_1.svg)
+
+[leccion2_nivel_1](assets/images/documentation/documentation/12_leccion2_nivel_1.svg)
+
+[leccion3_nivel_1](assets/images/documentation/documentation/13_leccion3_nivel_1.svg)
 
 **Funcionalidad:**
+
 Enseñar al usuario los gestos correspondientes al abecedario.
 
 **Elementos:**
-- Representación visual del gesto (mano)  
-- Instrucciones o indicaciones del movimiento  
-- Visualización de la letra correspondiente  
 
-**Acción:**
-- El usuario puede repetir la lección  
+* Representación visual del gesto (mano).
+* Instrucciones o indicaciones del movimiento.
+* Visualización de la letra correspondiente.
+* Descripción breve de la lección.
 
-#### Nivel 2 – Palabras básicas
+**Botones:**
 
-![aprendizaje_leccion2](assets/images/documentation/documentation/08_aprendizaje_leccion2.svg)
+* Intentar lección: inicia la práctica.
+* Continuar: avanza al siguiente flujo.
+* Nivel 2 – Palabras básicas.
+
+[leccion1_nivel_2](assets/images/documentation/documentation/14_leccion1_nivel_2.svg)
+
+[leccion2_nivel_2](assets/images/documentation/documentation/15_leccion2_nivel_2.svg)
+
+[leccion3_nivel_2](assets/images/documentation/documentation/16_leccion3_nivel_2.svg)
 
 **Funcionalidad:**
+
 Permitir al usuario practicar palabras mediante gestos.
 
 **Elementos:**
-- Visualización del gesto  
-- Resultado en forma de palabra  
 
-**Acción:**
-- Opción de repetir la lección  
+* Visualización del gesto
+* Resultado en forma de palabra
+* Descripción de la lección
 
-#### Nivel 3 – Frases básicas
+**Botones:**
 
-![aprendizaje_leccion3](assets/images/documentation/documentation/09_aprendizaje_leccion3.svg)
+* Intentar lección
+* Continuar
+* Nivel 3 – Frases básicas
 
-**Funcionalidad:**
+[leccion1_nivel_3](assets/images/documentation/documentation/17_leccion1_nivel_3.svg)
+
+[leccion2_nivel_3](assets/images/documentation/documentation/18_leccion2_nivel_3.svg)
+
+[leccion3_nivel_3](assets/images/documentation/documentation/19_leccion3_nivel_3.svg)
+
+Funcionalidad:
 Permitir la práctica de frases completas mediante gestos.
 
 **Elementos:**
-- Representación del gesto  
-- Visualización del resultado en forma de frase  
 
-**Acción:**
-- Opción de repetir la lección  
+* Representación del gesto.
+* Visualización del resultado en forma de frase.
+* Descripción de la lección.
 
-### Ubicación dentro de la app
+**Botones:**
 
-Este módulo se encuentra en la barra de navegación inferior (nav), representado por el ícono de libro.
+* Intentar lección.
+* Continuar.
 
-### Objetivo del módulo
+4. Pantalla de resultado (feedback)
 
-Proporcionar una experiencia de aprendizaje estructurada y progresiva, permitiendo al usuario mejorar sus habilidades en lenguaje de señas mediante práctica constante y repetición.
+Después de presionar "Continuar", el usuario es llevado a una nueva pantalla (slice).
 
-### Pantalla de resultado (Recompensa de XP)
-
-##### . Pantalla de resultado (Recompensa de XP)
-
-![aprendizaje_resultado](assets/images/documentation/documentation/10_resultado_experiencia.svg)
+[resultado_experiencia](assets/images/documentation/documentation/20_resultado_experiencia.svg)
 
 **Funcionalidad:**
-Mostrar al usuario el resultado de haber completado correctamente una lección y otorgar la recompensa correspondiente.
+
+Mostrar el resultado de la lección realizada.
 
 **Elementos:**
 
-**1. Mensaje de éxito**
-- Texto: “¡Excelente! Has completado esta lección”  
-- Función: Confirmar que la actividad fue completada correctamente  
+* Mensaje positivo (ejemplo: “Lo hiciste excelente”).
+* XP ganado.
+* Refuerzo visual del logro.
 
-**2. Representación visual (mascota)**
-- Elemento gráfico central  
-- Función: Reforzar visualmente la recompensa y motivación del usuario  
+**Botones:**
 
-**3. Barra de progreso**
-- Muestra cuánto progreso se ha alcanzado  
-- Indica cuánto XP se ha acumulado  
+* Continuar: avanza.
+* Volver: regresa al módulo de aprendizaje.
+* Ubicación dentro de la app.
 
-**4. Indicador de XP**
-- Muestra la cantidad de experiencia ganada  
-- Función: Recompensar al usuario por completar la lección  
+Este módulo se encuentra en la barra de navegación inferior (nav), representado por el ícono de libro.
 
-**5. Botón “Siguiente”**
-- Tipo: Botón interactivo  
-- Función: Continuar a la siguiente lección o regresar al flujo de aprendizaje  
+**Objetivo del módulo**
 
-**Objetivo del submódulo:**
-Reforzar el aprendizaje mediante retroalimentación positiva, mostrando el progreso y motivando al usuario a continuar.
+Proporcionar una experiencia de aprendizaje estructurada, progresiva y motivadora, permitiendo al usuario mejorar sus habilidades en lenguaje de señas mediante práctica constante, repetición y retroalimentación inmediata.
 
 ### 5 Módulo de Configuración (Calibración del Guante)
 
-![configuracion_calibracion](assets/images/documentation/documentation/11_configuracion_calibracion.svg)
+![configuracion_calibracion](assets/images/documentation/documentation/21_configuracion_calibracion.svg)
 
 **Funcionalidad principal:**
 Permitir al usuario visualizar el estado de los sensores del guante y recalibrarlos en caso de que alguno no esté funcionando correctamente.
@@ -270,12 +347,12 @@ Permitir al usuario visualizar el estado de los sensores del guante y recalibrar
 **Elementos visibles en la interfaz:**
 
 **1. Logo de la aplicación**
-- Ubicado en la parte superior  
-- Función: Identificación visual de la app  
+- Ubicado en la parte superior.
+- Función: Identificación visual de la app.
 
 **2. Representación de la mano**
-- Muestra una mano con los cinco dedos  
-- Cada dedo representa un sensor del guante  
+- Muestra una mano con los cinco dedos.
+- Cada dedo representa un sensor del guante.
 - Identificación:
   - Dedo 1  
   - Dedo 2  
@@ -284,27 +361,26 @@ Permitir al usuario visualizar el estado de los sensores del guante y recalibrar
   - Dedo 5  
 
 **3. Indicadores de estado por dedo**
-- Cada dedo cambia de color según su estado  
-- Estados:
-- Verde → Sensor calibrado correctamente  
-- Rojo → Sensor calibrado incorrectamente  
+- Cada dedo cambia de color según su estado.
+
+**Estados:**
+- Verde → Sensor calibrado correctamente.
+- Rojo → Sensor calibrado incorrectamente.
 
 **4. Botones de los dedos**
-- Representan cada uno de los sensores  
-- Función: Visualizar el estado individual de cada dedo  
+- Representan cada uno de los sensores. 
+- Función: Visualizar el estado individual de cada dedo.
 
 **5. Botón “Calibrar”**
-- Tipo: Botón interactivo  
-- Función: Recalibrar los sensores del guante  
+- Tipo: Botón interactivo.
+- Función: Recalibrar los sensores del guante. 
 
 **Comportamiento:**
-
-- Al presionar el botón “Calibrar”, el sistema realiza nuevamente el proceso de calibración  
-- Si algún sensor no se calibra correctamente, el dedo correspondiente se muestra en color rojo  
-- Si la calibración es exitosa, todos los dedos se muestran en color verde  
+- Al presionar el botón “Calibrar”, el sistema realiza nuevamente el proceso de calibración.
+- Si algún sensor no se calibra correctamente, el dedo correspondiente se muestra en color rojo.
+- Si la calibración es exitosa, todos los dedos se muestran en color verde.
 
 **Ubicación dentro de la app:**
-
 Este módulo se encuentra en la barra de navegación inferior (nav), representado por el ícono de configuración (tuerca).
 
 **Objetivo del módulo:**

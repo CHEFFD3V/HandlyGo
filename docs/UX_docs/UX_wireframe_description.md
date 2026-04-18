@@ -26,7 +26,17 @@ El módulo de Aprendizaje permite:
 
 - Durante las lecciones, el usuario tendrá la opción de repetir si gusta.
 
-- Contar con un sistema de experiencia (XP) y conteo de racha del usuario. (OJO PREGUNTAR A FRANCISCO)
+* Contar con un sistema de experiencia (XP) y conteo de racha del usuario.
+
+El sistema de progreso está basado en la acumulación de experiencia (XP) y en el seguimiento de la racha de uso del usuario. Cada vez que el usuario completa una lección y presiona el botón *“Continuar”*, se le otorga automáticamente una cantidad de XP.
+
+Este proceso *no incluye validación del desempeño*, ya que actualmente no existe un mecanismo que permita verificar si la lección fue realizada correctamente. Por lo tanto:
+
+* El otorgamiento de XP es automático
+* Se basa únicamente en la finalización de la lección
+* No depende de precisión ni evaluación del gesto
+
+Además, cada interacción contribuye al mantenimiento o incremento de la *racha de estudio*, incentivando la constancia dentro del módulo de aprendizaje.
 
 El módulo de Configuración permite:
 
