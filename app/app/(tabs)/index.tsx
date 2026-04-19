@@ -14,7 +14,7 @@ return (
 
     <ScrollView style={s.container} showsVerticalScrollIndicator={false}>
 
-      {/* HEADER dentro del scroll — se mueve con el contenido */}
+   
       <View style={s.header}>
         <View style={s.logoArea}>
           <Image
@@ -75,7 +75,7 @@ return (
     {/* ── NAVBAR ── */}
     <View style={s.navbar}>
 
-      {/* ICONO 1 — Modo oscuro */}
+      {/*Modo oscuro */}
       <TouchableOpacity
         style={s.navBtn}
         activeOpacity={0.6}
@@ -87,7 +87,7 @@ return (
         */}
       </TouchableOpacity>
 
-      {/* ICONO 2 — Aprendizaje */}
+      {/*Aprendizaje */}
       <TouchableOpacity
         style={s.navBtn}
         activeOpacity={0.6}
@@ -99,7 +99,7 @@ return (
         */}
       </TouchableOpacity>
 
-      {/* ICONO 3 — Home (activo) */}
+      {/*Home (activo) */}
       <TouchableOpacity
         style={s.navBtn}
         activeOpacity={0.6}
@@ -111,7 +111,7 @@ return (
         */}
       </TouchableOpacity>
 
-      {/* ICONO 4 — vinculacion */}
+      {/*vinculacion */}
       <TouchableOpacity
         style={s.navBtn}
         activeOpacity={0.6}
@@ -123,7 +123,7 @@ return (
         */}
       </TouchableOpacity>
 
-      {/* ICONO 5 — Configuración */}
+      {/*Configuración */}
       <TouchableOpacity
         style={s.navBtn}
         activeOpacity={0.6}
@@ -142,9 +142,6 @@ return (
 
 }
 
-// ─────────────────────────────────────────
-// COLORES Y FUENTES
-// ─────────────────────────────────────────
 const BLUE   = '#2200CC';
 const ORANGE = '#F59E0B';
 const BG     = '#FFFFFF';
