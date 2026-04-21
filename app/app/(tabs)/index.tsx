@@ -72,70 +72,6 @@ return (
       <View style={{ height: 80 }} />
     </ScrollView>
 
-    {/* ── NAVBAR ── */}
-    <View style={s.navbar}>
-
-      {/*Modo oscuro */}
-      <TouchableOpacity
-        style={s.navBtn}
-        activeOpacity={0.6}
-        // onPress={() => router.push('/(tabs)/modo')}
-      >
-        <Ionicons name="moon-outline" size={22} color="#fff" />
-        {/* Para imagen propia:
-        <Image source={require('../../assets/images/iconos/icono_modo.png')} style={s.navIcon} resizeMode="contain" />
-        */}
-      </TouchableOpacity>
-
-      {/*Aprendizaje */}
-      <TouchableOpacity
-        style={s.navBtn}
-        activeOpacity={0.6}
-        onPress={() => router.push('/aprendizaje')}
-      >
-        <Ionicons name="book-outline" size={22} color="#fff" />
-        {/* Para imagen propia:
-        <Image source={require('../../assets/images/iconos/icono_aprendizaje.png')} style={s.navIcon} resizeMode="contain" />
-        */}
-      </TouchableOpacity>
-
-      {/*Home (activo) */}
-      <TouchableOpacity
-        style={s.navBtn}
-        activeOpacity={0.6}
-        // onPress={() => router.push('/(tabs)/')}
-      >
-        <Ionicons name="home" size={26} color="#fff" />
-        {/* Para imagen propia:
-        <Image source={require('../../assets/images/iconos/icono_home.png')} style={s.navIconLarge} resizeMode="contain" />
-        */}
-      </TouchableOpacity>
-
-      {/*vinculacion */}
-      <TouchableOpacity
-        style={s.navBtn}
-        activeOpacity={0.6}
-        onPress={() => router.push('/vinculacion')}
-      >
-        <Ionicons name="link-outline" size={22} color="#fff" />
-        {/* Para imagen propia:
-        <Image source={require('../../assets/images/iconos/icono_traductor.png')} style={s.navIcon} resizeMode="contain" />
-        */}
-      </TouchableOpacity>
-
-      {/*Configuración */}
-      <TouchableOpacity
-        style={s.navBtn}
-        activeOpacity={0.6}
-        onPress={() => router.push('/(tabs)/configuracion')}
-      >
-        <Ionicons name="settings-outline" size={22} color="#fff" />
-        {/* Para imagen propia:
-        <Image source={require('../../assets/images/iconos/icono_config.png')} style={s.navIcon} resizeMode="contain" />
-        */}
-      </TouchableOpacity>
-
-    </View>
 
   </View>
 );
@@ -286,33 +222,5 @@ const s = StyleSheet.create({
     paddingBottom: 8,
   },
 
-  // ── Navbar
-  navbar: {
-    position: 'absolute',
-    bottom: 0,
-    width: '100%',
-    backgroundColor: BLUE,
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    paddingVertical: 14,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-  },
-
-  navBtn: {
-    padding: 8,
-    borderRadius: 12,
-  },
-
-  navIcon: {
-    width: 24,
-    height: 24,
-  },
-
-  navIconLarge: {
-    width: 30,
-    height: 30,
-  },
 
 });
