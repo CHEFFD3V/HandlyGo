@@ -1,8 +1,12 @@
 import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { Tabs, useRouter, usePathname } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { useTheme } from "../../hooks/useTheme";
+
 
 const BLUE = '#2200CC';
+const { toggleTheme } = useTheme();
+
 
 export default function TabsLayout() {
   const router = useRouter();
@@ -25,8 +29,8 @@ export default function TabsLayout() {
       <View style={s.navbar}>
 
         {/* Modo oscuro */}
-        <TouchableOpacity style={s.navBtn}>
-          <Ionicons name="moon-outline" size={22} color="#ccc" />
+        <TouchableOpacity style={s.navBtn} onPress={toggleTheme}>
+          <Ionicons name="moon-outline" size={22} color="colors.tabBar.inactive" />
         </TouchableOpacity>
 
         {/* Aprendizaje */}
