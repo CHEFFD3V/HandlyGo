@@ -1,13 +1,11 @@
 import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { Tabs, useRouter, usePathname } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from "../../hooks/useTheme";
+import { useTheme } from '../../hooks/useTheme';
 
 export default function TabsLayout() {
   const router = useRouter();
   const pathname = usePathname();
-
-  // ✅ hooks dentro del componente
   const { colors, toggleTheme } = useTheme();
 
   const getColor = (route: string) => {
@@ -17,28 +15,30 @@ export default function TabsLayout() {
   };
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={[s.container, { backgroundColor: colors.background }]}>
       
-      <Tabs screenOptions={{ headerShown: false }}>
+      {/* 👇 Tabs SIN tab bar interna */}
+      <Tabs
+        screenOptions={{
+          headerShown: false,
+          tabBarStyle: { display: 'none' }, // 🔥 evita duplicación
+        }}
+      >
         <Tabs.Screen name="index" />
         <Tabs.Screen name="aprendizaje" />
         <Tabs.Screen name="vinculacion" />
         <Tabs.Screen name="configuracion" />
       </Tabs>
 
-      <View
-        style={[
-          s.navbar,
-          { backgroundColor: colors.tabBar.background }
-        ]}
-      >
-
-        {/* Modo oscuro */}
+      {/* 👇 Navbar personalizada */}
+      <View style={[s.navbar, { backgroundColor: colors.tabBar.background }]}>
+        
+        {/* Toggle tema */}
         <TouchableOpacity style={s.navBtn} onPress={toggleTheme}>
           <Ionicons
             name="moon-outline"
             size={22}
-            color={colors.tabBar.inactive} // ✅ sin comillas
+            color={colors.tabBar.inactive}
           />
         </TouchableOpacity>
 
@@ -96,6 +96,10 @@ export default function TabsLayout() {
 }
 
 const s = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+
   navbar: {
     position: 'absolute',
     bottom: 0,
