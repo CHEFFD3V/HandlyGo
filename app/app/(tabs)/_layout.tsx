@@ -3,17 +3,17 @@ import { Tabs, useRouter, usePathname } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from "../../hooks/useTheme";
 
-
-const BLUE = '#2200CC';
-const { toggleTheme } = useTheme();
-
-
 export default function TabsLayout() {
   const router = useRouter();
   const pathname = usePathname();
 
+  // ✅ hooks dentro del componente
+  const { colors, toggleTheme } = useTheme();
+
   const getColor = (route: string) => {
-    return pathname === route ? '#fff' : '#ccc';
+    return pathname === route
+      ? colors.tabBar.active
+      : colors.tabBar.inactive;
   };
 
   return (
@@ -26,11 +26,20 @@ export default function TabsLayout() {
         <Tabs.Screen name="configuracion" />
       </Tabs>
 
-      <View style={s.navbar}>
+      <View
+        style={[
+          s.navbar,
+          { backgroundColor: colors.tabBar.background }
+        ]}
+      >
 
         {/* Modo oscuro */}
         <TouchableOpacity style={s.navBtn} onPress={toggleTheme}>
-          <Ionicons name="moon-outline" size={22} color="colors.tabBar.inactive" />
+          <Ionicons
+            name="moon-outline"
+            size={22}
+            color={colors.tabBar.inactive} // ✅ sin comillas
+          />
         </TouchableOpacity>
 
         {/* Aprendizaje */}
@@ -91,7 +100,6 @@ const s = StyleSheet.create({
     position: 'absolute',
     bottom: 0,
     width: '100%',
-    backgroundColor: BLUE,
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
