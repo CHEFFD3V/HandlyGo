@@ -1,23 +1,87 @@
+// theme/colors.ts
+
 export const lightTheme = {
-  background: "#FFFFFF",
-  text: "#000000",
-  primary: "#2200CC",
+  background: '#FFFFFF',
+
+  text: {
+    primary: '#1A1A1A',
+    secondary: '#6B7280',
+    inverse: '#FFFFFF',
+  },
+
+  primary: '#2200CC',
+
+  card: {
+    background: '#F0F0F5',
+    border: '#2200CC',
+  },
+
+  accent: '#FFA500',
+
+  icon: {
+    primary: '#1A1A1A',
+    inverse: '#FFFFFF',
+  },
+
+  wave: {
+    primary: '#2200CC',
+    secondary: '#1A00AA',
+  },
+
+  waveText: '#FFFFFF',
+  translation: {
+  background: '#F0F0F5',
+  text: '#1A1A1A',
+  }, 
 
   tabBar: {
-    background: "#2200CC",
-    active: "#FFFFFF",
-    inactive: "#D1D5DB",
+    background: '#2200CC',
+    active: '#FFFFFF',
+    inactive: '#CCCCCC',
   },
 };
 
 export const darkTheme = {
-  background: "#0F172A",
-  text: "#FFFFFF",
-  primary: "#4F46E5",
+
+    waveText: '#FFFFFF',
+
+  background: '#0D1B3E',
+
+  text: {
+    primary: '#FFFFFF',
+    secondary: '#AAB4C2',
+    inverse: '#0D1B3E',
+  },
+
+  primary: '#64B5F6', // logo azul claro
+
+  card: {
+    background: '#1E3A6E',
+    border: '#64B5F6',
+  },
+
+
+  accent: '#FFFFFF', // número 12
+
+  icon: {
+    primary: '#1A1A1A',
+    inverse: '#FFFFFF',
+  },
+
+  wave: {
+    primary: '#42A5F5',
+    secondary: '#1565C0',
+  },
 
   tabBar: {
-    background: "#1E293B",
-    active: "#FFFFFF",
-    inactive: "#64748B",
+    background: '#1976D2',
+    active: '#FFFFFF',
+    inactive: '#B0BEC5',
+  },
+
+  translation: {
+    background: '#D9D9D9',
+    text: ': #1A1A1A',
+    
   },
 };

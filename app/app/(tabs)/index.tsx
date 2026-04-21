@@ -30,40 +30,47 @@ return (
           <Svg viewBox="0 0 390 150" width="100%" height={200} preserveAspectRatio="none">
             <Path
               d="M0 25 Q60 0 130 30 Q200 62 270 25 Q330 0 390 38 Q370 95 300 80 Q220 62 150 88 Q80 108 0 82 Z"
-              fill={colors.primary}
+              fill={colors.wave.secondary}
             />
             <Path
               d="M0 58 Q60 12 130 42 Q200 74 270 37 Q330 12 390 50 Q370 105 300 90 Q220 72 150 98 Q80 118 0 99 Z"
-              fill={colors.primary}
+              fill={colors.wave.primary}
               opacity={0.4}
             />
+
+                        <Path
+              d="M0 58 Q60 12 130 42 Q200 74 270 37 Q330 12 390 50 Q370 105 300 90 Q220 72 150 98 Q80 118 0 99 Z"
+              fill={colors.wave.secondary}
+              opacity={0.4}
+            />
+
           </Svg>
-          <Text style={s.waveText}>Observa, entiende y traduce</Text>
+          <Text style={[s.waveText, { color: colors.waveText }]}>Observa, entiende y traduce</Text>
         </View>
       </View>
 
       {/* Gran tarjeta karaoke */}
-      <View style={[s.karoCard, { borderColor: colors.primary }]}>
-        <Text style={[s.karoText, { color: colors.text }]}>Hola, ¿Cómo{'\n'}Estás?</Text>
+      <View style={[s.karoCard, { borderColor: colors.card.border, backgroundColor: colors.card.background, }]}>
+        <Text style={[s.karoText, { color: colors.text.primary }]}>Hola, ¿Cómo{'\n'}Estás?</Text>
       </View>
 
       {/* Tarjetas inclinadas */}
       <View style={s.grid}>
-        <View style={[s.gridCard, s.tiltLeft, { borderColor: colors.primary }]}>
-          <Text style={[s.gridLabel, { color: colors.text }]}>Gestos Recientes</Text>
-          <Text style={[s.gridSmall, { color: colors.text }]}>{'• Hola\n• Gracias\n• Lo siento'}</Text>
+        <View style={[s.gridCard, s.tiltLeft, { borderColor: colors.primary, backgroundColor: colors.card.background }]}>
+          <Text style={[s.gridLabel, { color: colors.text.secondary }]}>Gestos Recientes</Text>
+          <Text style={[s.gridSmall, { color: colors.text.secondary }]}>{'• Hola\n• Gracias\n• Lo siento'}</Text>
         </View>
-        <View style={[s.gridCard, s.tiltRight, { borderColor: colors.primary }]}>
-          <Text style={[s.gridLabel, { color: colors.text }]}>Gestos de Hoy</Text>
-          <Text style={s.gridValue}>12</Text>
+        <View style={[s.gridCard, s.tiltRight, { borderColor: colors.primary, backgroundColor: colors.card.background }]}>
+          <Text style={[s.gridLabel, { color: colors.text.secondary }]}>Gestos de Hoy</Text>
+          <Text style={[s.gridValue, { color: colors.accent }]}>12</Text>
         </View>
       </View>
 
       {/* Sección de traducción */}
-      <View style={[s.translateBox, {borderColor: colors.primary, backgroundColor: colors.background,} ]}>
+      <View style={[s.translateBox, {borderColor: colors.primary, backgroundColor: colors.translation.background,} ]}>
         <View style={s.translateContent}>
-          <Ionicons name="volume-medium-outline" size={20} color={colors.text} />
-          <Text style={[s.translateText, {color: colors.text}]}>
+          <Ionicons name="volume-medium-outline" size={20} color={colors.icon.primary} />
+          <Text style={[s.translateText, { color: colors.translation.text }]}>
             "Hola, ¿cómo estás?{'\n'}me siento muy feliz hoy,{'\n'}te encuentras bien?"
           </Text>
         </View>
@@ -111,7 +118,6 @@ const s = StyleSheet.create({
     left: 0,
     right: 0,
     textAlign: 'center',
-    color: '#FFFFFF', 
     fontSize: 18,
     fontWeight: '700',
     fontStyle: 'italic',

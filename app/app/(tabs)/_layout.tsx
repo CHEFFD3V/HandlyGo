@@ -17,7 +17,7 @@ export default function TabsLayout() {
   return (
     <View style={[s.container, { backgroundColor: colors.background }]}>
       
-      {/* 👇 Tabs SIN tab bar interna */}
+
       <Tabs
         screenOptions={{
           headerShown: false,
@@ -30,7 +30,7 @@ export default function TabsLayout() {
         <Tabs.Screen name="configuracion" />
       </Tabs>
 
-      {/* 👇 Navbar personalizada */}
+
       <View style={[s.navbar, { backgroundColor: colors.tabBar.background }]}>
         
         {/* Toggle tema */}
