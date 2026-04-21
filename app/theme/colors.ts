@@ -57,7 +57,7 @@ export const darkTheme = {
 
   card: {
     background: '#1E3A6E',
-    border: '#64B5F6',
+    border: '#1E3A6E',
   },
 
 

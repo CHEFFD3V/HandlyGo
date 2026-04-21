@@ -56,18 +56,18 @@ return (
 
       {/* Tarjetas inclinadas */}
       <View style={s.grid}>
-        <View style={[s.gridCard, s.tiltLeft, { borderColor: colors.primary, backgroundColor: colors.card.background }]}>
+        <View style={[s.gridCard, s.tiltLeft, { borderColor: colors.card.border, backgroundColor: colors.card.background }]}>
           <Text style={[s.gridLabel, { color: colors.text.secondary }]}>Gestos Recientes</Text>
           <Text style={[s.gridSmall, { color: colors.text.secondary }]}>{'• Hola\n• Gracias\n• Lo siento'}</Text>
         </View>
-        <View style={[s.gridCard, s.tiltRight, { borderColor: colors.primary, backgroundColor: colors.card.background }]}>
+        <View style={[s.gridCard, s.tiltRight, { borderColor: colors.card.border, backgroundColor: colors.card.background }]}>
           <Text style={[s.gridLabel, { color: colors.text.secondary }]}>Gestos de Hoy</Text>
           <Text style={[s.gridValue, { color: colors.accent }]}>12</Text>
         </View>
       </View>
 
       {/* Sección de traducción */}
-      <View style={[s.translateBox, {borderColor: colors.primary, backgroundColor: colors.translation.background,} ]}>
+      <View style={[s.translateBox, {borderColor: colors.card.border, backgroundColor: colors.translation.background,} ]}>
         <View style={s.translateContent}>
           <Ionicons name="volume-medium-outline" size={20} color={colors.icon.primary} />
           <Text style={[s.translateText, { color: colors.translation.text }]}>
