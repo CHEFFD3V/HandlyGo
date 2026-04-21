@@ -1,20 +1,24 @@
 import {
   View, Text, ScrollView,
-  StyleSheet, Image, TouchableOpacity,
+  StyleSheet, TouchableOpacity,
 } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from "../../hooks/useTheme";
 import { useAssets } from "../../hooks/useAssets";
+import { Image } from 'expo-image';
+
 
 export default function HomeScreen() {
   const router = useRouter();
   const { colors } = useTheme();
   const assets = useAssets();
+  const { theme } = useTheme();
 
 
 return (
+  
   <View style={{ flex: 1 }}>
 
     <ScrollView style={[s.container, { backgroundColor: colors.background }]}
@@ -29,6 +33,8 @@ return (
             resizeMode="contain"
           />
         </View>
+
+        
         <View style={s.waveContainer}>
           <Svg viewBox="0 0 390 150" width="100%" height={200} preserveAspectRatio="none">
             <Path
