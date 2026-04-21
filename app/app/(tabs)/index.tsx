@@ -5,18 +5,21 @@ import {
 import Svg, { Path } from 'react-native-svg';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { useTheme } from "../../hooks/useTheme";
 
 export default function HomeScreen() {
   const router = useRouter();
+  const { colors } = useTheme();
 
 return (
   <View style={{ flex: 1 }}>
 
-    <ScrollView style={s.container} showsVerticalScrollIndicator={false}>
+    <ScrollView style={[s.container, { backgroundColor: colors.background }]}
+    showsVerticalScrollIndicator={false}>
 
    
-      <View style={s.header}>
-        <View style={s.logoArea}>
+      <View style={[s.header, { backgroundColor: colors.background }]}>
+        <View style={[s.logoArea, { backgroundColor: colors.background }]}>
           <Image
             source={require('../../assets/images/graphic/iconos_claros/graphic/handlygo_logo_icon_PNG.png')}
             style={s.logo}
@@ -27,11 +30,11 @@ return (
           <Svg viewBox="0 0 390 150" width="100%" height={200} preserveAspectRatio="none">
             <Path
               d="M0 25 Q60 0 130 30 Q200 62 270 25 Q330 0 390 38 Q370 95 300 80 Q220 62 150 88 Q80 108 0 82 Z"
-              fill="#2200CC"
+              fill={colors.primary}
             />
             <Path
               d="M0 58 Q60 12 130 42 Q200 74 270 37 Q330 12 390 50 Q370 105 300 90 Q220 72 150 98 Q80 118 0 99 Z"
-              fill="#1A00AA"
+              fill={colors.primary}
               opacity={0.4}
             />
           </Svg>
@@ -40,32 +43,32 @@ return (
       </View>
 
       {/* Gran tarjeta karaoke */}
-      <View style={s.karoCard}>
-        <Text style={s.karoText}>Hola, ¿Cómo{'\n'}Estás?</Text>
+      <View style={[s.karoCard, { borderColor: colors.primary }]}>
+        <Text style={[s.karoText, { color: colors.text }]}>Hola, ¿Cómo{'\n'}Estás?</Text>
       </View>
 
       {/* Tarjetas inclinadas */}
       <View style={s.grid}>
-        <View style={[s.gridCard, s.tiltLeft]}>
-          <Text style={s.gridLabel}>Gestos Recientes</Text>
-          <Text style={s.gridSmall}>{'• Hola\n• Gracias\n• Lo siento'}</Text>
+        <View style={[s.gridCard, s.tiltLeft, { borderColor: colors.primary }]}>
+          <Text style={[s.gridLabel, { color: colors.text }]}>Gestos Recientes</Text>
+          <Text style={[s.gridSmall, { color: colors.text }]}>{'• Hola\n• Gracias\n• Lo siento'}</Text>
         </View>
-        <View style={[s.gridCard, s.tiltRight]}>
-          <Text style={s.gridLabel}>Gestos de Hoy</Text>
+        <View style={[s.gridCard, s.tiltRight, { borderColor: colors.primary }]}>
+          <Text style={[s.gridLabel, { color: colors.text }]}>Gestos de Hoy</Text>
           <Text style={s.gridValue}>12</Text>
         </View>
       </View>
 
       {/* Sección de traducción */}
-      <View style={s.translateBox}>
+      <View style={[s.translateBox, {borderColor: colors.primary, backgroundColor: colors.background,} ]}>
         <View style={s.translateContent}>
-          <Ionicons name="volume-medium-outline" size={20} color="#000" />
-          <Text style={s.translateText}>
+          <Ionicons name="volume-medium-outline" size={20} color={colors.text} />
+          <Text style={[s.translateText, {color: colors.text}]}>
             "Hola, ¿cómo estás?{'\n'}me siento muy feliz hoy,{'\n'}te encuentras bien?"
           </Text>
         </View>
         <View style={s.translateFooter}>
-          <Ionicons name="expand-outline" size={16} color={BLUE} />
+          <Ionicons name="expand-outline" size={16} color={colors.primary} />
         </View>
       </View>
 
@@ -78,40 +81,20 @@ return (
 
 }
 
-const BLUE   = '#2200CC';
-const ORANGE = '#F59E0B';
-const BG     = '#FFFFFF';
 
 const s = StyleSheet.create({
 
   // ── Header
-  header: {
-    backgroundColor: '#FFFFFF',
-  },
+  header: { },
 
   logoArea: {
     alignItems: 'center',
-    paddingTop: 0,
-    paddingBottom: 0,
     paddingHorizontal: 24,
-    backgroundColor: '#FFFFFF',
   },
 
   logo: {
     width: 300,
     height: 300,
-  },
-
-  logoPlaceholder: {
-    width: 180,
-    height: 56,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  logoPlaceholderText: {
-    color: '#AAAAAA',
-    fontSize: 13,
   },
 
   // ── Ola
@@ -128,23 +111,20 @@ const s = StyleSheet.create({
     left: 0,
     right: 0,
     textAlign: 'center',
-    color: '#FFFFFF',
+    color: '#FFFFFF', 
     fontSize: 18,
     fontWeight: '700',
     fontStyle: 'italic',
-    letterSpacing: 0,
   },
 
   // ── Contenido
   container: {
     flex: 1,
-    backgroundColor: BG,
     paddingHorizontal: 16,
   },
 
   karoCard: {
     borderWidth: 2,
-    borderColor: BLUE,
     borderRadius: 14,
     padding: 20,
     marginBottom: 20,
@@ -152,30 +132,35 @@ const s = StyleSheet.create({
   },
 
   karoText: {
-    color: '#111111',
     fontSize: 24,
     fontWeight: '800',
     textAlign: 'center',
     lineHeight: 30,
   },
 
-  grid:     { flexDirection: 'row', gap: 10, marginBottom: 16 },
+  grid:{
+     flexDirection: 'row',
+    gap: 10,
+    marginBottom: 16, },
 
   gridCard: {
     flex: 1,
     borderWidth: 2,
-    borderColor: BLUE,
     borderRadius: 12,
     padding: 12,
     alignItems: 'center',
   },
 
-  tiltLeft:  { transform: [{ rotate: '-3deg' }] },
-  tiltRight: { transform: [{ rotate: '3deg'  }] },
+ tiltLeft: {
+    transform: [{ rotate: '-3deg' }],
+  },
+
+  tiltRight: {
+    transform: [{ rotate: '3deg' }],
+  },
 
   gridLabel: {
     fontSize: 15,
-    color: '#6B7280',
     fontWeight: '900',
     marginBottom: 6,
     textAlign: 'center',
@@ -184,25 +169,21 @@ const s = StyleSheet.create({
   gridValue: {
     fontSize: 40,
     fontWeight: '900',
-    color: ORANGE,
   },
 
   gridSmall: {
     fontSize: 11,
-    color: '#555',
     lineHeight: 18,
     textAlign: 'center',
   },
 
   translateBox: {
     borderWidth: 2,
-    borderColor: BLUE,
     borderRadius: 12,
     overflow: 'hidden',
-    backgroundColor: '#F9FAFB',
   },
 
-  translateContent: {
+    translateContent: {
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: 10,
@@ -211,7 +192,6 @@ const s = StyleSheet.create({
 
   translateText: {
     fontSize: 20,
-    color: '#000000',
     lineHeight: 28,
     flex: 1,
   },
@@ -221,6 +201,5 @@ const s = StyleSheet.create({
     paddingRight: 12,
     paddingBottom: 8,
   },
-
 
 });
