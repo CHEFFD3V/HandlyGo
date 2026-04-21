@@ -6,10 +6,13 @@ import Svg, { Path } from 'react-native-svg';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from "../../hooks/useTheme";
+import { useAssets } from "../../hooks/useAssets";
 
 export default function HomeScreen() {
   const router = useRouter();
   const { colors } = useTheme();
+  const assets = useAssets();
+
 
 return (
   <View style={{ flex: 1 }}>
@@ -21,7 +24,7 @@ return (
       <View style={[s.header, { backgroundColor: colors.background }]}>
         <View style={[s.logoArea, { backgroundColor: colors.background }]}>
           <Image
-            source={require('../../assets/images/graphic/iconos_claros/graphic/handlygo_logo_icon_PNG.png')}
+            source={(assets.logoPrincipal)}
             style={s.logo}
             resizeMode="contain"
           />
