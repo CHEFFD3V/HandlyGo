@@ -22,7 +22,7 @@ export default function TabsLayout() {
       <Tabs
         screenOptions={{
           headerShown: false,
-          tabBarStyle: { display: 'none' }, // 🔥 evita duplicación
+          tabBarStyle: { display: 'none' },
         }}
       >
         <Tabs.Screen name="index" />
@@ -34,7 +34,7 @@ export default function TabsLayout() {
 
       <View style={[s.navbar, { backgroundColor: colors.tabBar.background }]}>
         
-        {/* Toggle tema */}
+
         <TouchableOpacity style={s.navBtn} onPress={toggleTheme}>
           <Ionicons
             name="moon-outline"
@@ -43,7 +43,7 @@ export default function TabsLayout() {
           />
         </TouchableOpacity>
 
-        {/* Aprendizaje */}
+
         <TouchableOpacity
           style={s.navBtn}
           onPress={() => router.push('../aprendizaje')}
@@ -55,7 +55,7 @@ export default function TabsLayout() {
           />
         </TouchableOpacity>
 
-        {/* Home */}
+
         <TouchableOpacity
           style={s.navBtn}
           onPress={() => router.push('/')}
@@ -67,7 +67,7 @@ export default function TabsLayout() {
           />
         </TouchableOpacity>
 
-        {/* Vinculación */}
+
         <TouchableOpacity
           style={s.navBtn}
           onPress={() => router.push('../vinculacion')}
@@ -79,7 +79,7 @@ export default function TabsLayout() {
           />
         </TouchableOpacity>
 
-        {/* Configuración */}
+
         <TouchableOpacity
           style={s.navBtn}
           onPress={() => router.push('../configuracion')}

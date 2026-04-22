@@ -3,8 +3,7 @@
 export const themeAssets = {
   light: {
     logoPrincipal: require('../assets/images/graphic/iconos_claros/graphic/handlygo_logo_icon_PNG.png'),
-    // puedes agregar más:
-    // logoSecundario: require('...'),
+
   },
 
   dark: {

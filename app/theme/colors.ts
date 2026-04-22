@@ -1,4 +1,3 @@
-// theme/colors.ts
 
 export const lightTheme = {
   background: '#FFFFFF',
@@ -53,7 +52,7 @@ export const darkTheme = {
     inverse: '#0D1B3E',
   },
 
-  primary: '#64B5F6', // logo azul claro
+  primary: '#64B5F6', 
 
   card: {
     background: '#1E3A6E',
@@ -61,7 +60,7 @@ export const darkTheme = {
   },
 
 
-  accent: '#FFFFFF', // número 12
+  accent: '#FFFFFF', 
 
   icon: {
     primary: '#1A1A1A',

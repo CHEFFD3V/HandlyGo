@@ -1,4 +1,4 @@
-// hooks/useAssets.ts
+
 
 import { useTheme } from './useTheme';
 import { themeAssets } from '../theme/assets';
