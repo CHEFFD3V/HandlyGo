@@ -3,6 +3,7 @@ import { Tabs, useRouter, usePathname } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../hooks/useTheme';
 
+
 export default function TabsLayout() {
   const router = useRouter();
   const pathname = usePathname();
