@@ -46,7 +46,7 @@ export default function TabsLayout() {
         {/* Aprendizaje */}
         <TouchableOpacity
           style={s.navBtn}
-          onPress={() => router.push('/aprendizaje')}
+          onPress={() => router.push('../aprendizaje')}
         >
           <Ionicons
             name="book-outline"
@@ -70,7 +70,7 @@ export default function TabsLayout() {
         {/* Vinculación */}
         <TouchableOpacity
           style={s.navBtn}
-          onPress={() => router.push('/vinculacion')}
+          onPress={() => router.push('../vinculacion')}
         >
           <Ionicons
             name="link-outline"
@@ -82,7 +82,7 @@ export default function TabsLayout() {
         {/* Configuración */}
         <TouchableOpacity
           style={s.navBtn}
-          onPress={() => router.push('/configuracion')}
+          onPress={() => router.push('../configuracion')}
         >
           <Ionicons
             name="settings-outline"

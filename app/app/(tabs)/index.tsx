@@ -1,6 +1,6 @@
 import {
   View, Text, ScrollView,
-  StyleSheet, TouchableOpacity,
+  StyleSheet, TouchableOpacity, 
 } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import { useRouter } from 'expo-router';
@@ -8,6 +8,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from "../../hooks/useTheme";
 import { useAssets } from "../../hooks/useAssets";
 import { Image } from 'expo-image';
+import { useEffect } from 'react';
+import { getDictionaryByCategory } from '../../services/dictionaryService';
+
 
 
 export default function HomeScreen() {
@@ -16,6 +19,15 @@ export default function HomeScreen() {
   const assets = useAssets();
   const { theme } = useTheme();
 
+/* Lógica de prueba
+  useEffect(() => {
+    const testFetch = async () => {
+      const items = await getDictionaryByCategory("Abecedario");
+      console.log("REVISIÓN BACKEND - Elementos encontrados:", items);
+    };
+
+    testFetch();
+  }, []); */
 
 return (
   
@@ -24,7 +36,7 @@ return (
     <ScrollView style={[s.container, { backgroundColor: colors.background }]}
     showsVerticalScrollIndicator={false}>
 
-   
+
       <View style={[s.header, { backgroundColor: colors.background }]}>
         <View style={[s.logoArea, { backgroundColor: colors.background }]}>
           <Image
@@ -149,7 +161,7 @@ const s = StyleSheet.create({
   },
 
   grid:{
-     flexDirection: 'row',
+    flexDirection: 'row',
     gap: 10,
     marginBottom: 16, },
 
@@ -161,7 +173,7 @@ const s = StyleSheet.create({
     alignItems: 'center',
   },
 
- tiltLeft: {
+  tiltLeft: {
     transform: [{ rotate: '-3deg' }],
   },
 
