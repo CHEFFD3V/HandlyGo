@@ -45,8 +45,6 @@ export default function HomeScreen() {
               resizeMode="contain"
             />
           </View>
-
-
           <View style={s.waveContainer}>
             <Svg viewBox="0 0 390 150" width="100%" height={200} preserveAspectRatio="none">
               <Path
@@ -70,14 +68,10 @@ export default function HomeScreen() {
           </View>
         </View>
 
-
-
         {/* Gran tarjeta karaoke */}
         <View style={[s.karoCard, { borderColor: colors.card.border, backgroundColor: colors.card.background, }]}>
           <Text style={[s.karoText, { color: colors.text.primary }]}>Hola, ¿Cómo{'\n'}Estás?</Text>
         </View>
-
-
 
         {/* Tarjetas inclinadas */}
         <View style={s.grid}>
@@ -90,8 +84,6 @@ export default function HomeScreen() {
             <Text style={[s.gridValue, { color: colors.accent }]}>12</Text>
           </View>
         </View>
-
-
 
         {/* Sección de traducción */}
         <View style={[s.translateBox, { borderColor: colors.card.border, backgroundColor: colors.translation.background, }]}>
@@ -114,7 +106,6 @@ export default function HomeScreen() {
   );
 
 }
-
 
 const s = StyleSheet.create({
 
