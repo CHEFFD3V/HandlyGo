@@ -1,4 +1,4 @@
-import { View, Text, Switch, TouchableOpacity, StyleSheet } from 'react-native';
+import { Pressable, StyleSheet, Switch, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../hooks/useTheme';
 
@@ -6,38 +6,56 @@ type SettingItemProps = {
   icon: keyof typeof Ionicons.glyphMap;
   label: string;
   description?: string;
+  showChevron?: boolean;
 } & (
   | { type: 'toggle'; value: boolean; onToggle: (val: boolean) => void }
   | { type: 'action'; onPress: () => void }
   | { type: 'info'; value: string }
 );
 
-export default function SettingItem(props: SettingItemProps) {
+export function SettingItem(props: SettingItemProps) {
   const { colors } = useTheme();
+  const isAction = props.type === 'action';
+  const Container = isAction ? Pressable : View;
 
   return (
-    <View
-      style={[
-        s.item,
-        {
-          backgroundColor: colors.card.background,
-          borderColor: colors.card.border,
-        },
-      ]}
+    <Container
+      {...(isAction ? { onPress: props.onPress } : {})}
+      {...(isAction
+        ? {
+            style: ({ pressed }: { pressed: boolean }) => [
+              styles.item,
+              {
+                backgroundColor: colors.card.background,
+                borderColor: colors.card.border,
+                opacity: pressed ? 0.82 : 1,
+              },
+            ],
+          }
+        : {
+            style: [
+              styles.item,
+              {
+                backgroundColor: colors.card.background,
+                borderColor: colors.card.border,
+              },
+            ],
+          })}
     >
-      <View style={[s.iconWrap, { backgroundColor: colors.primary + '18' }]}>
+      <View style={[styles.iconWrap, { backgroundColor: colors.primary + '18' }]}>
         <Ionicons name={props.icon} size={20} color={colors.primary} />
       </View>
 
-      <View style={s.textBlock}>
-        <Text style={[s.label, { color: colors.text.primary }]}>
+      <View style={styles.textBlock}>
+        <Text style={[styles.label, { color: colors.text.primary }]}>
           {props.label}
         </Text>
-        {props.description ? (
-          <Text style={[s.description, { color: colors.text.secondary }]}>
+
+        {props.description && (
+          <Text style={[styles.description, { color: colors.text.secondary }]}>
             {props.description}
           </Text>
-        ) : null}
+        )}
       </View>
 
       {props.type === 'toggle' && (
@@ -49,22 +67,24 @@ export default function SettingItem(props: SettingItemProps) {
         />
       )}
 
-      {props.type === 'action' && (
-        <TouchableOpacity onPress={props.onPress}>
-          <Ionicons name="chevron-forward" size={18} color={colors.text.secondary} />
-        </TouchableOpacity>
+      {props.type === 'action' && props.showChevron !== false && (
+        <Ionicons
+          name="chevron-forward"
+          size={18}
+          color={colors.text.secondary}
+        />
       )}
 
       {props.type === 'info' && (
-        <Text style={[s.infoValue, { color: colors.text.secondary }]}>
+        <Text style={[styles.infoValue, { color: colors.text.secondary }]}>
           {props.value}
         </Text>
       )}
-    </View>
+    </Container>
   );
 }
 
-const s = StyleSheet.create({
+const styles = StyleSheet.create({
   item: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -74,6 +94,7 @@ const s = StyleSheet.create({
     paddingVertical: 13,
     marginBottom: 10,
     gap: 12,
+    minHeight: 68,
   },
   iconWrap: {
     width: 36,
