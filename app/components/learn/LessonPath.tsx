@@ -1,5 +1,6 @@
 import { View, Text, StyleSheet } from 'react-native';
 import { useTheme } from '../../hooks/useTheme';
+import { TouchableOpacity } from 'react-native';
 
 type Lesson = {
   id: number;
@@ -10,12 +11,13 @@ type Lesson = {
 
 type Props = {
   lessons: Lesson[];
+  onPressLesson: (lessonId: number) => void;
 };
 
 // Alterna la posición del nodo: izquierda → derecha → izquierda...
 const OFFSETS = ['15%', '55%', '15%', '55%'] as const;
 
-export function LessonPath({ lessons }: Props) {
+export function LessonPath({ lessons, onPressLesson  }: Props) {
   const { colors } = useTheme();
 
   return (
@@ -37,13 +39,15 @@ export function LessonPath({ lessons }: Props) {
         const circleContent = lesson.completed ? '✓' : String(lesson.id);
 
         return (
-          <View
-            key={lesson.id}
-            style={[
-              s.row,
-              { flexDirection: isLeft ? 'row' : 'row-reverse', marginLeft: isLeft ? 8 : 0 },
-            ]}
-          >
+         <TouchableOpacity
+        key={lesson.id}
+        onPress={() => onPressLesson(lesson.id)}
+        activeOpacity={0.7}
+        style={[
+        s.row,
+      { flexDirection: isLeft ? 'row' : 'row-reverse', marginLeft: isLeft ? 8 : 0 },
+      ]}
+>
             {/* Nodo circular */}
             <View
               style={[
@@ -63,7 +67,7 @@ export function LessonPath({ lessons }: Props) {
                 {lesson.title}
               </Text>
             </View>
-          </View>
+          </TouchableOpacity>
         );
       })}
 
