@@ -51,6 +51,7 @@ export default function Onboarding() {
         </TouchableOpacity>
       </View>
 
+
     </View>
   );
 }
