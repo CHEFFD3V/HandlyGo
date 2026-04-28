@@ -30,7 +30,7 @@ export function ProgressFooter({ xp, streak, daysStudying }: Props) {
       <View style={s.stat}>
         <Image
           source={require('../../assets/images/graphic/iconos_oscuros/graphic/brain_icon.png')}
-          style={s.icon}
+          style={{width: 100, height: 100, left: 11}}
           resizeMode="contain"
         />
         <Text style={[s.statValue, { color: colors.text.primary }]}>
@@ -63,7 +63,7 @@ export function ProgressFooter({ xp, streak, daysStudying }: Props) {
 const s = StyleSheet.create({
   footer: {
     position: 'absolute',
-    bottom: 68,
+    bottom: 120,
     left: 16,
     right: 16,
     flexDirection: 'row',
