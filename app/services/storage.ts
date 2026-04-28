@@ -4,6 +4,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 export type UserProgress = {
   xp: number;
   streak: number;
+  daysStudying: number;
   unlockedLevels: number[];
   completedItems: number[];
   version: number;
@@ -13,6 +14,7 @@ export type UserProgress = {
 export const defaultUser: UserProgress = {
   xp: 0,
   streak: 0,
+  daysStudying: 0,
   unlockedLevels: [1],
   completedItems: [],
   version: 1,
@@ -20,6 +22,8 @@ export const defaultUser: UserProgress = {
 
 // CLAVE DE ALMACENAMIENTO
 const STORAGE_KEY = "user_progress";
+
+
 
 // loadProgress
 // Lee el progreso guardado en el teléfono.
