@@ -54,11 +54,8 @@ export default function AprendizajeScreen() {
       </View>
 
       {/* ── Contenido ── */}
-      <ScrollView
-        style={s.scroll}
-        contentContainerStyle={s.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
+      <View
+        style={s.scroll}>
         <Text style={[s.sectionTitle, { color: colors.primary }]}>NIVELES</Text>
 
         {LEVELS.map((level) => {
@@ -95,7 +92,7 @@ export default function AprendizajeScreen() {
         })}
 
         <View style={{ height: 180 }} />
-      </ScrollView>
+      </View>
 
       {/* ── Footer de progreso ── */}
       <ProgressFooter xp={xp} streak={streak} daysStudying={daysStudying} />
@@ -147,7 +144,7 @@ const s = StyleSheet.create({
     paddingHorizontal: 20,
   },
   scrollContent: {
-    paddingTop: 20,
+    paddingBottom: 20,
   },
 
   // Título sección
