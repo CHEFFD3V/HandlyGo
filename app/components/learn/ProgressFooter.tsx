@@ -17,7 +17,7 @@ export function ProgressFooter({ xp, streak, daysStudying }: Props) {
       <View style={s.stat}>
         <Image
           source={require('../../assets/images/graphic/iconos_oscuros/graphic/XP_icon.png')}
-          style={s.icon}
+          style={{width: 80, height: 80, left: -6}}
           resizeMode="contain"
         />
         <Text style={[s.statValue, { color: '#22C55E' }]}>{xp}</Text>
@@ -45,7 +45,7 @@ export function ProgressFooter({ xp, streak, daysStudying }: Props) {
       <View style={s.stat}>
         <Image
           source={require('../../assets/images/graphic/iconos_oscuros/graphic/streak_icon.png')}
-          style={s.icon}
+          style={{width: 80, height: 80, }}
           resizeMode="contain"
         />
         <Text style={[s.statValue, { color: '#FF4500' }]}>
