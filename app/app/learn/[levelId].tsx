@@ -133,12 +133,16 @@ const s = StyleSheet.create({
     alignItems: 'center',
     paddingBottom: 20,
   },
+  
   card: {
-    width: '100%',
-    borderRadius: 20,
-    padding: 20,
-    marginBottom: 28,
+  width: '100%',
+  borderRadius: 20,
+  padding: 74,
+  paddingBottom: 55,
+  marginBottom: 80,
+  marginTop:36,
   },
+
   continueBtn: {
     width: '70%',
     paddingVertical: 16,

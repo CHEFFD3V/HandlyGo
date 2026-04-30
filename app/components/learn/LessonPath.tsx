@@ -1,6 +1,6 @@
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import Svg, { Path } from 'react-native-svg';
 import { useTheme } from '../../hooks/useTheme';
-import { TouchableOpacity } from 'react-native';
 
 type Lesson = {
   id: number;
@@ -14,55 +14,105 @@ type Props = {
   onPressLesson: (lessonId: number) => void;
 };
 
-// Alterna la posición del nodo: izquierda → derecha → izquierda...
-const OFFSETS = ['15%', '55%', '15%', '55%'] as const;
+// Altura reservada por cada lección en el SVG
+const ROW_HEIGHT = 90;
+const SVG_WIDTH = 300;
 
-export function LessonPath({ lessons, onPressLesson  }: Props) {
+export function LessonPath({ lessons, onPressLesson }: Props) {
   const { colors } = useTheme();
 
-  return (
-    <View style={s.container}>
-      {/* Línea decorativa de fondo */}
-      <View style={[s.line, { borderColor: colors.card.border }]} />
+  const totalHeight = ROW_HEIGHT * lessons.length + 60;
 
+  // Posiciones X alternadas para cada nodo (izquierda / derecha)
+  const nodeX = [60, 220, 60, 220];
+  // Posición Y de cada nodo
+  const nodeY = lessons.map((_, i) => 40 + i * ROW_HEIGHT);
+
+  // Construye el path SVG curvo que pasa por todos los nodos
+  const buildPath = () => {
+    if (lessons.length < 2) return '';
+    let d = `M ${nodeX[0]} ${nodeY[0]}`;
+    for (let i = 1; i < lessons.length; i++) {
+      const x1 = nodeX[(i - 1) % nodeX.length];
+      const y1 = nodeY[i - 1];
+      const x2 = nodeX[i % nodeX.length];
+      const y2 = nodeY[i];
+      // Control point en el centro vertical entre los dos nodos
+      const cy = (y1 + y2) / 2;
+      d += ` C ${x1} ${cy}, ${x2} ${cy}, ${x2} ${y2}`;
+    }
+    // Extiende la curva hacia el nodo FINAL
+    const lastX = nodeX[(lessons.length - 1) % nodeX.length];
+    const lastY = nodeY[lessons.length - 1];
+    const finalX = SVG_WIDTH / 2;
+    const finalY = totalHeight - 30;
+    const cy = (lastY + finalY) / 2;
+    d += ` C ${lastX} ${cy}, ${finalX} ${cy}, ${finalX} ${finalY}`;
+    return d;
+  };
+
+  return (
+    <View style={[
+    s.container,
+    { height: totalHeight } 
+  ]}>
+      <Svg
+        width={SVG_WIDTH}
+        height={totalHeight}
+        style={s.svg}
+      >
+        {/* Línea curva de fondo */}
+        <Path
+          d={buildPath()}
+          stroke="#CBD5E1"
+          strokeWidth={3}
+          strokeDasharray="8 6"
+          fill="none"
+          strokeLinecap="round"
+        />
+      </Svg>
+
+      {/* Nodos de lección superpuestos sobre el SVG */}
       {lessons.map((lesson, index) => {
         const isLeft = index % 2 === 0;
-        
-        // Colores según estado
-        const circleBg = lesson.completed
-          ? '#22C55E'       // verde
-          : lesson.current
-          ? colors.primary  // azul primario
-          : colors.card.border;
+        const x = nodeX[index % nodeX.length];
+        const y = nodeY[index];
 
-        const circleContent = lesson.completed ? '✓' : String(lesson.id);
+        const isCompleted = lesson.completed;
+        const isCurrent = lesson.current;
+
+        const circleBg = isCompleted
+          ? '#22C55E'
+          : isCurrent
+          ? colors.primary
+          : '#CBD5E1';
+
+        const circleContent = isCompleted ? '✓' : String(lesson.id);
 
         return (
-         <TouchableOpacity
-        key={lesson.id}
-        onPress={() => onPressLesson(lesson.id)}
-        activeOpacity={0.7}
-        style={[
-        s.row,
-      { flexDirection: isLeft ? 'row' : 'row-reverse', marginLeft: isLeft ? 8 : 0 },
-      ]}
->
-            {/* Nodo circular */}
-            <View
-              style={[
-                s.circle,
-                { backgroundColor: circleBg, marginLeft: isLeft ? 0 : 'auto' },
-              ]}
-            >
+          <TouchableOpacity
+            key={lesson.id}
+            onPress={() => onPressLesson(lesson.id)}
+            activeOpacity={0.7}
+            style={[
+              s.nodeWrapper,
+              {
+                top: y - 22,      // centrado respecto al punto SVG
+                left: x - 22,     // centrado respecto al punto SVG
+              },
+            ]}
+          >
+            {/* Círculo */}
+            <View style={[s.circle, { backgroundColor: circleBg }]}>
               <Text style={s.circleText}>{circleContent}</Text>
             </View>
 
-            {/* Título de la lección */}
-            <View style={s.labelBox}>
+            {/* Etiqueta a la derecha o izquierda según posición */}
+            <View style={[s.label, isLeft ? s.labelRight : s.labelLeft]}>
+              <Text style={[s.lessonNum, { color: colors.text.secondary }]}>
+                Lección {lesson.id}:
+              </Text>
               <Text style={[s.lessonTitle, { color: colors.text.primary }]}>
-                <Text style={[s.lessonNum, { color: colors.text.secondary }]}>
-                  Lección {lesson.id}:{' '}
-                </Text>
                 {lesson.title}
               </Text>
             </View>
@@ -70,37 +120,37 @@ export function LessonPath({ lessons, onPressLesson  }: Props) {
         );
       })}
 
-      {/* Nodo final */}
-      <View style={s.finalRow}>
+      {/* Nodo FINAL */}
+      <View
+        style={[
+          s.finalWrapper,
+          { top: totalHeight - 30 - 16, left: SVG_WIDTH / 2 - 36 },
+        ]}
+      >
         <View style={[s.finalBtn, { backgroundColor: colors.primary }]}>
           <Text style={[s.finalTxt, { color: colors.text.inverse }]}>FINAL</Text>
         </View>
       </View>
+
     </View>
   );
 }
 
 const s = StyleSheet.create({
   container: {
-    paddingHorizontal: 16,
-    paddingTop: 8,
-    paddingBottom: 4,
+    width: SVG_WIDTH,
+    alignSelf: 'center',
     position: 'relative',
   },
-  line: {
+  svg: {
     position: 'absolute',
-    left: '40%',
     top: 0,
-    bottom: 0,
-    width: 2,
-    borderLeftWidth: 2,
-    borderStyle: 'dashed',
-    borderColor: '#CBD5E1',
+    left: 0,
   },
-  row: {
+  nodeWrapper: {
+    position: 'absolute',
+    flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 24,
-    gap: 12,
   },
   circle: {
     width: 44,
@@ -115,27 +165,31 @@ const s = StyleSheet.create({
     fontWeight: '800',
     fontSize: 16,
   },
-  labelBox: {
-    flex: 1,
-    maxWidth: '60%',
+  label: {
+    position: 'absolute',
+    width: 110,
+  },
+  labelRight: {
+    left: 52,   // a la derecha del círculo
+  },
+  labelLeft: {
+    right: 52,  // a la izquierda del círculo
   },
   lessonNum: {
-    fontSize: 12,
-    fontWeight: '600',
+    fontSize: 11,
+    fontWeight: '700',
   },
   lessonTitle: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '500',
-    lineHeight: 18,
+    lineHeight: 16,
   },
-  finalRow: {
-    alignItems: 'center',
-    marginTop: 4,
-    marginBottom: 8,
+  finalWrapper: {
+    position: 'absolute',
   },
   finalBtn: {
-    paddingHorizontal: 28,
-    paddingVertical: 10,
+    paddingHorizontal: 24,
+    paddingVertical: 8,
     borderRadius: 20,
   },
   finalTxt: {
