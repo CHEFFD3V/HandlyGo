@@ -27,8 +27,7 @@ export function LessonPath({ lessons, onPressLesson  }: Props) {
 
       {lessons.map((lesson, index) => {
         const isLeft = index % 2 === 0;
-        const offset = OFFSETS[index % OFFSETS.length];
-
+        
         // Colores según estado
         const circleBg = lesson.completed
           ? '#22C55E'       // verde
