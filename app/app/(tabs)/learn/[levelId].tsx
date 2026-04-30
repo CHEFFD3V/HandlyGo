@@ -1,8 +1,8 @@
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../../hooks/useTheme';
-import { LessonPath } from '../../components/learn/LessonPath';
+import { useTheme } from '../../../hooks/useTheme';
+import { LessonPath } from '../../../components/learn/LessonPath';
 
 const LEVEL_DATA: Record<string, { title: string; lessons: { id: number; title: string; completed: boolean; current?: boolean }[] }> = {
   '1': {
@@ -40,7 +40,7 @@ export default function LevelScreen() {
 
   const handleLessonPress = (lessonId: number) => {
     router.push({
-      pathname: '/learn/lesson',
+      pathname: '../(tabs)/learn/lesson',
       params: { levelId, lessonId },
     });
   };

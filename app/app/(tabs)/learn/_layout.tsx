@@ -1,5 +1,5 @@
 import { Stack } from 'expo-router';
-import { useTheme } from '../../hooks/useTheme';
+import { useTheme } from '../../../hooks/useTheme';
 
 export default function LearnLayout() {
   const { colors } = useTheme();
