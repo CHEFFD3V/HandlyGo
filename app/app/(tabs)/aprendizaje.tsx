@@ -68,8 +68,8 @@ export default function AprendizajeScreen() {
               disabled={!isUnlocked}
               onPress={() =>
                 router.push({
-                  pathname: '../learn/level',
-                  params: { levelId: level.id },
+                  pathname: '../learn/[levelId]',
+                  params: { levelId: String(level.id) },
                 })
               }
               style={[
