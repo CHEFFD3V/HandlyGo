@@ -81,10 +81,7 @@ const s = StyleSheet.create({
     alignItems: 'center',
     gap: 4,
   },
-  icon: {
-    width: 36,
-    height: 36,
-  },
+  
   statValue: {
     fontSize: 20,
     fontWeight: '900',
