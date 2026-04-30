@@ -87,7 +87,7 @@ export default function LevelScreen() {
           }]}
           activeOpacity={0.8}
           onPress={() => {
-            // Navega a la primera lección no completada
+            
             const next = data.lessons.find((l) => !l.completed);
             if (next) handleLessonPress(next.id);
           }}

@@ -14,7 +14,7 @@ type Props = {
   onPressLesson: (lessonId: number) => void;
 };
 
-// Altura reservada por cada lección en el SVG
+
 const ROW_HEIGHT = 90;
 const SVG_WIDTH = 300;
 
@@ -23,12 +23,12 @@ export function LessonPath({ lessons, onPressLesson }: Props) {
 
   const totalHeight = ROW_HEIGHT * lessons.length + 60;
 
-  // Posiciones X alternadas para cada nodo (izquierda / derecha)
+  
   const nodeX = [60, 220, 60, 220];
-  // Posición Y de cada nodo
+  
   const nodeY = lessons.map((_, i) => 40 + i * ROW_HEIGHT);
 
-  // Construye el path SVG curvo que pasa por todos los nodos
+  
   const buildPath = () => {
     if (lessons.length < 2) return '';
     let d = `M ${nodeX[0]} ${nodeY[0]}`;
@@ -37,11 +37,11 @@ export function LessonPath({ lessons, onPressLesson }: Props) {
       const y1 = nodeY[i - 1];
       const x2 = nodeX[i % nodeX.length];
       const y2 = nodeY[i];
-      // Control point en el centro vertical entre los dos nodos
+      
       const cy = (y1 + y2) / 2;
       d += ` C ${x1} ${cy}, ${x2} ${cy}, ${x2} ${y2}`;
     }
-    // Extiende la curva hacia el nodo FINAL
+    
     const lastX = nodeX[(lessons.length - 1) % nodeX.length];
     const lastY = nodeY[lessons.length - 1];
     const finalX = SVG_WIDTH / 2;
@@ -97,8 +97,8 @@ export function LessonPath({ lessons, onPressLesson }: Props) {
             style={[
               s.nodeWrapper,
               {
-                top: y - 22,      // centrado respecto al punto SVG
-                left: x - 22,     // centrado respecto al punto SVG
+                top: y - 22,      
+                left: x - 22,     
               },
             ]}
           >
@@ -170,10 +170,10 @@ const s = StyleSheet.create({
     width: 110,
   },
   labelRight: {
-    left: 52,   // a la derecha del círculo
+    left: 52,   
   },
   labelLeft: {
-    right: 52,  // a la izquierda del círculo
+    right: 52,  
   },
   lessonNum: {
     fontSize: 11,

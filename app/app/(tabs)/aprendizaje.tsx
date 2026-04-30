@@ -106,7 +106,7 @@ const s = StyleSheet.create({
     flex: 1,
   },
 
-  // Hero
+  
   hero: {
     paddingTop: 52,
     paddingHorizontal: 28,
@@ -133,12 +133,12 @@ const s = StyleSheet.create({
     opacity: 0.9,
   },
 
-  // Ola
+  
   waveWrapper: {
     marginTop: -1,
   },
 
-  // Scroll
+  
   scroll: {
     flex: 1,
     paddingHorizontal: 20,
@@ -147,7 +147,7 @@ const s = StyleSheet.create({
     paddingBottom: 20,
   },
 
-  // Título sección
+  
   sectionTitle: {
     fontSize: 22,
     fontWeight: '900',
@@ -155,7 +155,7 @@ const s = StyleSheet.create({
     letterSpacing: 1,
   },
 
-  // Tarjeta de nivel
+  
   card: {
     borderWidth: 1.5,
     borderRadius: 28,
