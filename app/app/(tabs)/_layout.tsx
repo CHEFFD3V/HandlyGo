@@ -29,6 +29,8 @@ export default function TabsLayout() {
         <Tabs.Screen name="aprendizaje" />
         <Tabs.Screen name="vinculacion" />
         <Tabs.Screen name="configuracion" />
+        <Tabs.Screen name="learn"options={{href: null,}}/>
+
       </Tabs>
 
 
