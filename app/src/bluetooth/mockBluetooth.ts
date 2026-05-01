@@ -1,25 +1,68 @@
-import { useEffect, useRef } from "react";
-import { useAppStore } from "../../store/useAppStore";
-import type { AppState } from "../../store/useAppStore";
+import { useAppStore } from '../../store/useAppStore';
 
-const MOCK_WORDS = ["Hola", "Gracias", "Por favor"] as const;
-const EMIT_INTERVAL_MS = 2000;
+const MOCK_WORDS = ['Hola', 'Gracias', 'Por favor', 'Ayuda', 'Sí', 'No'];
+const INTERVAL_MS = 2000;
 
-export function useMockBluetooth() {
-  const isTranslating = useAppStore((state: AppState) => state.isTranslating);
-  const setWord       = useAppStore((state: AppState) => state.setWord);
+let intervalId: ReturnType<typeof setInterval> | null = null;
 
-  const indexRef = useRef(0);
+/**
+ * Simula la conexión BLE con el dispositivo ESP32.
+ * Activa el estado de conexión en el store global.
+ */
+export function connectMockBLE(): void {
+  const { setConnected } = useAppStore.getState();
+  setConnected(true);
+  console.log('[MockBLE] Dispositivo conectado (simulado)');
+}
 
-  useEffect(() => {
-    if (!isTranslating) return;
+/**
+ * Simula la desconexión BLE.
+ * Detiene la traducción si estaba activa y limpia la conexión.
+ */
+export function disconnectMockBLE(): void {
+  stopMockTranslation();
+  const { setConnected } = useAppStore.getState();
+  setConnected(false);
+  console.log('[MockBLE] Dispositivo desconectado (simulado)');
+}
 
-    const interval = setInterval(() => {
-      const word = MOCK_WORDS[indexRef.current];
-      setWord(word);
-      indexRef.current = (indexRef.current + 1) % MOCK_WORDS.length;
-    }, EMIT_INTERVAL_MS);
+/**
+ * Inicia la emisión simulada de palabras cada INTERVAL_MS ms.
+ * Solo funciona si el dispositivo está conectado.
+ */
+export function startMockTranslation(): void {
+  const { isConnected, startTranslating, setWord } = useAppStore.getState();
 
-    return () => clearInterval(interval);
-  }, [isTranslating, setWord]);
+  if (!isConnected) {
+    console.warn('[MockBLE] No se puede traducir: dispositivo no conectado');
+    return;
+  }
+
+  if (intervalId !== null) {
+    console.warn('[MockBLE] La traducción ya está activa');
+    return;
+  }
+
+  startTranslating();
+  console.log('[MockBLE] Iniciando traducción simulada...');
+
+  intervalId = setInterval(() => {
+    const randomWord = MOCK_WORDS[Math.floor(Math.random() * MOCK_WORDS.length)];
+    setWord(randomWord);
+    console.log(`[MockBLE] Palabra recibida: ${randomWord}`);
+  }, INTERVAL_MS);
+}
+
+/**
+ * Detiene la emisión simulada de palabras.
+ */
+export function stopMockTranslation(): void {
+  if (intervalId !== null) {
+    clearInterval(intervalId);
+    intervalId = null;
+    console.log('[MockBLE] Traducción detenida');
+  }
+
+  const { stopTranslating } = useAppStore.getState();
+  stopTranslating();
 }
