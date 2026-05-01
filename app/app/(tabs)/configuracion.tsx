@@ -319,7 +319,7 @@ export default function ConfiguracionScreen() {
           }]}>
             <Text style={[styles.instructionIcon, { color: C.secondary }]}>{'>'}</Text>
             <Text style={[styles.instructionText, { color: C.secondary }]}>
-              Cierra la mano formando un puno apretado.{'\n'}
+              Cierra la mano formando un puño apretado.{'\n'}
               Esto establece el valor{' '}
               <Text style={{ fontWeight: '800' }}>maximo (100% flexion)</Text> de cada sensor.
             </Text>
