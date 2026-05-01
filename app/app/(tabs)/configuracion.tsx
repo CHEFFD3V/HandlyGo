@@ -14,15 +14,15 @@ import {
 } from 'react-native';
 import { Image } from 'expo-image';
 import { useTheme } from '../../hooks/useTheme';
-
+ 
 // ─── Assets ──────────────────────────────────────────────────────────────────
 const LIGHT_MOCKUP = require('../../assets/images/ui_modo_claro/images/21_configuracion_calibracion.svg');
 const DARK_MOCKUP  = require('../../assets/images/ui_modo_oscuro/images/21_configuracion_calibracion.svg');
-
+ 
 // ─── Constantes ───────────────────────────────────────────────────────────────
 const DEDOS = ['Dedo 1', 'Dedo 2', 'Dedo 3', 'Dedo 4', 'Dedo 5'] as const;
 type DedoKey = typeof DEDOS[number];
-
+ 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 interface DedoConfig {
   rawMin: number;
@@ -30,10 +30,9 @@ interface DedoConfig {
   umbral: number;
   sensibilidad: number;
 }
-
-type GloveConfig  = Record<DedoKey, DedoConfig>;
-type BaselineMap  = Record<DedoKey, number>;
-
+ 
+type GloveConfig = Record<DedoKey, DedoConfig>;
+ 
 const DEFAULT_CONFIG: GloveConfig = {
   'Dedo 1': { rawMin: 300, rawMax: 800, umbral: 50, sensibilidad: 100 },
   'Dedo 2': { rawMin: 300, rawMax: 800, umbral: 50, sensibilidad: 100 },
@@ -41,16 +40,12 @@ const DEFAULT_CONFIG: GloveConfig = {
   'Dedo 4': { rawMin: 300, rawMax: 800, umbral: 50, sensibilidad: 100 },
   'Dedo 5': { rawMin: 300, rawMax: 800, umbral: 50, sensibilidad: 100 },
 };
-
-const DEFAULT_BASELINE: BaselineMap = {
-  'Dedo 1': 550, 'Dedo 2': 550, 'Dedo 3': 550, 'Dedo 4': 550, 'Dedo 5': 550,
-};
-
-type CalStep    = 'idle' | 'open' | 'close' | 'review' | 'done';
+ 
+type CalStep     = 'idle' | 'open' | 'close' | 'review' | 'done';
 type ActiveModal = 'none' | 'calibration' | 'settings';
-
+ 
 type GlobalColors = ReturnType<typeof useTheme>['colors'];
-
+ 
 function withAlpha(hex: string, alpha: number): string {
   const safeAlpha = Math.max(0, Math.min(1, alpha));
   const normalized = hex.replace('#', '');
@@ -60,55 +55,43 @@ function withAlpha(hex: string, alpha: number): string {
   const b = parseInt(normalized.slice(4, 6), 16);
   return `rgba(${r}, ${g}, ${b}, ${safeAlpha})`;
 }
-
-// ─── Paleta derivada del tema global (Zustand) ────────────────────────────────
+ 
+// ─── Paleta derivada del tema global ─────────────────────────────────────────
 function buildColors(colors: GlobalColors, dark: boolean) {
   return {
-    // ── Fondos y superficies ──
-    bg:            colors.background,
-    surface:       colors.card.background,
-    card:          colors.card.background,
-    modalSurface:  colors.card.background,
-    modalBorder:   withAlpha(colors.card.border, dark ? 0.74 : 0.3),
-
-    // ── Bordes ──
-    border:        withAlpha(colors.card.border, dark ? 0.76 : 0.24),
-    track:         withAlpha(colors.text.secondary, dark ? 0.36 : 0.18),
-
-    // ── Texto ──
-    text:          colors.text.primary,
-    textMuted:     colors.text.secondary,
-    textInverse:   colors.text.inverse,
-
-    // ── Acentos ──
-    accent:        colors.wave.primary,
-    accentLight:   withAlpha(colors.wave.primary, dark ? 0.26 : 0.14),
-
+    bg:              colors.background,
+    surface:         colors.card.background,
+    card:            colors.card.background,
+    modalSurface:    colors.card.background,
+    modalBorder:     withAlpha(colors.card.border, dark ? 0.74 : 0.3),
+    border:          withAlpha(colors.card.border, dark ? 0.76 : 0.24),
+    track:           withAlpha(colors.text.secondary, dark ? 0.36 : 0.18),
+    text:            colors.text.primary,
+    textMuted:       colors.text.secondary,
+    textInverse:     colors.text.inverse,
+    accent:          colors.wave.primary,
+    accentLight:     withAlpha(colors.wave.primary, dark ? 0.26 : 0.14),
     secondary:       colors.wave.secondary,
     secondaryLight:  withAlpha(colors.wave.secondary, dark ? 0.24 : 0.15),
     secondaryBorder: withAlpha(colors.wave.secondary, dark ? 0.68 : 0.36),
-
-    // ── Error / estado fuerte ──
-    error:       colors.accent,
-
-    // ── Inputs ──
-    inputBg:     withAlpha(colors.card.background, dark ? 0.84 : 0.88),
-    inputBorder: withAlpha(colors.primary, dark ? 0.66 : 0.3),
+    error:           colors.accent,
+    inputBg:         withAlpha(colors.card.background, dark ? 0.84 : 0.88),
+    inputBorder:     withAlpha(colors.primary, dark ? 0.66 : 0.3),
   } as const;
 }
-
+ 
 type ColorMap = ReturnType<typeof buildColors>;
-
+ 
 // ─── Utilidades ───────────────────────────────────────────────────────────────
 function normalizar(raw: number, min: number, max: number): number {
   if (max <= min) return 0;
   return Math.min(100, Math.max(0, Math.round(((raw - min) / (max - min)) * 100)));
 }
-
+ 
 function aplicarSensibilidad(pct: number, sensibilidad: number): number {
   return Math.min(100, Math.max(0, Math.round(pct * (sensibilidad / 100))));
 }
-
+ 
 function validarRango(min: number, max: number): string | null {
   if (isNaN(min) || isNaN(max)) return 'Los valores deben ser numeros validos';
   if (max <= min)               return 'RAW max debe ser mayor que RAW min';
@@ -116,46 +99,43 @@ function validarRango(min: number, max: number): string | null {
   if (min < 0 || max > 4095)   return 'Valores fuera del rango ADC (0-4095)';
   return null;
 }
-
+ 
 function validarUmbral(v: number): string | null {
   if (isNaN(v) || v < 0 || v > 100) return 'El umbral debe estar entre 0 y 100';
   return null;
 }
-
+ 
 function validarSensibilidad(v: number): string | null {
   if (isNaN(v) || v < 50 || v > 200) return 'La sensibilidad debe estar entre 50 y 200';
   return null;
 }
-
+ 
 // ─── Componente principal ─────────────────────────────────────────────────────
 export default function ConfiguracionScreen() {
   const { theme, colors } = useTheme();
   const dark = theme === 'dark';
   const mockupSource = useMemo(() => (dark ? DARK_MOCKUP : LIGHT_MOCKUP), [dark]);
-
-  // Sistema de colores global (proviene de useThemeStore via useTheme)
+ 
   const C: ColorMap = useMemo(() => buildColors(colors, dark), [colors, dark]);
-
+ 
   const [selectedFinger, setSelectedFinger] = useState<DedoKey>('Dedo 1');
   const [activeModal, setActiveModal]       = useState<ActiveModal>('none');
   const [calStep, setCalStep]               = useState<CalStep>('idle');
-
-  const [config, setConfig]     = useState<GloveConfig>(DEFAULT_CONFIG);
-  const [baseline, setBaseline] = useState<BaselineMap>(DEFAULT_BASELINE);
-  const [baselineSaved, setBaselineSaved] = useState(false);
-
+ 
+  const [config, setConfig] = useState<GloveConfig>(DEFAULT_CONFIG);
+ 
   const [rawActual, setRawActual] = useState<Record<DedoKey, number>>({
     'Dedo 1': 550, 'Dedo 2': 550, 'Dedo 3': 550, 'Dedo 4': 550, 'Dedo 5': 550,
   });
-
+ 
   const [snapOpen,  setSnapOpen]  = useState<Record<DedoKey, number> | null>(null);
   const [snapClose, setSnapClose] = useState<Record<DedoKey, number> | null>(null);
-
+ 
   const [editConfig,   setEditConfig]   = useState<GloveConfig>(DEFAULT_CONFIG);
   const [editSettings, setEditSettings] = useState<GloveConfig>(DEFAULT_CONFIG);
   const [captureFlash, setCaptureFlash] = useState<'open' | 'close' | null>(null);
-
-  // ── Simulación BLE ───────────────────────────────────────────────────────────
+ 
+  // ── Simulación BLE (reemplazar con stream real del guante) ───────────────────
   useEffect(() => {
     const id = setInterval(() => {
       setRawActual(prev => {
@@ -169,7 +149,7 @@ export default function ConfiguracionScreen() {
     }, 600);
     return () => clearInterval(id);
   }, []);
-
+ 
   // ── Calibración ──────────────────────────────────────────────────────────────
   function iniciarCalibracion() {
     setSnapOpen(null);
@@ -177,13 +157,13 @@ export default function ConfiguracionScreen() {
     setCalStep('open');
     setActiveModal('calibration');
   }
-
+ 
   function capturarManoAbierta() {
     setSnapOpen({ ...rawActual });
     setCaptureFlash('open');
     setTimeout(() => { setCaptureFlash(null); setCalStep('close'); }, 700);
   }
-
+ 
   function capturarManoCerrada() {
     const snap = { ...rawActual };
     setSnapClose(snap);
@@ -204,7 +184,7 @@ export default function ConfiguracionScreen() {
     setCaptureFlash('close');
     setTimeout(() => { setCaptureFlash(null); setCalStep('review'); }, 700);
   }
-
+ 
   function guardarCalibracion() {
     for (const dedo of DEDOS) {
       const cfg = editConfig[dedo];
@@ -218,25 +198,18 @@ export default function ConfiguracionScreen() {
     setConfig(editConfig);
     setCalStep('done');
   }
-
+ 
   function cerrarModal() {
     setActiveModal('none');
     setCalStep('idle');
   }
-
-  // ── Baseline ─────────────────────────────────────────────────────────────────
-  function guardarBaseline() {
-    setBaseline({ ...rawActual });
-    setBaselineSaved(true);
-    setTimeout(() => setBaselineSaved(false), 2000);
-  }
-
+ 
   // ── Ajustes avanzados ────────────────────────────────────────────────────────
   function abrirSettings() {
     setEditSettings({ ...config });
     setActiveModal('settings');
   }
-
+ 
   function guardarSettings() {
     for (const dedo of DEDOS) {
       const cfg = editSettings[dedo];
@@ -248,7 +221,7 @@ export default function ConfiguracionScreen() {
     setConfig(editSettings);
     cerrarModal();
   }
-
+ 
   function updateEditField(
     dedo: DedoKey,
     field: keyof DedoConfig,
@@ -263,15 +236,16 @@ export default function ConfiguracionScreen() {
       setEditSettings(prev => ({ ...prev, [dedo]: { ...prev[dedo], [field]: num } }));
     }
   }
-
+ 
+  // ── Verde = relajado · Rojo = flexionado (sobre umbral) ──────────────────────
   function getFingerUiState(dedo: DedoKey) {
     const pct = normalizar(rawActual[dedo], config[dedo].rawMin, config[dedo].rawMax);
     return {
       selected: selectedFinger === dedo,
-      active: pct >= config[dedo].umbral,
+      active:   pct >= config[dedo].umbral,
     };
   }
-
+ 
   // ─── LivePreview ──────────────────────────────────────────────────────────────
   function LivePreview() {
     return (
@@ -307,13 +281,13 @@ export default function ConfiguracionScreen() {
       </View>
     );
   }
-
+ 
   // ── Modal de calibración ─────────────────────────────────────────────────────
   function CalibrationModalContent() {
     const flashBg =
       captureFlash === 'open'  ? C.secondaryLight :
       captureFlash === 'close' ? C.accentLight    : 'transparent';
-
+ 
     if (calStep === 'open') {
       return (
         <View style={{ backgroundColor: flashBg, borderRadius: 16, padding: 4 }}>
@@ -334,7 +308,7 @@ export default function ConfiguracionScreen() {
         </View>
       );
     }
-
+ 
     if (calStep === 'close') {
       return (
         <View style={{ backgroundColor: flashBg, borderRadius: 16, padding: 4 }}>
@@ -372,7 +346,7 @@ export default function ConfiguracionScreen() {
         </View>
       );
     }
-
+ 
     if (calStep === 'review') {
       return (
         <>
@@ -380,14 +354,14 @@ export default function ConfiguracionScreen() {
           <Text style={[styles.stepDesc, { color: C.textMuted }]}>
             Verifica los rangos capturados. Puedes ajustar manualmente si fuese necesario.
           </Text>
-
+ 
           {DEDOS.map(dedo => {
             const cfg          = editConfig[dedo];
             const pctRaw       = normalizar(rawActual[dedo], cfg.rawMin, cfg.rawMax);
             const pct          = aplicarSensibilidad(pctRaw, cfg.sensibilidad);
             const umbralActivo = pct >= cfg.umbral;
             const errRango     = validarRango(cfg.rawMin, cfg.rawMax);
-
+ 
             return (
               <View
                 key={dedo}
@@ -410,7 +384,7 @@ export default function ConfiguracionScreen() {
                     </Text>
                   </View>
                 </View>
-
+ 
                 <View style={styles.dedoRow}>
                   <FieldInput
                     label="RAW min"
@@ -441,11 +415,11 @@ export default function ConfiguracionScreen() {
                     C={C}
                   />
                 </View>
-
+ 
                 {errRango && (
                   <Text style={[styles.fieldError, { color: C.error }]}>{errRango}</Text>
                 )}
-
+ 
                 <View style={[styles.previewBar, { backgroundColor: C.track }]}>
                   <View
                     style={[styles.previewBarFill, {
@@ -471,12 +445,12 @@ export default function ConfiguracionScreen() {
               </View>
             );
           })}
-
+ 
           <ActionButton label="Guardar calibracion" color={C.accent} onPress={guardarCalibracion} C={C} />
         </>
       );
     }
-
+ 
     if (calStep === 'done') {
       return (
         <View style={styles.doneContainer}>
@@ -507,10 +481,10 @@ export default function ConfiguracionScreen() {
         </View>
       );
     }
-
+ 
     return null;
   }
-
+ 
   // ── Modal de ajustes avanzados ───────────────────────────────────────────────
   function SettingsModalContent() {
     return (
@@ -521,7 +495,7 @@ export default function ConfiguracionScreen() {
             Umbral (0-100%) y sensibilidad (50-200%) por dedo
           </Text>
         </View>
-
+ 
         {DEDOS.map(dedo => {
           const cfg       = editSettings[dedo];
           const errUmbral = validarUmbral(cfg.umbral);
@@ -529,7 +503,7 @@ export default function ConfiguracionScreen() {
           const pctRaw    = normalizar(rawActual[dedo], config[dedo].rawMin, config[dedo].rawMax);
           const pct       = aplicarSensibilidad(pctRaw, cfg.sensibilidad);
           const activo    = pct >= cfg.umbral;
-
+ 
           return (
             <View key={dedo} style={[styles.settingsCard, { backgroundColor: C.modalSurface, borderColor: C.modalBorder }]}>
               <View style={styles.dedoCardHeader}>
@@ -538,7 +512,7 @@ export default function ConfiguracionScreen() {
                   {pct}% {activo ? '(activo)' : '(inactivo)'}
                 </Text>
               </View>
-
+ 
               <View style={styles.settingsRow}>
                 <View style={styles.settingsField}>
                   <Text style={[styles.settingsLabel, { color: C.textMuted }]}>Umbral (%)</Text>
@@ -558,9 +532,9 @@ export default function ConfiguracionScreen() {
                     <Text style={[styles.fieldError, { color: C.error }]}>{errUmbral}</Text>
                   )}
                 </View>
-
+ 
                 <View style={[styles.settingsDivider, { backgroundColor: C.modalBorder }]} />
-
+ 
                 <View style={styles.settingsField}>
                   <Text style={[styles.settingsLabel, { color: C.textMuted }]}>Sensibilidad (%)</Text>
                   <TextInput
@@ -580,7 +554,7 @@ export default function ConfiguracionScreen() {
                   )}
                 </View>
               </View>
-
+ 
               <View style={[styles.settingsBar, { backgroundColor: C.track }]}>
                 <View style={[styles.settingsBarFill, {
                   width: `${pct}%` as any,
@@ -594,7 +568,7 @@ export default function ConfiguracionScreen() {
             </View>
           );
         })}
-
+ 
         <View style={styles.settingsActions}>
           <TouchableOpacity
             onPress={cerrarModal}
@@ -612,24 +586,17 @@ export default function ConfiguracionScreen() {
       </>
     );
   }
-
+ 
   // ─── Render principal ─────────────────────────────────────────────────────────
   return (
     <View style={[styles.screen, { backgroundColor: C.bg }]}>
-
-      {/* Mockup SVG con hotspots */}
+ 
+      {/* Mockup SVG */}
       <View style={styles.mockupFrame}>
         <Image source={mockupSource} style={styles.mockupImage} contentFit="fill" />
-        <View style={StyleSheet.absoluteFillObject}>
-          <Pressable onPress={() => setSelectedFinger('Dedo 1')} style={styles.finger1} />
-          <Pressable onPress={() => setSelectedFinger('Dedo 2')} style={styles.finger2} />
-          <Pressable onPress={() => setSelectedFinger('Dedo 3')} style={styles.finger3} />
-          <Pressable onPress={() => setSelectedFinger('Dedo 4')} style={styles.finger4} />
-          <Pressable onPress={() => setSelectedFinger('Dedo 5')} style={styles.finger5} />
-          <Pressable onPress={iniciarCalibracion} style={styles.calibrateHotspot} />
-        </View>
       </View>
-
+ 
+      {/* Botones de dedos + Calibrar */}
       <View style={styles.mockButtonsArea}>
         <View style={styles.mockButtonsCanvas}>
           {DEDOS.map((dedo, index) => {
@@ -646,8 +613,11 @@ export default function ConfiguracionScreen() {
                   index === 3 && styles.fingerBtn4,
                   index === 4 && styles.fingerBtn5,
                   {
-                    backgroundColor: state.selected || state.active ? '#E25D5D' : '#64C79D',
+                    // Verde = relajado · Rojo = flexionado (supera umbral)
+                    backgroundColor: state.active ? '#E25D5D' : '#64C79D',
+                    // Borde más grueso para indicar dedo seleccionado
                     borderColor: withAlpha(C.text, dark ? 0.12 : 0.08),
+                    borderWidth: state.selected ? 2.5 : 1,
                   },
                 ]}
               >
@@ -655,7 +625,7 @@ export default function ConfiguracionScreen() {
               </Pressable>
             );
           })}
-
+ 
           <Pressable
             onPress={iniciarCalibracion}
             style={[
@@ -670,7 +640,7 @@ export default function ConfiguracionScreen() {
           </Pressable>
         </View>
       </View>
-
+ 
       {/* Modal principal */}
       <Modal
         visible={activeModal !== 'none'}
@@ -710,33 +680,9 @@ export default function ConfiguracionScreen() {
     </View>
   );
 }
-
+ 
 // ─── Componentes auxiliares puros ─────────────────────────────────────────────
-
-function SectionHeader({
-  letter, title, subtitle, color, accentLight, textColor, textMuted,
-}: {
-  letter: string;
-  title: string;
-  subtitle: string;
-  color: string;
-  accentLight: string;
-  textColor: string;
-  textMuted: string;
-}) {
-  return (
-    <View style={[styles.sectionHeader, { borderLeftColor: color }]}>
-      <View style={[styles.sectionLetterBadge, { backgroundColor: accentLight }]}>
-        <Text style={[styles.sectionLetter, { color }]}>{letter}</Text>
-      </View>
-      <View>
-        <Text style={[styles.sectionTitle,    { color: textColor }]}>{title}</Text>
-        <Text style={[styles.sectionSubtitle, { color: textMuted }]}>{subtitle}</Text>
-      </View>
-    </View>
-  );
-}
-
+ 
 function StepHeader({
   step, total, title, color, C,
 }: {
@@ -766,7 +712,7 @@ function StepHeader({
     </View>
   );
 }
-
+ 
 function ActionButton({ label, color, onPress, C }: {
   label: string;
   color: string;
@@ -783,7 +729,7 @@ function ActionButton({ label, color, onPress, C }: {
     </TouchableOpacity>
   );
 }
-
+ 
 function FieldInput({ label, value, onChangeText, hasError, C }: {
   label: string;
   value: string;
@@ -808,22 +754,14 @@ function FieldInput({ label, value, onChangeText, hasError, C }: {
     </View>
   );
 }
-
+ 
 // ─── Estilos ──────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
   screen: { flex: 1 },
-
-  // Recorte del mock justo hasta la mano (sin navbar fake).
+ 
   mockupFrame: { width: '100%', aspectRatio: 310.5 / 408, overflow: 'hidden', position: 'relative' },
   mockupImage: { position: 'absolute', width: '100%', aspectRatio: 310.5 / 672, top: '-8%' },
-  finger1: { position: 'absolute', width: '37.36%', height: '8.4%', left: '7.09%', bottom: '40%', borderRadius: 999 },
-  finger2: { position: 'absolute', width: '37.36%', height: '8.4%', left: '7.09%', bottom: '30.4%', borderRadius: 999 },
-  finger3: { position: 'absolute', width: '37.36%', height: '8.4%', right: '7.09%', bottom: '40%', borderRadius: 999 },
-  finger4: { position: 'absolute', width: '37.36%', height: '8.4%', right: '7.09%', bottom: '30.4%', borderRadius: 999 },
-  finger5: { position: 'absolute', width: '37.36%', height: '8.4%', left: '31.32%', bottom: '20.8%', borderRadius: 999 },
-  calibrateHotspot: { position: 'absolute', width: '63.12%', height: '11.2%', left: '18.44%', bottom: '6.2%', borderRadius: 999 },
-
-  // Botones reconstruidos debajo de la mano.
+ 
   mockButtonsArea: { width: '100%', alignItems: 'center', marginTop: 20, paddingBottom: 18 },
   mockButtonsCanvas: { width: '92%', aspectRatio: 310.5 / 205, position: 'relative' },
   fingerBtn: {
@@ -833,7 +771,6 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1,
   },
   fingerBtn1: { left: '2%', top: '-2%' },
   fingerBtn2: { left: '2%', top: '18%' },
@@ -853,47 +790,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   calibrateBtnRebuiltText: { fontSize: 19, fontWeight: '900' },
-
-  panel: { flex: 1, borderTopWidth: 1, paddingHorizontal: 16 },
-
-  sectionHeader: { flexDirection: 'row', alignItems: 'center', marginTop: 20, marginBottom: 10, paddingLeft: 12, borderLeftWidth: 3, gap: 10 },
-  sectionLetterBadge: { width: 28, height: 28, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
-  sectionLetter: { fontSize: 13, fontWeight: '900' },
-  sectionTitle: { fontSize: 14, fontWeight: '700', letterSpacing: 0.2 },
-  sectionSubtitle: { fontSize: 11, marginTop: 1 },
-
-  sectionCard: { borderWidth: 1, borderRadius: 16, padding: 14, marginBottom: 4, shadowColor: '#000', shadowOpacity: 0.04, shadowOffset: { width: 0, height: 2 }, shadowRadius: 8, elevation: 2 },
-
-  calInfoRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 },
-  calInfoCell: { flex: 1, alignItems: 'center', gap: 2 },
-  calInfoDedo: { fontSize: 9, fontWeight: '700', textTransform: 'uppercase', marginBottom: 2 },
-  calInfoRange: { fontSize: 11, fontWeight: '700' },
-  calInfoDot: { width: 4, height: 4, borderRadius: 2 },
-  calInfoHint: { fontSize: 10, textAlign: 'center', marginBottom: 12 },
-
-  primaryBtn: { borderRadius: 12, paddingVertical: 13, alignItems: 'center' },
-  primaryBtnText: { color: '#fff', fontSize: 14, fontWeight: '700', letterSpacing: 0.3 },
-  secondaryBtn: { marginTop: 12, borderRadius: 12, paddingVertical: 11, borderWidth: 1.5, alignItems: 'center' },
-  secondaryBtnText: { fontSize: 13, fontWeight: '700', letterSpacing: 0.2 },
-
-  baselineTable: { borderWidth: 1, borderRadius: 12, overflow: 'hidden', marginBottom: 4 },
-  baselineTableRow: { flexDirection: 'row', paddingHorizontal: 10, paddingVertical: 8 },
-  baselineTableHeader: { paddingVertical: 6 },
-  baselineColHeader: { flex: 1, fontSize: 9, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5, textAlign: 'center' },
-  baselineCell: { flex: 1, fontSize: 12, textAlign: 'center' },
-
-  settingsSummary: { borderWidth: 1, borderRadius: 12, overflow: 'hidden', marginBottom: 4 },
-  miniBar: { height: 4, borderRadius: 2, overflow: 'hidden', marginBottom: 2 },
-  miniBarFill: { height: 4, borderRadius: 2 },
-  miniBarLabel: { fontSize: 9, textAlign: 'right' },
-
+ 
   overlay: { flex: 1 },
   sheet: { borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 20, paddingBottom: 40, maxHeight: '88%' },
   handle: { width: 40, height: 4, borderRadius: 2, alignSelf: 'center', marginBottom: 18 },
   modalHeader: { marginBottom: 16 },
   modalTitle: { fontSize: 18, fontWeight: '800' },
   modalSubtitle: { fontSize: 12, marginTop: 3 },
-
+ 
   stepHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 14, gap: 10 },
   stepBadge: { borderRadius: 10, paddingHorizontal: 9, paddingVertical: 4 },
   stepBadgeText: { fontWeight: '800', fontSize: 12 },
@@ -901,11 +805,11 @@ const styles = StyleSheet.create({
   stepProgress: { flexDirection: 'row', gap: 5 },
   stepDot: { width: 8, height: 8, borderRadius: 4 },
   stepDesc: { fontSize: 13, lineHeight: 19, marginBottom: 14 },
-
+ 
   instructionBox: { flexDirection: 'row', alignItems: 'flex-start', borderWidth: 1.5, borderRadius: 12, padding: 12, marginBottom: 14, gap: 10 },
   instructionIcon: { fontSize: 20, marginTop: 1 },
   instructionText: { flex: 1, fontSize: 13, lineHeight: 19 },
-
+ 
   livePreview: { borderWidth: 1, borderRadius: 14, padding: 12, marginBottom: 14 },
   livePrevTitle: { fontSize: 10, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 10 },
   liveRow: { flexDirection: 'row', justifyContent: 'space-between' },
@@ -915,14 +819,14 @@ const styles = StyleSheet.create({
   liveCellBar: { width: 20, height: 40, borderRadius: 4, overflow: 'hidden', justifyContent: 'flex-end' },
   liveCellBarFill: { width: '100%', borderRadius: 4 },
   liveCellPct: { fontSize: 11, fontWeight: '800' },
-
+ 
   snapRow: { borderWidth: 1, borderRadius: 12, padding: 10, marginBottom: 14 },
   snapRowTitle: { fontSize: 9, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 8 },
   snapCells: { flexDirection: 'row', justifyContent: 'space-between' },
   snapCell: { flex: 1, alignItems: 'center' },
   snapLabel: { fontSize: 9, fontWeight: '700', marginBottom: 2 },
   snapValue: { fontSize: 14, fontWeight: '800' },
-
+ 
   dedoCard: { borderWidth: 1, borderRadius: 14, padding: 12, marginBottom: 10 },
   dedoCardHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 },
   dedoCardTitle: { fontSize: 13, fontWeight: '700' },
@@ -938,7 +842,7 @@ const styles = StyleSheet.create({
   previewThreshold: { position: 'absolute', top: -3, width: 2, height: 12, borderRadius: 1 },
   previewMeta: { flexDirection: 'row', justifyContent: 'space-between' },
   previewMetaText: { fontSize: 10 },
-
+ 
   settingsCard: { borderWidth: 1, borderRadius: 14, padding: 12, marginBottom: 10 },
   settingsPreview: { fontSize: 11, fontWeight: '700' },
   settingsRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, marginBottom: 10 },
@@ -955,10 +859,10 @@ const styles = StyleSheet.create({
   cancelBtnText: { fontSize: 14, fontWeight: '600' },
   saveBtn: { flex: 2, borderRadius: 12, paddingVertical: 12, alignItems: 'center' },
   saveBtnText: { color: '#fff', fontSize: 14, fontWeight: '700' },
-
+ 
   actionBtn: { marginTop: 14, borderRadius: 14, paddingVertical: 13, alignItems: 'center' },
   actionBtnText: { fontSize: 15, fontWeight: '700' },
-
+ 
   doneContainer: { alignItems: 'center', paddingTop: 8 },
   doneIconCircle: { width: 72, height: 72, borderRadius: 36, alignItems: 'center', justifyContent: 'center', marginBottom: 14 },
   doneIconText: { fontSize: 16, fontWeight: '900' },
