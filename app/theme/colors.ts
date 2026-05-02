@@ -36,7 +36,7 @@ export const lightTheme = {
   tabBar: {
     background: '#2200CC',
     active: '#FFFFFF',
-    inactive: '#CCCCCC',
+    inactive: '#8f9699',
   },
 };
 
@@ -75,7 +75,7 @@ export const darkTheme = {
   tabBar: {
     background: '#1976D2',
     active: '#FFFFFF',
-    inactive: '#B0BEC5',
+    inactive: '#8f9699',
   },
 
   translation: {
