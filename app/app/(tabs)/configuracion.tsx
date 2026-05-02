@@ -789,7 +789,7 @@ const styles = StyleSheet.create({
   screen: { flex: 1 },
 
   mockupFrame: { width: '100%', aspectRatio: 310.5 / 408, overflow: 'hidden', position: 'relative' },
-  mockupImage: { position: 'absolute', width: '100%', aspectRatio: 310.5 / 672, top: '-8%' },
+  mockupImage: { position: 'absolute', width: '100%', aspectRatio: 310.5 / 672, top: '-10%' },
 
   mockButtonsArea: { width: '100%', alignItems: 'center', marginTop: 20, paddingBottom: 18 },
   mockButtonsCanvas: { width: '92%', aspectRatio: 310.5 / 205, position: 'relative' },
