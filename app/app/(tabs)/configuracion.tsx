@@ -60,7 +60,7 @@ function withAlpha(hex: string, alpha: number): string {
 // ─── Paleta derivada del tema global ─────────────────────────────────────────
 function buildColors(colors: GlobalColors, dark: boolean) {
   return {
-    bg:              colors.background,
+    bg:              dark ? '#0d203b' : colors.background,
     surface:         colors.card.background,
     card:            colors.card.background,
     modalSurface:    colors.card.background,
