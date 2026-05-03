@@ -53,6 +53,15 @@ export default function HomeScreen() {
   const { theme } = useTheme();
 
   
+  /* Lógica de prueba
+    useEffect(() => {
+      const testFetch = async () => {
+        const items = await getDictionaryByCategory("Abecedario");
+        console.log("REVISIÓN BACKEND - Elementos encontrados:", items);
+      };
+  
+      testFetch();
+    }, []); */
 
   return (
 
@@ -163,6 +172,33 @@ export default function HomeScreen() {
               </TouchableOpacity>
             )}
             <Ionicons name="expand-outline" size={16} color={colors.primary} style={{ marginLeft: 8 }} />
+        {/* Gran tarjeta karaoke */}
+        <View style={[s.karoCard, { borderColor: colors.card.border, backgroundColor: colors.card.background, }]}>
+          <Text style={[s.karoText, { color: colors.text.primary }]}>Hola, ¿Cómo{'\n'}Estás?</Text>
+        </View>
+
+        {/* Tarjetas inclinadas */}
+        <View style={s.grid}>
+          <View style={[s.gridCard, s.tiltLeft, { borderColor: colors.card.border, backgroundColor: colors.card.background }]}>
+            <Text style={[s.gridLabel, { color: colors.text.secondary }]}>Gestos Recientes</Text>
+            <Text style={[s.gridSmall, { color: colors.text.secondary }]}>{'• Hola\n• Gracias\n• Lo siento'}</Text>
+          </View>
+          <View style={[s.gridCard, s.tiltRight, { borderColor: colors.card.border, backgroundColor: colors.card.background }]}>
+            <Text style={[s.gridLabel, { color: colors.text.secondary }]}>Gestos de Hoy</Text>
+            <Text style={[s.gridValue, { color: colors.accent }]}>12</Text>
+          </View>
+        </View>
+
+        {/* Sección de traducción */}
+        <View style={[s.translateBox, { borderColor: colors.card.border, backgroundColor: colors.translation.background, }]}>
+          <View style={s.translateContent}>
+            <Ionicons name="volume-medium-outline" size={20} color={colors.icon.primary} />
+            <Text style={[s.translateText, { color: colors.translation.text }]}>
+              "Hola, ¿cómo estás?{'\n'}me siento muy feliz hoy,{'\n'}te encuentras bien?"
+            </Text>
+          </View>
+          <View style={s.translateFooter}>
+            <Ionicons name="expand-outline" size={16} color={colors.primary} />
           </View>
         </View>
 
