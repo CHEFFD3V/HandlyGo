@@ -24,7 +24,7 @@ export default function VinculacionScreen() {
   useMockBluetooth(); // activa la simulación BLE reactiva
   //console.log({ isConnected, isTranslating, currentWord, history }); comando para debug en consola, si se necesita
 
-  const battery = 20; // fijo hasta integración BLE real
+  const battery = useAppStore((s) => s.battery);
 
   const batteryColor = battery > 30 ? STATIC.green : STATIC.red;
 
