@@ -16,17 +16,7 @@ import {
   startMockTranslation,
   stopMockTranslation,
 } from '../../src/bluetooth/mockBluetooth';
-
-
-
-
-export default function HomeScreen() {
-  const router = useRouter();
-  const { colors } = useTheme();
-  const assets = useAssets();
-  const { theme } = useTheme();
-
-  const { isConnected, isTranslating, currentWord, history } = useAppStore();
+const { isConnected, isTranslating, currentWord, history } = useAppStore();
 
   // Limpiar el intervalo BLE al desmontar la pantalla
   useEffect(() => {
@@ -53,6 +43,16 @@ export default function HomeScreen() {
   const handleDisconnect = () => {
     disconnectMockBLE();
   };
+
+
+
+export default function HomeScreen() {
+  const router = useRouter();
+  const { colors } = useTheme();
+  const assets = useAssets();
+  const { theme } = useTheme();
+
+  
 
   return (
 
