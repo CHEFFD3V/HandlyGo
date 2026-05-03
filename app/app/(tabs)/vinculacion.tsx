@@ -2,20 +2,29 @@ import {
   View, Text, ScrollView, StyleSheet, TouchableOpacity,
 } from 'react-native';
 import { Image } from 'expo-image';
-import { useState } from 'react';
+import { useAppStore } from '../../store/useAppStore';
+import { useMockBluetooth } from '../../src/bluetooth/mockBluetooth';
 import { useTheme } from '../../hooks/useTheme';
 import { useAssets } from '../../hooks/useAssets';
 
 // ── Estado simulado — reemplazar con BLE real en sprint futuro ──
-const SIMULATED_BATTERY  = 20;
-const IS_CONNECTED_MOCK  = true; // ← cambia a false para ver estado desconectado
 
 export default function VinculacionScreen() {
   const { colors } = useTheme();
   const assets     = useAssets();
 
-  const [isConnected] = useState(IS_CONNECTED_MOCK);
-  const [battery]     = useState(SIMULATED_BATTERY);
+  const isConnected   = useAppStore((s) => s.isConnected);
+  const isTranslating = useAppStore((s) => s.isTranslating);
+  const currentWord   = useAppStore((s) => s.currentWord);
+  const history       = useAppStore((s) => s.history);
+  const setConnected  = useAppStore((s) => s.setConnected);
+  const startTranslating = useAppStore((s) => s.startTranslating);
+  const stopTranslating  = useAppStore((s) => s.stopTranslating);
+
+  useMockBluetooth(); // activa la simulación BLE reactiva
+  //console.log({ isConnected, isTranslating, currentWord, history }); comando para debug en consola, si se necesita
+
+  const battery = 20; // fijo hasta integración BLE real
 
   const batteryColor = battery > 30 ? STATIC.green : STATIC.red;
 
@@ -78,6 +87,15 @@ export default function VinculacionScreen() {
           style={[s.searchBtn, { backgroundColor: colors.primary }]}
           activeOpacity={0.75}
           // onPress={() => { /* lógica BLE futura aquí */ }}
+          onPress={() => {
+            if (isConnected) {
+            stopTranslating();
+            setConnected(false);
+            } else {
+            setConnected(true);
+            startTranslating();
+          }
+}}
         >
           <Text style={[s.searchBtnText, { color: colors.text.inverse }]}>
             Buscar Guante
@@ -100,6 +118,32 @@ export default function VinculacionScreen() {
             BATERIA 1{'\n'}({battery}%)
           </Text>
         </View>
+        //eso es para ver los msje de la palabra actual y el historial, solo se muestra si isTranslating es true, lo que simula que el guante está enviando datos de traducción
+        {isTranslating && (
+  <View style={{ marginTop: 24, alignItems: 'center', gap: 6 }}>
+
+    <Text style={{ color: colors.text.secondary, fontSize: 13 }}>
+      Palabra actual
+    </Text>
+    <Text style={{ color: colors.accent, fontSize: 32, fontWeight: '900' }}>
+      {currentWord ?? '...'}
+    </Text>
+
+    {history.length > 0 && (
+      <>
+        <Text style={{ color: colors.text.secondary, fontSize: 13, marginTop: 12 }}>
+          Historial
+        </Text>
+        {[...history].reverse().slice(0, 5).map((word, i) => (
+          <Text key={i} style={{ color: colors.text.primary, fontSize: 15 }}>
+            {word}
+          </Text>
+        ))}
+      </>
+    )}
+
+  </View>
+)}
 
         <View style={{ height: 40 }} />
       </ScrollView>
