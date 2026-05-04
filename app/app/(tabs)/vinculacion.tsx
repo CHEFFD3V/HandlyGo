@@ -14,9 +14,6 @@ export default function VinculacionScreen() {
   const assets     = useAssets();
 
   const isConnected   = useAppStore((s) => s.isConnected);
-  const isTranslating = useAppStore((s) => s.isTranslating);
-  const currentWord   = useAppStore((s) => s.currentWord);
-  const history       = useAppStore((s) => s.history);
   const setConnected  = useAppStore((s) => s.setConnected);
   const startTranslating = useAppStore((s) => s.startTranslating);
   const stopTranslating  = useAppStore((s) => s.stopTranslating);
@@ -118,33 +115,6 @@ export default function VinculacionScreen() {
             BATERIA 1{'\n'}({battery}%)
           </Text>
         </View>
-        //eso es para ver los msje de la palabra actual y el historial, solo se muestra si isTranslating es true, lo que simula que el guante está enviando datos de traducción
-        {isTranslating && (
-  <View style={{ marginTop: 24, alignItems: 'center', gap: 6 }}>
-
-    <Text style={{ color: colors.text.secondary, fontSize: 13 }}>
-      Palabra actual
-    </Text>
-    <Text style={{ color: colors.accent, fontSize: 32, fontWeight: '900' }}>
-      {currentWord ?? '...'}
-    </Text>
-
-    {history.length > 0 && (
-      <>
-        <Text style={{ color: colors.text.secondary, fontSize: 13, marginTop: 12 }}>
-          Historial
-        </Text>
-        {[...history].reverse().slice(0, 5).map((word, i) => (
-          <Text key={i} style={{ color: colors.text.primary, fontSize: 15 }}>
-            {word}
-          </Text>
-        ))}
-      </>
-    )}
-
-  </View>
-)}
-
         <View style={{ height: 40 }} />
       </ScrollView>
     </View>

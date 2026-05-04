@@ -4,7 +4,7 @@ import type { AppState } from "../../store/useAppStore";
 
 const MOCK_WORDS = ["Hola", "Gracias", "Por favor", "Adiós", "Buenos días", "Bienvenido", "Hasta luego"] as const;
 const EMIT_INTERVAL_MS    = 2000;  // 👈 tiempo de las palabras
-const BATTERY_INTERVAL_MS = 1000;  // 👈 tiempo de la batería
+const BATTERY_INTERVAL_MS = 3000;  // 👈 tiempo de la batería
 
 export function useMockBluetooth() {
   const isTranslating = useAppStore((state: AppState) => state.isTranslating);

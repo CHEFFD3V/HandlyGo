@@ -8,6 +8,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from "../../hooks/useTheme";
 import { useAssets } from "../../hooks/useAssets";
 import { Image } from 'expo-image';
+import { useAppStore } from '../../store/useAppStore';
+import { useMockBluetooth } from '../../src/bluetooth/mockBluetooth';
 import { useEffect } from 'react';
 import { getDictionaryByCategory } from '../../services/dictionaryService';
 
@@ -18,6 +20,9 @@ export default function HomeScreen() {
   const { colors } = useTheme();
   const assets = useAssets();
   const { theme } = useTheme();
+  const currentWord = useAppStore((s) => s.currentWord);
+  const history     = useAppStore((s) => s.history);
+  useMockBluetooth();
 
   /* Lógica de prueba
     useEffect(() => {
@@ -70,14 +75,18 @@ export default function HomeScreen() {
 
         {/* Gran tarjeta karaoke */}
         <View style={[s.karoCard, { borderColor: colors.card.border, backgroundColor: colors.card.background, }]}>
-          <Text style={[s.karoText, { color: colors.text.primary }]}>Hola, ¿Cómo{'\n'}Estás?</Text>
+          <Text style={[s.karoText, { color: colors.text.primary }]}>
+            {currentWord ?? 'Esperando...'}
+          </Text>
         </View>
 
         {/* Tarjetas inclinadas */}
         <View style={s.grid}>
           <View style={[s.gridCard, s.tiltLeft, { borderColor: colors.card.border, backgroundColor: colors.card.background }]}>
             <Text style={[s.gridLabel, { color: colors.text.secondary }]}>Gestos Recientes</Text>
-            <Text style={[s.gridSmall, { color: colors.text.secondary }]}>{'• Hola\n• Gracias\n• Lo siento'}</Text>
+            <Text style={[s.gridSmall, { color: colors.text.secondary }]}>
+              {[...history].reverse().slice(0, 3).map(w => `• ${w}`).join('\n') || 'Sin gestos aún'}
+            </Text>
           </View>
           <View style={[s.gridCard, s.tiltRight, { borderColor: colors.card.border, backgroundColor: colors.card.background }]}>
             <Text style={[s.gridLabel, { color: colors.text.secondary }]}>Gestos de Hoy</Text>
