@@ -12,6 +12,12 @@ import { useAppStore } from '../../store/useAppStore';
 import { useMockBluetooth } from '../../src/bluetooth/mockBluetooth';
 import { useEffect } from 'react';
 import { getDictionaryByCategory } from '../../services/dictionaryService';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  withSequence,
+} from 'react-native-reanimated';
 
 
 
@@ -23,7 +29,25 @@ export default function HomeScreen() {
   const currentWord = useAppStore((s) => s.currentWord);
   const history     = useAppStore((s) => s.history);
   const todayCount = useAppStore((s) => s.todayCount);
+  const opacity = useSharedValue(1);
+  const scale   = useSharedValue(1);
   useMockBluetooth();
+
+  useEffect(() => {
+    opacity.value = withSequence(
+      withTiming(0, { duration: 200 }),  // desvanece
+      withTiming(1, { duration: 300 }),  // reaparece
+    );
+    scale.value = withSequence(
+      withTiming(0.8, { duration: 200 }), // encoge
+      withTiming(1,   { duration: 300 }), // vuelve al tamaño normal
+    );
+  }, [currentWord]);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+    transform: [{ scale: scale.value }],
+  }));
 
   /* Lógica de prueba
     useEffect(() => {
@@ -75,11 +99,11 @@ export default function HomeScreen() {
         </View>
 
         {/* Gran tarjeta karaoke */}
-        <View style={[s.karoCard, { borderColor: colors.card.border, backgroundColor: colors.card.background, }]}>
+        <Animated.View style={[s.karoCard, animatedStyle, { borderColor: colors.card.border, backgroundColor: colors.card.background }]}>
           <Text style={[s.karoText, { color: colors.text.primary }]}>
             {currentWord ?? 'Esperando...'}
           </Text>
-        </View>
+        </Animated.View>
 
         {/* Tarjetas inclinadas */}
         <View style={s.grid}>
