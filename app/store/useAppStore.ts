@@ -8,6 +8,7 @@ export type AppState = {
   currentWord: string | null;
   history: string[];
   battery: number; 
+  todayCount: number;  
   
 
   setConnected: (value: boolean) => void;
@@ -16,6 +17,7 @@ export type AppState = {
   setWord: (word: string) => void;
   clearHistory: () => void;
   setBattery: (value: number) => void; 
+  incrementTodayCount: () => void; 
 };
 
 export const useAppStore = create<AppState>((set) => ({
@@ -23,7 +25,8 @@ export const useAppStore = create<AppState>((set) => ({
   isTranslating: false,
   currentWord: null,
   history: [],
-   battery: INITIAL_BATTERY, // valor inicial de batería
+   battery: INITIAL_BATTERY,
+   todayCount: 0,   // valor inicial de batería
 
   setConnected: (value) =>
     set((state) => ({
@@ -41,14 +44,18 @@ export const useAppStore = create<AppState>((set) => ({
   stopTranslating: () => set({ isTranslating: false }),
 
   setWord: (word) =>
-    set((state) => ({
-      currentWord: word,
-      history:
-        state.history[state.history.length - 1] === word
-          ? state.history
-          : [...state.history, word],
-    })),
+    set((state) => {
+      const isDuplicate = state.history[state.history.length - 1] === word;
+      return  {
+        currentWord: word,
+        history: isDuplicate ? state.history : [...state.history, word],
+        todayCount: isDuplicate ? state.todayCount : state.todayCount + 1, 
+      };
+    }),
+      
 
   clearHistory: () => set({ history: [], currentWord: null }),
   setBattery: (value) => set({ battery: value }),
+  incrementTodayCount: () =>
+    set((state) => ({ todayCount: state.todayCount + 1 })),
 }));

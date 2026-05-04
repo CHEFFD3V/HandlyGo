@@ -22,6 +22,7 @@ export default function HomeScreen() {
   const { theme } = useTheme();
   const currentWord = useAppStore((s) => s.currentWord);
   const history     = useAppStore((s) => s.history);
+  const todayCount = useAppStore((s) => s.todayCount);
   useMockBluetooth();
 
   /* Lógica de prueba
@@ -90,7 +91,7 @@ export default function HomeScreen() {
           </View>
           <View style={[s.gridCard, s.tiltRight, { borderColor: colors.card.border, backgroundColor: colors.card.background }]}>
             <Text style={[s.gridLabel, { color: colors.text.secondary }]}>Gestos de Hoy</Text>
-            <Text style={[s.gridValue, { color: colors.accent }]}>12</Text>
+            <Text style={[s.gridValue, { color: colors.accent }]}>{todayCount}</Text>
           </View>
         </View>
 
