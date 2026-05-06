@@ -2,20 +2,26 @@ import {
   View, Text, ScrollView, StyleSheet, TouchableOpacity,
 } from 'react-native';
 import { Image } from 'expo-image';
-import { useState } from 'react';
+import { useAppStore } from '../../store/useAppStore';
+import { useMockBluetooth } from '../../src/bluetooth/mockBluetooth';
 import { useTheme } from '../../hooks/useTheme';
 import { useAssets } from '../../hooks/useAssets';
 
 // ── Estado simulado — reemplazar con BLE real en sprint futuro ──
-const SIMULATED_BATTERY  = 20;
-const IS_CONNECTED_MOCK  = true; // ← cambia a false para ver estado desconectado
 
 export default function VinculacionScreen() {
   const { colors } = useTheme();
   const assets     = useAssets();
 
-  const [isConnected] = useState(IS_CONNECTED_MOCK);
-  const [battery]     = useState(SIMULATED_BATTERY);
+  const isConnected   = useAppStore((s) => s.isConnected);
+  const setConnected  = useAppStore((s) => s.setConnected);
+  const startTranslating = useAppStore((s) => s.startTranslating);
+  const stopTranslating  = useAppStore((s) => s.stopTranslating);
+
+  useMockBluetooth(); // activa la simulación BLE reactiva
+  //console.log({ isConnected, isTranslating, currentWord, history }); comando para debug en consola, si se necesita
+
+  const battery = useAppStore((s) => s.battery);
 
   const batteryColor = battery > 30 ? STATIC.green : STATIC.red;
 
@@ -78,6 +84,15 @@ export default function VinculacionScreen() {
           style={[s.searchBtn, { backgroundColor: colors.primary }]}
           activeOpacity={0.75}
           // onPress={() => { /* lógica BLE futura aquí */ }}
+          onPress={() => {
+            if (isConnected) {
+            stopTranslating();
+            setConnected(false);
+            } else {
+            setConnected(true);
+            startTranslating();
+          }
+}}
         >
           <Text style={[s.searchBtnText, { color: colors.text.inverse }]}>
             Buscar Guante
@@ -100,7 +115,6 @@ export default function VinculacionScreen() {
             BATERIA 1{'\n'}({battery}%)
           </Text>
         </View>
-
         <View style={{ height: 40 }} />
       </ScrollView>
     </View>
