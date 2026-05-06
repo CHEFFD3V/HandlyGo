@@ -17,8 +17,10 @@ import { Image } from 'expo-image';
 import { useTheme } from '../../hooks/useTheme';
 
 // ─── Assets ──────────────────────────────────────────────────────────────────
-const LIGHT_MOCKUP = require('../../assets/images/ui_modo_claro/images/21_configuracion_calibracion.svg');
-const DARK_MOCKUP  = require('../../assets/images/ui_modo_oscuro/images/21_configuracion_calibracion.svg');
+const LIGHT_HEADER_PNG = require('../../assets/images/graphic/iconos_claros/graphic/configuracion.png');
+const DARK_HEADER_PNG = require('../../assets/images/graphic/iconos_oscuros/graphic/configuracion-oscuro.png');
+const LIGHT_HAND_PNG = require('../../assets/images/graphic/iconos_claros/graphic/mano-configuracion-claro.png');
+const DARK_HAND_PNG = require('../../assets/images/graphic/iconos_oscuros/graphic/mano-configuracion.svg.png');
 
 // ─── Constantes ───────────────────────────────────────────────────────────────
 const DEDOS = ['Dedo 1', 'Dedo 2', 'Dedo 3', 'Dedo 4', 'Dedo 5'] as const;
@@ -111,605 +113,6 @@ function validarSensibilidad(v: number): string | null {
   return null;
 }
 
-// ─── Componente principal ─────────────────────────────────────────────────────
-export default function ConfiguracionScreen() {
-  const { theme, colors } = useTheme();
-  const dark = theme === 'dark';
-
-  // ── Animated value para controlar la opacidad del SVG en sync con el tema ───
-  // Se inicializa con el valor correcto para evitar cualquier flash inicial.
-  const darkOpacity = useRef(new Animated.Value(dark ? 1 : 0)).current;
-
-  useEffect(() => {
-    // duration: 0 → el cambio es instantáneo y ocurre en el mismo frame
-    // que el cambio de backgroundColor del tema, eliminando el desface visual.
-    // Si el sistema de temas usa una transición animada, ajusta duration para que coincida.
-    Animated.timing(darkOpacity, {
-      toValue: dark ? 1 : 0,
-      duration: 0,
-      useNativeDriver: true,
-    }).start();
-  }, [dark]);
-
-  const C: ColorMap = useMemo(() => buildColors(colors, dark), [colors, dark]);
-
-  const [selectedFinger, setSelectedFinger] = useState<DedoKey>('Dedo 1');
-  const [activeModal, setActiveModal]       = useState<ActiveModal>('none');
-  const [calStep, setCalStep]               = useState<CalStep>('idle');
-
-  const [config, setConfig] = useState<GloveConfig>(DEFAULT_CONFIG);
-
-  const [rawActual, setRawActual] = useState<Record<DedoKey, number>>({
-    'Dedo 1': 550, 'Dedo 2': 550, 'Dedo 3': 550, 'Dedo 4': 550, 'Dedo 5': 550,
-  });
-
-  const [snapOpen,  setSnapOpen]  = useState<Record<DedoKey, number> | null>(null);
-  const [snapClose, setSnapClose] = useState<Record<DedoKey, number> | null>(null);
-
-  const [editConfig,   setEditConfig]   = useState<GloveConfig>(DEFAULT_CONFIG);
-  const [editSettings, setEditSettings] = useState<GloveConfig>(DEFAULT_CONFIG);
-  const [captureFlash, setCaptureFlash] = useState<'open' | 'close' | null>(null);
-
-  // ── Simulación BLE (reemplazar con stream real del guante) ───────────────────
-  useEffect(() => {
-    const id = setInterval(() => {
-      setRawActual(prev => {
-        const next = { ...prev };
-        for (const dedo of DEDOS) {
-          const delta = (Math.random() - 0.5) * 30;
-          next[dedo] = Math.min(4095, Math.max(0, Math.round(prev[dedo] + delta)));
-        }
-        return next;
-      });
-    }, 600);
-    return () => clearInterval(id);
-  }, []);
-
-  // ── Calibración ──────────────────────────────────────────────────────────────
-  function iniciarCalibracion() {
-    setSnapOpen(null);
-    setSnapClose(null);
-    setCalStep('open');
-    setActiveModal('calibration');
-  }
-
-  function capturarManoAbierta() {
-    setSnapOpen({ ...rawActual });
-    setCaptureFlash('open');
-    setTimeout(() => { setCaptureFlash(null); setCalStep('close'); }, 700);
-  }
-
-  function capturarManoCerrada() {
-    const snap = { ...rawActual };
-    setSnapClose(snap);
-    const nueva = { ...config };
-    for (const dedo of DEDOS) {
-      const openRaw  = snapOpen?.[dedo] ?? snap[dedo];
-      const closeRaw = snap[dedo];
-      const rawMin   = Math.min(openRaw, closeRaw);
-      const rawMax   = Math.max(openRaw, closeRaw);
-      const safeDiff = rawMax - rawMin;
-      nueva[dedo] = {
-        ...nueva[dedo],
-        rawMin: safeDiff >= 50 ? rawMin : Math.max(0,    openRaw - 100),
-        rawMax: safeDiff >= 50 ? rawMax : Math.min(4095, openRaw + 100),
-      };
-    }
-    setEditConfig(nueva);
-    setCaptureFlash('close');
-    setTimeout(() => { setCaptureFlash(null); setCalStep('review'); }, 700);
-  }
-
-  function guardarCalibracion() {
-    for (const dedo of DEDOS) {
-      const cfg = editConfig[dedo];
-      const e1 = validarRango(cfg.rawMin, cfg.rawMax);
-      if (e1) { Alert.alert('Error en ' + dedo, e1); return; }
-      const e2 = validarUmbral(cfg.umbral);
-      if (e2) { Alert.alert('Error en ' + dedo, e2); return; }
-      const e3 = validarSensibilidad(cfg.sensibilidad);
-      if (e3) { Alert.alert('Error en ' + dedo, e3); return; }
-    }
-    setConfig(editConfig);
-    setCalStep('done');
-  }
-
-  function cerrarModal() {
-    setActiveModal('none');
-    setCalStep('idle');
-  }
-
-  // ── Ajustes avanzados ────────────────────────────────────────────────────────
-  function abrirSettings() {
-    setEditSettings({ ...config });
-    setActiveModal('settings');
-  }
-
-  function guardarSettings() {
-    for (const dedo of DEDOS) {
-      const cfg = editSettings[dedo];
-      const e1 = validarUmbral(cfg.umbral);
-      if (e1) { Alert.alert('Error en ' + dedo, e1); return; }
-      const e2 = validarSensibilidad(cfg.sensibilidad);
-      if (e2) { Alert.alert('Error en ' + dedo, e2); return; }
-    }
-    setConfig(editSettings);
-    cerrarModal();
-  }
-
-  function updateEditField(
-    dedo: DedoKey,
-    field: keyof DedoConfig,
-    value: string,
-    target: 'edit' | 'settings' = 'edit',
-  ) {
-    const num = Number(value);
-    if (isNaN(num)) return;
-    if (target === 'edit') {
-      setEditConfig(prev => ({ ...prev, [dedo]: { ...prev[dedo], [field]: num } }));
-    } else {
-      setEditSettings(prev => ({ ...prev, [dedo]: { ...prev[dedo], [field]: num } }));
-    }
-  }
-
-  // ── Verde = relajado · Rojo = flexionado (sobre umbral) ──────────────────────
-  function getFingerUiState(dedo: DedoKey) {
-    const pct = normalizar(rawActual[dedo], config[dedo].rawMin, config[dedo].rawMax);
-    return {
-      selected: selectedFinger === dedo,
-      active:   pct >= config[dedo].umbral,
-    };
-  }
-
-  // ─── LivePreview ──────────────────────────────────────────────────────────────
-  function LivePreview() {
-    return (
-      <View style={[styles.livePreview, { backgroundColor: C.modalSurface, borderColor: C.modalBorder }]}>
-        <Text style={[styles.livePrevTitle, { color: C.textMuted }]}>
-          Valores en tiempo real
-        </Text>
-        <View style={styles.liveRow}>
-          {DEDOS.map(d => {
-            const pct     = normalizar(rawActual[d], config[d].rawMin, config[d].rawMax);
-            const flexing = pct > 50;
-            return (
-              <View key={d} style={styles.liveCell}>
-                <Text style={[styles.liveCellLabel, { color: C.textMuted }]}>
-                  {d.replace('Dedo ', 'D')}
-                </Text>
-                <Text style={[styles.liveCellRaw, { color: C.text }]}>{rawActual[d]}</Text>
-                <View style={[styles.liveCellBar, { backgroundColor: C.track }]}>
-                  <View
-                    style={[
-                      styles.liveCellBarFill,
-                      { height: `${pct}%` as any, backgroundColor: flexing ? C.secondary : C.accent },
-                    ]}
-                  />
-                </View>
-                <Text style={[styles.liveCellPct, { color: flexing ? C.secondary : C.accent }]}>
-                  {pct}%
-                </Text>
-              </View>
-            );
-          })}
-        </View>
-      </View>
-    );
-  }
-
-  // ── Modal de calibración ─────────────────────────────────────────────────────
-  function CalibrationModalContent() {
-    const flashBg =
-      captureFlash === 'open'  ? C.secondaryLight :
-      captureFlash === 'close' ? C.accentLight    : 'transparent';
-
-    if (calStep === 'open') {
-      return (
-        <View style={{ backgroundColor: flashBg, borderRadius: 16, padding: 4 }}>
-          <StepHeader step={1} total={3} title="Mano abierta" color={C.secondary} C={C} />
-          <View style={[styles.instructionBox, {
-            backgroundColor: C.secondaryLight,
-            borderColor: C.secondaryBorder,
-          }]}>
-            <Text style={[styles.instructionIcon, { color: C.secondary }]}>{'~'}</Text>
-            <Text style={[styles.instructionText, { color: C.secondary }]}>
-              Extiende todos los dedos completamente relajados.{'\n'}
-              Esto establece el valor{' '}
-              <Text style={{ fontWeight: '800' }}>minimo (0% flexion)</Text> de cada sensor.
-            </Text>
-          </View>
-          <LivePreview />
-          <ActionButton label="Capturar mano abierta" color={C.secondary} onPress={capturarManoAbierta} C={C} />
-        </View>
-      );
-    }
-
-    if (calStep === 'close') {
-      return (
-        <View style={{ backgroundColor: flashBg, borderRadius: 16, padding: 4 }}>
-          <StepHeader step={2} total={3} title="Mano cerrada" color={C.secondary} C={C} />
-          <View style={[styles.instructionBox, {
-            backgroundColor: C.secondaryLight,
-            borderColor: C.secondaryBorder,
-          }]}>
-            <Text style={[styles.instructionIcon, { color: C.secondary }]}>{'>'}</Text>
-            <Text style={[styles.instructionText, { color: C.secondary }]}>
-              Cierra la mano formando un puño apretado.{'\n'}
-              Esto establece el valor{' '}
-              <Text style={{ fontWeight: '800' }}>maximo (100% flexion)</Text> de cada sensor.
-            </Text>
-          </View>
-          <LivePreview />
-          {snapOpen && (
-            <View style={[styles.snapRow, { backgroundColor: C.modalSurface, borderColor: C.modalBorder }]}>
-              <Text style={[styles.snapRowTitle, { color: C.textMuted }]}>
-                Valores capturados (mano abierta)
-              </Text>
-              <View style={styles.snapCells}>
-                {DEDOS.map(d => (
-                  <View key={d} style={styles.snapCell}>
-                    <Text style={[styles.snapLabel, { color: C.textMuted }]}>
-                      {d.replace('Dedo ', 'D')}
-                    </Text>
-                    <Text style={[styles.snapValue, { color: C.accent }]}>{snapOpen[d]}</Text>
-                  </View>
-                ))}
-              </View>
-            </View>
-          )}
-          <ActionButton label="Capturar mano cerrada" color={C.secondary} onPress={capturarManoCerrada} C={C} />
-        </View>
-      );
-    }
-
-    if (calStep === 'review') {
-      return (
-        <>
-          <StepHeader step={3} total={3} title="Revisar rangos" color={C.accent} C={C} />
-          <Text style={[styles.stepDesc, { color: C.textMuted }]}>
-            Verifica los rangos capturados. Puedes ajustar manualmente si fuese necesario.
-          </Text>
-
-          {DEDOS.map(dedo => {
-            const cfg          = editConfig[dedo];
-            const pctRaw       = normalizar(rawActual[dedo], cfg.rawMin, cfg.rawMax);
-            const pct          = aplicarSensibilidad(pctRaw, cfg.sensibilidad);
-            const umbralActivo = pct >= cfg.umbral;
-            const errRango     = validarRango(cfg.rawMin, cfg.rawMax);
-
-            return (
-              <View
-                key={dedo}
-                style={[
-                  styles.dedoCard,
-                  { backgroundColor: C.modalSurface, borderColor: errRango ? C.error : C.modalBorder },
-                ]}
-              >
-                <View style={styles.dedoCardHeader}>
-                  <Text style={[styles.dedoCardTitle, { color: C.text }]}>{dedo}</Text>
-                  <View style={[
-                    styles.dedoStatusBadge,
-                    { backgroundColor: umbralActivo ? C.accentLight : C.modalBorder },
-                  ]}>
-                    <Text style={[
-                      styles.dedoStatusText,
-                      { color: umbralActivo ? C.accent : C.textMuted },
-                    ]}>
-                      {umbralActivo ? 'ACTIVO' : 'INACTIVO'}
-                    </Text>
-                  </View>
-                </View>
-
-                <View style={styles.dedoRow}>
-                  <FieldInput
-                    label="RAW min"
-                    value={String(cfg.rawMin)}
-                    onChangeText={v => updateEditField(dedo, 'rawMin', v, 'edit')}
-                    hasError={!!errRango}
-                    C={C}
-                  />
-                  <FieldInput
-                    label="RAW max"
-                    value={String(cfg.rawMax)}
-                    onChangeText={v => updateEditField(dedo, 'rawMax', v, 'edit')}
-                    hasError={!!errRango}
-                    C={C}
-                  />
-                  <FieldInput
-                    label="Umbral %"
-                    value={String(cfg.umbral)}
-                    onChangeText={v => updateEditField(dedo, 'umbral', v, 'edit')}
-                    hasError={!!validarUmbral(cfg.umbral)}
-                    C={C}
-                  />
-                  <FieldInput
-                    label="Sens. %"
-                    value={String(cfg.sensibilidad)}
-                    onChangeText={v => updateEditField(dedo, 'sensibilidad', v, 'edit')}
-                    hasError={!!validarSensibilidad(cfg.sensibilidad)}
-                    C={C}
-                  />
-                </View>
-
-                {errRango && (
-                  <Text style={[styles.fieldError, { color: C.error }]}>{errRango}</Text>
-                )}
-
-                <View style={[styles.previewBar, { backgroundColor: C.track }]}>
-                  <View
-                    style={[styles.previewBarFill, {
-                      width: `${pct}%` as any,
-                      backgroundColor: C.accent,
-                    }]}
-                  />
-                  <View
-                    style={[styles.previewThreshold, {
-                      left: `${cfg.umbral}%` as any,
-                      backgroundColor: C.secondary,
-                    }]}
-                  />
-                </View>
-                <View style={styles.previewMeta}>
-                  <Text style={[styles.previewMetaText, { color: C.textMuted }]}>
-                    RAW actual: {rawActual[dedo]}  {'->'}  {pct}%
-                  </Text>
-                  <Text style={[styles.previewMetaText, { color: C.secondary }]}>
-                    Umbral: {cfg.umbral}%
-                  </Text>
-                </View>
-              </View>
-            );
-          })}
-
-          <ActionButton label="Guardar calibracion" color={C.accent} onPress={guardarCalibracion} C={C} />
-        </>
-      );
-    }
-
-    if (calStep === 'done') {
-      return (
-        <View style={styles.doneContainer}>
-          <View style={[styles.doneIconCircle, { backgroundColor: C.accentLight }]}>
-            <Text style={[styles.doneIconText, { color: C.accent }]}>OK</Text>
-          </View>
-          <Text style={[styles.doneTitle, { color: C.text }]}>Calibracion guardada</Text>
-          <Text style={[styles.doneSub, { color: C.textMuted }]}>
-            El guante HandlyGo esta listo con los nuevos rangos de calibracion.
-          </Text>
-          <View style={[styles.doneSummary, { backgroundColor: C.modalSurface, borderColor: C.modalBorder }]}>
-            {DEDOS.map(d => (
-              <View key={d} style={[styles.doneSummaryRow, { borderBottomColor: C.modalBorder }]}>
-                <Text style={[styles.doneSummaryLabel, { color: C.textMuted }]}>{d}</Text>
-                <Text style={[styles.doneSummaryVal, { color: C.text }]}>
-                  {config[d].rawMin} - {config[d].rawMax}
-                </Text>
-                <Text style={[styles.doneSummaryTag, { backgroundColor: C.accentLight, color: C.accent }]}>
-                  U:{config[d].umbral}%
-                </Text>
-                <Text style={[styles.doneSummaryTag, { backgroundColor: C.secondaryLight, color: C.secondary }]}>
-                  S:{config[d].sensibilidad}%
-                </Text>
-              </View>
-            ))}
-          </View>
-          <ActionButton label="Cerrar" color={C.accent} onPress={cerrarModal} C={C} />
-        </View>
-      );
-    }
-
-    return null;
-  }
-
-  // ── Modal de ajustes avanzados ───────────────────────────────────────────────
-  function SettingsModalContent() {
-    return (
-      <>
-        <View style={styles.modalHeader}>
-          <Text style={[styles.modalTitle,    { color: C.text }]}>Ajustes avanzados</Text>
-          <Text style={[styles.modalSubtitle, { color: C.textMuted }]}>
-            Umbral (0-100%) y sensibilidad (50-200%) por dedo
-          </Text>
-        </View>
-
-        {DEDOS.map(dedo => {
-          const cfg       = editSettings[dedo];
-          const errUmbral = validarUmbral(cfg.umbral);
-          const errSens   = validarSensibilidad(cfg.sensibilidad);
-          const pctRaw    = normalizar(rawActual[dedo], config[dedo].rawMin, config[dedo].rawMax);
-          const pct       = aplicarSensibilidad(pctRaw, cfg.sensibilidad);
-          const activo    = pct >= cfg.umbral;
-
-          return (
-            <View key={dedo} style={[styles.settingsCard, { backgroundColor: C.modalSurface, borderColor: C.modalBorder }]}>
-              <View style={styles.dedoCardHeader}>
-                <Text style={[styles.dedoCardTitle, { color: C.text }]}>{dedo}</Text>
-                <Text style={[styles.settingsPreview, { color: activo ? C.accent : C.textMuted }]}>
-                  {pct}% {activo ? '(activo)' : '(inactivo)'}
-                </Text>
-              </View>
-
-              <View style={styles.settingsRow}>
-                <View style={styles.settingsField}>
-                  <Text style={[styles.settingsLabel, { color: C.textMuted }]}>Umbral (%)</Text>
-                  <TextInput
-                    style={[styles.settingsInput, {
-                      backgroundColor: C.inputBg,
-                      borderColor: errUmbral ? C.error : C.inputBorder,
-                      color: C.text,
-                    }]}
-                    keyboardType="numeric"
-                    maxLength={3}
-                    value={String(cfg.umbral)}
-                    onChangeText={v => updateEditField(dedo, 'umbral', v, 'settings')}
-                  />
-                  <Text style={[styles.settingsHint, { color: C.textMuted }]}>0 - 100</Text>
-                  {errUmbral && (
-                    <Text style={[styles.fieldError, { color: C.error }]}>{errUmbral}</Text>
-                  )}
-                </View>
-
-                <View style={[styles.settingsDivider, { backgroundColor: C.modalBorder }]} />
-
-                <View style={styles.settingsField}>
-                  <Text style={[styles.settingsLabel, { color: C.textMuted }]}>Sensibilidad (%)</Text>
-                  <TextInput
-                    style={[styles.settingsInput, {
-                      backgroundColor: C.inputBg,
-                      borderColor: errSens ? C.error : C.inputBorder,
-                      color: C.text,
-                    }]}
-                    keyboardType="numeric"
-                    maxLength={3}
-                    value={String(cfg.sensibilidad)}
-                    onChangeText={v => updateEditField(dedo, 'sensibilidad', v, 'settings')}
-                  />
-                  <Text style={[styles.settingsHint, { color: C.textMuted }]}>50 - 200</Text>
-                  {errSens && (
-                    <Text style={[styles.fieldError, { color: C.error }]}>{errSens}</Text>
-                  )}
-                </View>
-              </View>
-
-              <View style={[styles.settingsBar, { backgroundColor: C.track }]}>
-                <View style={[styles.settingsBarFill, {
-                  width: `${pct}%` as any,
-                  backgroundColor: C.accent,
-                }]} />
-                <View style={[styles.settingsThreshold, {
-                  left: `${cfg.umbral}%` as any,
-                  backgroundColor: C.secondary,
-                }]} />
-              </View>
-            </View>
-          );
-        })}
-
-        <View style={styles.settingsActions}>
-          <TouchableOpacity
-            onPress={cerrarModal}
-            style={[styles.cancelBtn, { borderColor: C.modalBorder }]}
-          >
-            <Text style={[styles.cancelBtnText, { color: C.textMuted }]}>Cancelar</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={guardarSettings}
-            style={[styles.saveBtn, { backgroundColor: C.accent }]}
-          >
-            <Text style={styles.saveBtnText}>Guardar ajustes</Text>
-          </TouchableOpacity>
-        </View>
-      </>
-    );
-  }
-
-  // ─── Render principal ─────────────────────────────────────────────────────────
-  return (
-    <View style={[styles.screen, { backgroundColor: C.bg }]}>
-
-      {/* Mockup SVG — dos capas superpuestas, opacidad controlada en sync con el tema */}
-      <View style={styles.mockupFrame}>
-        {/* Capa clara: visible cuando dark = 0 */}
-        <Animated.View
-          style={[StyleSheet.absoluteFill, { opacity: Animated.subtract(1, darkOpacity) }]}
-          pointerEvents="none"
-        >
-          <Image source={LIGHT_MOCKUP} style={styles.mockupImage} contentFit="fill" />
-        </Animated.View>
-
-        {/* Capa oscura: visible cuando dark = 1 */}
-        <Animated.View
-          style={[StyleSheet.absoluteFill, { opacity: darkOpacity }]}
-          pointerEvents="none"
-        >
-          <Image source={DARK_MOCKUP} style={styles.mockupImage} contentFit="fill" />
-        </Animated.View>
-      </View>
-
-      {/* Botones de dedos + Calibrar */}
-      <View style={styles.mockButtonsArea}>
-        <View style={styles.mockButtonsCanvas}>
-          {DEDOS.map((dedo, index) => {
-            const state = getFingerUiState(dedo);
-            return (
-              <Pressable
-                key={dedo}
-                onPress={() => setSelectedFinger(dedo)}
-                style={[
-                  styles.fingerBtn,
-                  index === 0 && styles.fingerBtn1,
-                  index === 1 && styles.fingerBtn2,
-                  index === 2 && styles.fingerBtn3,
-                  index === 3 && styles.fingerBtn4,
-                  index === 4 && styles.fingerBtn5,
-                  {
-                    // Verde = relajado · Rojo = flexionado (supera umbral)
-                    backgroundColor: state.active ? '#E25D5D' : '#64C79D',
-                    // Borde más grueso para indicar dedo seleccionado
-                    borderColor: withAlpha(C.text, dark ? 0.12 : 0.08),
-                    borderWidth: state.selected ? 2.5 : 1,
-                  },
-                ]}
-              >
-                <Text style={[styles.fingerBtnText, { color: C.textInverse }]}>{dedo}</Text>
-              </Pressable>
-            );
-          })}
-
-          <Pressable
-            onPress={iniciarCalibracion}
-            style={[
-              styles.calibrateBtnRebuilt,
-              {
-                backgroundColor: withAlpha(C.surface, dark ? 0.9 : 0.98),
-                borderColor: withAlpha(C.border, 0.6),
-              },
-            ]}
-          >
-            <Text style={[styles.calibrateBtnRebuiltText, { color: C.accent }]}>Calibrar</Text>
-          </Pressable>
-        </View>
-      </View>
-
-      {/* Modal principal */}
-      <Modal
-        visible={activeModal !== 'none'}
-        transparent
-        animationType="slide"
-        onRequestClose={cerrarModal}
-      >
-        <KeyboardAvoidingView
-          style={{ flex: 1 }}
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        >
-          <Pressable
-            style={[styles.overlay, { backgroundColor: withAlpha(colors.text.primary, dark ? 0.55 : 0.4) }]}
-            onPress={cerrarModal}
-          />
-          <View
-            style={[
-              styles.sheet,
-              {
-                backgroundColor: C.modalSurface,
-                borderTopColor: C.modalBorder,
-                borderTopWidth: 1,
-              },
-            ]}
-          >
-            <View style={[styles.handle, { backgroundColor: C.accent }]} />
-            <ScrollView
-              showsVerticalScrollIndicator={false}
-              keyboardShouldPersistTaps="handled"
-            >
-              {activeModal === 'calibration' && <CalibrationModalContent />}
-              {activeModal === 'settings'    && <SettingsModalContent />}
-            </ScrollView>
-          </View>
-        </KeyboardAvoidingView>
-      </Modal>
-    </View>
-  );
-}
-
 // ─── Componentes auxiliares puros ─────────────────────────────────────────────
 
 function StepHeader({
@@ -784,15 +187,716 @@ function FieldInput({ label, value, onChangeText, hasError, C }: {
   );
 }
 
+// ─── Subcomponente: LivePreview ───────────────────────────────────────────────
+function LivePreview({
+  rawActual,
+  config,
+  C,
+}: {
+  rawActual: Record<DedoKey, number>;
+  config: GloveConfig;
+  C: ColorMap;
+}) {
+  return (
+    <View style={[styles.livePreview, { backgroundColor: C.modalSurface, borderColor: C.modalBorder }]}>
+      <Text style={[styles.livePrevTitle, { color: C.textMuted }]}>
+        Valores en tiempo real
+      </Text>
+      <View style={styles.liveRow}>
+        {DEDOS.map(d => {
+          const pct     = normalizar(rawActual[d], config[d].rawMin, config[d].rawMax);
+          const flexing = pct > 50;
+          return (
+            <View key={d} style={styles.liveCell}>
+              <Text style={[styles.liveCellLabel, { color: C.textMuted }]}>
+                {d.replace('Dedo ', 'D')}
+              </Text>
+              <Text style={[styles.liveCellRaw, { color: C.text }]}>{rawActual[d]}</Text>
+              <View style={[styles.liveCellBar, { backgroundColor: C.track }]}>
+                <View
+                  style={[
+                    styles.liveCellBarFill,
+                    { height: `${pct}%` as any, backgroundColor: flexing ? C.secondary : C.accent },
+                  ]}
+                />
+              </View>
+              <Text style={[styles.liveCellPct, { color: flexing ? C.secondary : C.accent }]}>
+                {pct}%
+              </Text>
+            </View>
+          );
+        })}
+      </View>
+    </View>
+  );
+}
+
+// ─── Subcomponente: CalibrationModal ─────────────────────────────────────────
+function CalibrationModal({
+  calStep,
+  captureFlash,
+  rawActual,
+  config,
+  editConfig,
+  snapOpen,
+  C,
+  onCapturarManoAbierta,
+  onCapturarManoCerrada,
+  onGuardarCalibracion,
+  onCerrarModal,
+  onUpdateEditField,
+}: {
+  calStep: CalStep;
+  captureFlash: 'open' | 'close' | null;
+  rawActual: Record<DedoKey, number>;
+  config: GloveConfig;
+  editConfig: GloveConfig;
+  snapOpen: Record<DedoKey, number> | null;
+  C: ColorMap;
+  onCapturarManoAbierta: () => void;
+  onCapturarManoCerrada: () => void;
+  onGuardarCalibracion: () => void;
+  onCerrarModal: () => void;
+  onUpdateEditField: (dedo: DedoKey, field: keyof DedoConfig, value: string) => void;
+}) {
+  const flashBg =
+    captureFlash === 'open'  ? C.secondaryLight :
+    captureFlash === 'close' ? C.accentLight    : 'transparent';
+
+  if (calStep === 'open') {
+    return (
+      <View style={{ backgroundColor: flashBg, borderRadius: 16, padding: 4 }}>
+        <StepHeader step={1} total={3} title="Mano abierta" color={C.secondary} C={C} />
+        <View style={[styles.instructionBox, {
+          backgroundColor: C.secondaryLight,
+          borderColor: C.secondaryBorder,
+        }]}>
+          <Text style={[styles.instructionIcon, { color: C.secondary }]}>{'~'}</Text>
+          <Text style={[styles.instructionText, { color: C.secondary }]}>
+            Extiende todos los dedos completamente relajados.{'\n'}
+            Esto establece el valor{' '}
+            <Text style={{ fontWeight: '800' }}>minimo (0% flexion)</Text> de cada sensor.
+          </Text>
+        </View>
+        <LivePreview rawActual={rawActual} config={config} C={C} />
+        <ActionButton label="Capturar mano abierta" color={C.secondary} onPress={onCapturarManoAbierta} C={C} />
+      </View>
+    );
+  }
+
+  if (calStep === 'close') {
+    return (
+      <View style={{ backgroundColor: flashBg, borderRadius: 16, padding: 4 }}>
+        <StepHeader step={2} total={3} title="Mano cerrada" color={C.secondary} C={C} />
+        <View style={[styles.instructionBox, {
+          backgroundColor: C.secondaryLight,
+          borderColor: C.secondaryBorder,
+        }]}>
+          <Text style={[styles.instructionIcon, { color: C.secondary }]}>{'>'}</Text>
+          <Text style={[styles.instructionText, { color: C.secondary }]}>
+            Cierra la mano formando un puño apretado.{'\n'}
+            Esto establece el valor{' '}
+            <Text style={{ fontWeight: '800' }}>maximo (100% flexion)</Text> de cada sensor.
+          </Text>
+        </View>
+        <LivePreview rawActual={rawActual} config={config} C={C} />
+        {snapOpen && (
+          <View style={[styles.snapRow, { backgroundColor: C.modalSurface, borderColor: C.modalBorder }]}>
+            <Text style={[styles.snapRowTitle, { color: C.textMuted }]}>
+              Valores capturados (mano abierta)
+            </Text>
+            <View style={styles.snapCells}>
+              {DEDOS.map(d => (
+                <View key={d} style={styles.snapCell}>
+                  <Text style={[styles.snapLabel, { color: C.textMuted }]}>
+                    {d.replace('Dedo ', 'D')}
+                  </Text>
+                  <Text style={[styles.snapValue, { color: C.accent }]}>{snapOpen[d]}</Text>
+                </View>
+              ))}
+            </View>
+          </View>
+        )}
+        <ActionButton label="Capturar mano cerrada" color={C.secondary} onPress={onCapturarManoCerrada} C={C} />
+      </View>
+    );
+  }
+
+  if (calStep === 'review') {
+    return (
+      <>
+        <StepHeader step={3} total={3} title="Revisar rangos" color={C.accent} C={C} />
+        <Text style={[styles.stepDesc, { color: C.textMuted }]}>
+          Verifica los rangos capturados. Puedes ajustar manualmente si fuese necesario.
+        </Text>
+
+        {DEDOS.map(dedo => {
+          const cfg          = editConfig[dedo];
+          const pctRaw       = normalizar(rawActual[dedo], cfg.rawMin, cfg.rawMax);
+          const pct          = aplicarSensibilidad(pctRaw, cfg.sensibilidad);
+          const umbralActivo = pct >= cfg.umbral;
+          const errRango     = validarRango(cfg.rawMin, cfg.rawMax);
+
+          return (
+            <View
+              key={dedo}
+              style={[
+                styles.dedoCard,
+                { backgroundColor: C.modalSurface, borderColor: errRango ? C.error : C.modalBorder },
+              ]}
+            >
+              <View style={styles.dedoCardHeader}>
+                <Text style={[styles.dedoCardTitle, { color: C.text }]}>{dedo}</Text>
+                <View style={[
+                  styles.dedoStatusBadge,
+                  { backgroundColor: umbralActivo ? C.accentLight : C.modalBorder },
+                ]}>
+                  <Text style={[
+                    styles.dedoStatusText,
+                    { color: umbralActivo ? C.accent : C.textMuted },
+                  ]}>
+                    {umbralActivo ? 'ACTIVO' : 'INACTIVO'}
+                  </Text>
+                </View>
+              </View>
+
+              <View style={styles.dedoRow}>
+                <FieldInput
+                  label="RAW min"
+                  value={String(cfg.rawMin)}
+                  onChangeText={v => onUpdateEditField(dedo, 'rawMin', v)}
+                  hasError={!!errRango}
+                  C={C}
+                />
+                <FieldInput
+                  label="RAW max"
+                  value={String(cfg.rawMax)}
+                  onChangeText={v => onUpdateEditField(dedo, 'rawMax', v)}
+                  hasError={!!errRango}
+                  C={C}
+                />
+                <FieldInput
+                  label="Umbral %"
+                  value={String(cfg.umbral)}
+                  onChangeText={v => onUpdateEditField(dedo, 'umbral', v)}
+                  hasError={!!validarUmbral(cfg.umbral)}
+                  C={C}
+                />
+                <FieldInput
+                  label="Sens. %"
+                  value={String(cfg.sensibilidad)}
+                  onChangeText={v => onUpdateEditField(dedo, 'sensibilidad', v)}
+                  hasError={!!validarSensibilidad(cfg.sensibilidad)}
+                  C={C}
+                />
+              </View>
+
+              {errRango && (
+                <Text style={[styles.fieldError, { color: C.error }]}>{errRango}</Text>
+              )}
+
+              <View style={[styles.previewBar, { backgroundColor: C.track }]}>
+                <View
+                  style={[styles.previewBarFill, {
+                    width: `${pct}%` as any,
+                    backgroundColor: C.accent,
+                  }]}
+                />
+                <View
+                  style={[styles.previewThreshold, {
+                    left: `${cfg.umbral}%` as any,
+                    backgroundColor: C.secondary,
+                  }]}
+                />
+              </View>
+              <View style={styles.previewMeta}>
+                <Text style={[styles.previewMetaText, { color: C.textMuted }]}>
+                  RAW actual: {rawActual[dedo]}  {'->'}  {pct}%
+                </Text>
+                <Text style={[styles.previewMetaText, { color: C.secondary }]}>
+                  Umbral: {cfg.umbral}%
+                </Text>
+              </View>
+            </View>
+          );
+        })}
+
+        <ActionButton label="Guardar calibracion" color={C.accent} onPress={onGuardarCalibracion} C={C} />
+      </>
+    );
+  }
+
+  if (calStep === 'done') {
+    return (
+      <View style={styles.doneContainer}>
+        <View style={[styles.doneIconCircle, { backgroundColor: C.accentLight }]}>
+          <Text style={[styles.doneIconText, { color: C.accent }]}>OK</Text>
+        </View>
+        <Text style={[styles.doneTitle, { color: C.text }]}>Calibracion guardada</Text>
+        <Text style={[styles.doneSub, { color: C.textMuted }]}>
+          El guante HandlyGo esta listo con los nuevos rangos de calibracion.
+        </Text>
+        <View style={[styles.doneSummary, { backgroundColor: C.modalSurface, borderColor: C.modalBorder }]}>
+          {DEDOS.map(d => (
+            <View key={d} style={[styles.doneSummaryRow, { borderBottomColor: C.modalBorder }]}>
+              <Text style={[styles.doneSummaryLabel, { color: C.textMuted }]}>{d}</Text>
+              <Text style={[styles.doneSummaryVal, { color: C.text }]}>
+                {config[d].rawMin} - {config[d].rawMax}
+              </Text>
+              <Text style={[styles.doneSummaryTag, { backgroundColor: C.accentLight, color: C.accent }]}>
+                U:{config[d].umbral}%
+              </Text>
+              <Text style={[styles.doneSummaryTag, { backgroundColor: C.secondaryLight, color: C.secondary }]}>
+                S:{config[d].sensibilidad}%
+              </Text>
+            </View>
+          ))}
+        </View>
+        <ActionButton label="Cerrar" color={C.accent} onPress={onCerrarModal} C={C} />
+      </View>
+    );
+  }
+
+  return null;
+}
+
+// ─── Subcomponente: SettingsModal ─────────────────────────────────────────────
+function SettingsModal({
+  editSettings,
+  rawActual,
+  config,
+  C,
+  onUpdateField,
+  onGuardar,
+  onCancelar,
+}: {
+  editSettings: GloveConfig;
+  rawActual: Record<DedoKey, number>;
+  config: GloveConfig;
+  C: ColorMap;
+  onUpdateField: (dedo: DedoKey, field: keyof DedoConfig, value: string) => void;
+  onGuardar: () => void;
+  onCancelar: () => void;
+}) {
+  return (
+    <>
+      <View style={styles.modalHeader}>
+        <Text style={[styles.modalTitle,    { color: C.text }]}>Ajustes avanzados</Text>
+        <Text style={[styles.modalSubtitle, { color: C.textMuted }]}>
+          Umbral (0-100%) y sensibilidad (50-200%) por dedo
+        </Text>
+      </View>
+
+      {DEDOS.map(dedo => {
+        const cfg       = editSettings[dedo];
+        const errUmbral = validarUmbral(cfg.umbral);
+        const errSens   = validarSensibilidad(cfg.sensibilidad);
+        const pctRaw    = normalizar(rawActual[dedo], config[dedo].rawMin, config[dedo].rawMax);
+        const pct       = aplicarSensibilidad(pctRaw, cfg.sensibilidad);
+        const activo    = pct >= cfg.umbral;
+
+        return (
+          <View key={dedo} style={[styles.settingsCard, { backgroundColor: C.modalSurface, borderColor: C.modalBorder }]}>
+            <View style={styles.dedoCardHeader}>
+              <Text style={[styles.dedoCardTitle, { color: C.text }]}>{dedo}</Text>
+              <Text style={[styles.settingsPreview, { color: activo ? C.accent : C.textMuted }]}>
+                {pct}% {activo ? '(activo)' : '(inactivo)'}
+              </Text>
+            </View>
+
+            <View style={styles.settingsRow}>
+              <View style={styles.settingsField}>
+                <Text style={[styles.settingsLabel, { color: C.textMuted }]}>Umbral (%)</Text>
+                <TextInput
+                  style={[styles.settingsInput, {
+                    backgroundColor: C.inputBg,
+                    borderColor: errUmbral ? C.error : C.inputBorder,
+                    color: C.text,
+                  }]}
+                  keyboardType="numeric"
+                  maxLength={3}
+                  value={String(cfg.umbral)}
+                  onChangeText={v => onUpdateField(dedo, 'umbral', v)}
+                />
+                <Text style={[styles.settingsHint, { color: C.textMuted }]}>0 - 100</Text>
+                {errUmbral && (
+                  <Text style={[styles.fieldError, { color: C.error }]}>{errUmbral}</Text>
+                )}
+              </View>
+
+              <View style={[styles.settingsDivider, { backgroundColor: C.modalBorder }]} />
+
+              <View style={styles.settingsField}>
+                <Text style={[styles.settingsLabel, { color: C.textMuted }]}>Sensibilidad (%)</Text>
+                <TextInput
+                  style={[styles.settingsInput, {
+                    backgroundColor: C.inputBg,
+                    borderColor: errSens ? C.error : C.inputBorder,
+                    color: C.text,
+                  }]}
+                  keyboardType="numeric"
+                  maxLength={3}
+                  value={String(cfg.sensibilidad)}
+                  onChangeText={v => onUpdateField(dedo, 'sensibilidad', v)}
+                />
+                <Text style={[styles.settingsHint, { color: C.textMuted }]}>50 - 200</Text>
+                {errSens && (
+                  <Text style={[styles.fieldError, { color: C.error }]}>{errSens}</Text>
+                )}
+              </View>
+            </View>
+
+            <View style={[styles.settingsBar, { backgroundColor: C.track }]}>
+              <View style={[styles.settingsBarFill, {
+                width: `${pct}%` as any,
+                backgroundColor: C.accent,
+              }]} />
+              <View style={[styles.settingsThreshold, {
+                left: `${cfg.umbral}%` as any,
+                backgroundColor: C.secondary,
+              }]} />
+            </View>
+          </View>
+        );
+      })}
+
+      <View style={styles.settingsActions}>
+        <TouchableOpacity
+          onPress={onCancelar}
+          style={[styles.cancelBtn, { borderColor: C.modalBorder }]}
+        >
+          <Text style={[styles.cancelBtnText, { color: C.textMuted }]}>Cancelar</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={onGuardar}
+          style={[styles.saveBtn, { backgroundColor: C.accent }]}
+        >
+          <Text style={styles.saveBtnText}>Guardar ajustes</Text>
+        </TouchableOpacity>
+      </View>
+    </>
+  );
+}
+
+// ─── Componente principal ─────────────────────────────────────────────────────
+export default function ConfiguracionScreen() {
+  const { theme, colors } = useTheme();
+  const dark = theme === 'dark';
+  const darkOpacity = useRef(new Animated.Value(dark ? 1 : 0)).current;
+
+  useEffect(() => {
+    Animated.timing(darkOpacity, {
+      toValue: dark ? 1 : 0,
+      duration: 0,
+      useNativeDriver: true,
+    }).start();
+  }, [dark, darkOpacity]);
+
+  const C: ColorMap = useMemo(() => buildColors(colors, dark), [colors, dark]);
+
+  const [selectedFinger, setSelectedFinger] = useState<DedoKey>('Dedo 1');
+  const [activeModal, setActiveModal]       = useState<ActiveModal>('none');
+  const [calStep, setCalStep]               = useState<CalStep>('idle');
+
+  const [config, setConfig] = useState<GloveConfig>(DEFAULT_CONFIG);
+
+  const [rawActual, setRawActual] = useState<Record<DedoKey, number>>({
+    'Dedo 1': 550, 'Dedo 2': 550, 'Dedo 3': 550, 'Dedo 4': 550, 'Dedo 5': 550,
+  });
+
+  const [snapOpen,  setSnapOpen]  = useState<Record<DedoKey, number> | null>(null);
+  const [snapClose, setSnapClose] = useState<Record<DedoKey, number> | null>(null);
+
+  const [editConfig,   setEditConfig]   = useState<GloveConfig>(DEFAULT_CONFIG);
+  const [editSettings, setEditSettings] = useState<GloveConfig>(DEFAULT_CONFIG);
+  const [captureFlash, setCaptureFlash] = useState<'open' | 'close' | null>(null);
+
+  // ── Simulación BLE ───────────────────────────────────────────────────────────
+  useEffect(() => {
+    const id = setInterval(() => {
+      setRawActual(prev => {
+        const next = { ...prev };
+        DEDOS.forEach(dedo => {
+          const delta = (Math.random() - 0.5) * 30;
+          next[dedo] = Math.min(4095, Math.max(0, Math.round(prev[dedo] + delta)));
+        });
+        return next;
+      });
+    }, 600);
+    return () => clearInterval(id);
+  }, []);
+
+  // ── Calibración ──────────────────────────────────────────────────────────────
+  function iniciarCalibracion() {
+    setSnapOpen(null);
+    setSnapClose(null);
+    setCalStep('open');
+    setActiveModal('calibration');
+  }
+
+  function capturarManoAbierta() {
+    setSnapOpen({ ...rawActual });
+    setCaptureFlash('open');
+    setTimeout(() => { setCaptureFlash(null); setCalStep('close'); }, 700);
+  }
+
+  function capturarManoCerrada() {
+    if (!snapOpen) return;
+    const snap = { ...rawActual };
+    setSnapClose(snap);
+    const nueva = { ...config };
+    for (const dedo of DEDOS) {
+      const openRaw  = snapOpen[dedo];
+      const closeRaw = snap[dedo];
+      const rawMin   = Math.min(openRaw, closeRaw);
+      const rawMax   = Math.max(openRaw, closeRaw);
+      const safeDiff = rawMax - rawMin;
+      nueva[dedo] = {
+        ...nueva[dedo],
+        rawMin: safeDiff >= 50 ? rawMin : Math.max(0,    openRaw - 100),
+        rawMax: safeDiff >= 50 ? rawMax : Math.min(4095, openRaw + 100),
+      };
+    }
+    setEditConfig(nueva);
+    setCaptureFlash('close');
+    setTimeout(() => { setCaptureFlash(null); setCalStep('review'); }, 700);
+  }
+
+  function guardarCalibracion() {
+    for (const dedo of DEDOS) {
+      const cfg = editConfig[dedo];
+      const e1 = validarRango(cfg.rawMin, cfg.rawMax);
+      if (e1) { Alert.alert('Error en ' + dedo, e1); return; }
+      const e2 = validarUmbral(cfg.umbral);
+      if (e2) { Alert.alert('Error en ' + dedo, e2); return; }
+      const e3 = validarSensibilidad(cfg.sensibilidad);
+      if (e3) { Alert.alert('Error en ' + dedo, e3); return; }
+    }
+    setConfig(editConfig);
+    setCalStep('done');
+  }
+
+  function cerrarModal() {
+    setActiveModal('none');
+    setCalStep('idle');
+  }
+
+  // ── Ajustes avanzados ────────────────────────────────────────────────────────
+  function abrirSettings() {
+    setEditSettings({ ...config });
+    setActiveModal('settings');
+  }
+
+  function guardarSettings() {
+    for (const dedo of DEDOS) {
+      const cfg = editSettings[dedo];
+      const e1 = validarUmbral(cfg.umbral);
+      if (e1) { Alert.alert('Error en ' + dedo, e1); return; }
+      const e2 = validarSensibilidad(cfg.sensibilidad);
+      if (e2) { Alert.alert('Error en ' + dedo, e2); return; }
+    }
+    setConfig(editSettings);
+    cerrarModal();
+  }
+
+  function updateEditField(
+    dedo: DedoKey,
+    field: keyof DedoConfig,
+    value: string,
+    target: 'edit' | 'settings' = 'edit',
+  ) {
+    const num = Number(value);
+    if (isNaN(num)) return;
+    if (target === 'edit') {
+      setEditConfig(prev => ({ ...prev, [dedo]: { ...prev[dedo], [field]: num } }));
+    } else {
+      setEditSettings(prev => ({ ...prev, [dedo]: { ...prev[dedo], [field]: num } }));
+    }
+  }
+
+  function getFingerUiState(dedo: DedoKey) {
+    const pct = normalizar(rawActual[dedo], config[dedo].rawMin, config[dedo].rawMax);
+    return {
+      selected: selectedFinger === dedo,
+      active:   pct >= config[dedo].umbral,
+    };
+  }
+
+  // ─── Render principal ─────────────────────────────────────────────────────────
+  return (
+    <View style={[styles.screen, { backgroundColor: C.bg }]}>
+      <ScrollView
+        style={styles.mainScroll}
+        bounces={false}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.content}
+      >
+        <View style={styles.headerFrame}>
+          <Animated.View
+            style={[StyleSheet.absoluteFill, { opacity: Animated.subtract(1, darkOpacity) }]}
+            pointerEvents="none"
+          >
+            <Image source={LIGHT_HEADER_PNG} style={styles.headerImage} contentFit="fill" />
+          </Animated.View>
+          <Animated.View
+            style={[StyleSheet.absoluteFill, { opacity: darkOpacity }]}
+            pointerEvents="none"
+          >
+            <Image source={DARK_HEADER_PNG} style={styles.headerImage} contentFit="fill" />
+          </Animated.View>
+        </View>
+
+        <View style={[styles.handStage, { backgroundColor: dark ? '#0d203b' : '#ffffff' }]}>
+          <View style={styles.handFrame}>
+            <Animated.View
+              style={[StyleSheet.absoluteFill, { opacity: Animated.subtract(1, darkOpacity) }]}
+              pointerEvents="none"
+            >
+              <Image source={LIGHT_HAND_PNG} style={styles.handImage} contentFit="contain" />
+            </Animated.View>
+            <Animated.View
+              style={[StyleSheet.absoluteFill, { opacity: darkOpacity }]}
+              pointerEvents="none"
+            >
+              <Image source={DARK_HAND_PNG} style={styles.handImage} contentFit="contain" />
+            </Animated.View>
+          </View>
+        </View>
+
+        <View style={[styles.mockButtonsArea, { backgroundColor: dark ? '#0d203b' : '#ffffff' }]}>
+          <View style={styles.mockButtonsCanvas}>
+            {DEDOS.map((dedo, index) => {
+              const state = getFingerUiState(dedo);
+              return (
+                <Pressable
+                  key={dedo}
+                  onPress={() => setSelectedFinger(dedo)}
+                  style={[
+                    styles.fingerBtn,
+                    index === 0 && styles.fingerBtn1,
+                    index === 1 && styles.fingerBtn2,
+                    index === 2 && styles.fingerBtn3,
+                    index === 3 && styles.fingerBtn4,
+                    index === 4 && styles.fingerBtn5,
+                    {
+                      backgroundColor: state.active ? '#E25D5D' : '#64C79D',
+                      borderColor: withAlpha(C.text, dark ? 0.12 : 0.08),
+                      borderWidth: state.selected ? 2.5 : 1,
+                    },
+                  ]}
+                >
+                  <Text style={[styles.fingerBtnText, { color: C.textInverse }]}>{dedo}</Text>
+                </Pressable>
+              );
+            })}
+
+            <Pressable
+              onPress={iniciarCalibracion}
+              style={[
+                styles.calibrateBtnRebuilt,
+                {
+                  backgroundColor: withAlpha(C.surface, dark ? 0.9 : 0.98),
+                  borderColor: withAlpha(C.border, 0.6),
+                },
+              ]}
+            >
+              <Text style={[styles.calibrateBtnRebuiltText, { color: C.accent }]}>Calibrar</Text>
+            </Pressable>
+          </View>
+        </View>
+      </ScrollView>
+
+      <Modal
+        visible={activeModal !== 'none'}
+        transparent
+        animationType="slide"
+        onRequestClose={cerrarModal}
+      >
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        >
+          <Pressable
+            style={[styles.overlay, { backgroundColor: withAlpha(colors.text.primary, dark ? 0.55 : 0.4) }]}
+            onPress={cerrarModal}
+          />
+          <View
+            style={[
+              styles.sheet,
+              {
+                backgroundColor: C.modalSurface,
+                borderTopColor: C.modalBorder,
+                borderTopWidth: 1,
+              },
+            ]}
+          >
+            <View style={[styles.handle, { backgroundColor: C.accent }]} />
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+            >
+              {activeModal === 'calibration' && (
+                <CalibrationModal
+                  calStep={calStep}
+                  captureFlash={captureFlash}
+                  rawActual={rawActual}
+                  config={config}
+                  editConfig={editConfig}
+                  snapOpen={snapOpen}
+                  C={C}
+                  onCapturarManoAbierta={capturarManoAbierta}
+                  onCapturarManoCerrada={capturarManoCerrada}
+                  onGuardarCalibracion={guardarCalibracion}
+                  onCerrarModal={cerrarModal}
+                  onUpdateEditField={(dedo, field, value) => updateEditField(dedo, field, value, 'edit')}
+                />
+              )}
+              {activeModal === 'settings' && (
+                <SettingsModal
+                  editSettings={editSettings}
+                  rawActual={rawActual}
+                  config={config}
+                  C={C}
+                  onUpdateField={(dedo, field, value) => updateEditField(dedo, field, value, 'settings')}
+                  onGuardar={guardarSettings}
+                  onCancelar={cerrarModal}
+                />
+              )}
+            </ScrollView>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
+    </View>
+  );
+}
+
 // ─── Estilos ──────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
-  screen: { flex: 1 },
+  screen: { flex: 1, overflow: 'hidden' },
+  mainScroll: { flex: 1, width: '100%' },
+  content: { width: '100%', alignItems: 'stretch', paddingBottom: 28 },
+  headerFrame: {
+    width: '112%',
+    alignSelf: 'center',
+    aspectRatio: 515 / 365,
+    maxHeight: 286,
+    overflow: 'hidden',
+    position: 'relative',
+  },
+  headerImage: { width: '100%', height: '100%' },
+  handStage: {
+    width: '100%',
+    alignSelf: 'stretch',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingTop: 24,
+    paddingBottom: 6,
+  },
+  handFrame: { width: '74%', maxWidth: 282, aspectRatio: 282 / 263, position: 'relative' },
+  handImage: { width: '100%', height: '100%' },
 
-  mockupFrame: { width: '100%', aspectRatio: 310.5 / 408, overflow: 'hidden', position: 'relative' },
-  mockupImage: { position: 'absolute', width: '100%', aspectRatio: 310.5 / 672, top: '-10%' },
-
-  mockButtonsArea: { width: '100%', alignItems: 'center', marginTop: 20, paddingBottom: 18 },
-  mockButtonsCanvas: { width: '92%', aspectRatio: 310.5 / 205, position: 'relative' },
+  mockButtonsArea: { width: '100%', alignSelf: 'stretch', alignItems: 'center', paddingTop: 12, paddingBottom: 42 },
+  mockButtonsCanvas: { width: '94%', maxWidth: 372, aspectRatio: 310.5 / 224, position: 'relative' },
   fingerBtn: {
     position: 'absolute',
     width: '30%',
@@ -806,19 +910,19 @@ const styles = StyleSheet.create({
   fingerBtn3: { right: '2%', top: '-2%' },
   fingerBtn4: { right: '2%', top: '18%' },
   fingerBtn5: { left: '35%', top: '36%' },
-  fingerBtnText: { fontSize: 15, fontWeight: '900', letterSpacing: 0.2 },
+  fingerBtnText: { fontSize: 16, fontWeight: '900', letterSpacing: 0.2 },
   calibrateBtnRebuilt: {
     position: 'absolute',
-    left: '24%',
-    width: '52%',
-    height: '28%',
-    bottom: '4%',
-    borderRadius: 22,
+    left: '24.5%',
+    width: '51%',
+    height: '23%',
+    bottom: '7%',
+    borderRadius: 20,
     borderWidth: 1.5,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  calibrateBtnRebuiltText: { fontSize: 19, fontWeight: '900' },
+  calibrateBtnRebuiltText: { fontSize: 18, fontWeight: '900' },
 
   overlay: { flex: 1 },
   sheet: { borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 20, paddingBottom: 40, maxHeight: '88%' },
