@@ -4,6 +4,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useRef } from 'react';
 import { useTheme } from '../../../hooks/useTheme';
 import { useProgressStore } from '../../../store/useProgressStore';
+import { LEVEL_DATA } from '../../../constants/learnData';
+
 
 export default function RewardScreen() {
   const { levelId, lessonId, xp } = useLocalSearchParams<{
@@ -13,16 +15,33 @@ export default function RewardScreen() {
   }>();
   const router = useRouter();
   const { colors } = useTheme();
-  const { completeLesson } = useProgressStore();
+  const { completeLesson, unlockLevel } = useProgressStore();
 
   // Se ejecuta una sola vez al montar — guarda el progreso
   const saved = useRef(false);
-  useEffect(() => {
-    if (!saved.current) {
-      completeLesson(Number(lessonId), Number(xp));
-      saved.current = true;
+useEffect(() => {
+  if (!saved.current) {
+    completeLesson(Number(lessonId), Number(xp));
+
+    // Busca si hay una siguiente lección en este nivel
+    const levelData = LEVEL_DATA[levelId ?? '1'];
+    const currentLessonIndex = levelData?.lessons.findIndex(
+      (l) => l.id === Number(lessonId)
+    );
+
+    const nextLesson = levelData?.lessons[currentLessonIndex + 1];
+
+    if (nextLesson) {
+      // Hay otra lección en el mismo nivel — no hace falta desbloquear nivel
+      // El marcado de current lo manejará el backend en el futuro
+    } else {
+      // Era la última lección del nivel — desbloquea el siguiente nivel
+      unlockLevel(Number(levelId) + 1);
     }
-  }, []);
+
+    saved.current = true;
+  }
+}, []);
 
   const handleNext = () => {
     // Vuelve a la pantalla del nivel
