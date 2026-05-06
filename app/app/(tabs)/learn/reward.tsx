@@ -6,7 +6,6 @@ import { useTheme } from '../../../hooks/useTheme';
 import { useProgressStore } from '../../../store/useProgressStore';
 import { LEVEL_DATA } from '../../../constants/learnData';
 
-
 export default function RewardScreen() {
   const { levelId, lessonId, xp } = useLocalSearchParams<{
     levelId: string;
@@ -17,35 +16,29 @@ export default function RewardScreen() {
   const { colors } = useTheme();
   const { completeLesson, unlockLevel } = useProgressStore();
 
+  const levelData = LEVEL_DATA[levelId ?? '1'];
+  const lesson = levelData?.lessons.find((l) => l.id === Number(lessonId));
+
   // Se ejecuta una sola vez al montar — guarda el progreso
   const saved = useRef(false);
-useEffect(() => {
-  if (!saved.current) {
-    completeLesson(Number(lessonId), Number(xp));
+  useEffect(() => {
+    if (!saved.current && lesson) {
+      // Marca la lección como completada usando su lessonKey único
+      completeLesson(lesson.lessonKey, Number(xp));
 
-    // Busca si hay una siguiente lección en este nivel
-    const levelData = LEVEL_DATA[levelId ?? '1'];
-    const currentLessonIndex = levelData?.lessons.findIndex(
-      (l) => l.id === Number(lessonId)
-    );
+      // Si era la última lección del nivel, desbloquea el siguiente
+      const isLastLesson =
+        levelData.lessons[levelData.lessons.length - 1].id === lesson.id;
+      if (isLastLesson) {
+        unlockLevel(Number(levelId) + 1);
+      }
 
-    const nextLesson = levelData?.lessons[currentLessonIndex + 1];
-
-    if (nextLesson) {
-      // Hay otra lección en el mismo nivel — no hace falta desbloquear nivel
-      // El marcado de current lo manejará el backend en el futuro
-    } else {
-      // Era la última lección del nivel — desbloquea el siguiente nivel
-      unlockLevel(Number(levelId) + 1);
+      saved.current = true;
     }
-
-    saved.current = true;
-  }
-}, []);
+  }, []);
 
   const handleNext = () => {
-    // Vuelve a la pantalla del nivel
-    router.replace({
+    router.push({
       pathname: '/(tabs)/learn/[levelId]',
       params: { levelId },
     });
@@ -114,15 +107,12 @@ const s = StyleSheet.create({
   },
   backBtn: { flexShrink: 0 },
   headerTitle: { fontSize: 17, fontWeight: '700' },
-
   content: {
     flex: 1,
     paddingHorizontal: 20,
     gap: 16,
     alignItems: 'center',
   },
-
-  // Tarjeta éxito
   successCard: {
     width: '100%',
     borderRadius: 20,
@@ -144,8 +134,6 @@ const s = StyleSheet.create({
     fontSize: 15,
     fontWeight: '400',
   },
-
-  // Tarjeta XP
   xpCard: {
     width: '100%',
     borderRadius: 20,
@@ -172,12 +160,11 @@ const s = StyleSheet.create({
     overflow: 'hidden',
   },
   progressFill: {
-    width: '75%',   // TODO: calcular dinámicamente con el XP real del usuario
+    // TODO: calcular dinámicamente con el XP real del usuario cuando llegue el backend
+    width: '75%',
     height: '100%',
     borderRadius: 6,
   },
-
-  // Botón
   nextBtn: {
     width: '60%',
     paddingVertical: 14,
