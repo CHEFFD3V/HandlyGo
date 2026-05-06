@@ -8,8 +8,16 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from "../../hooks/useTheme";
 import { useAssets } from "../../hooks/useAssets";
 import { Image } from 'expo-image';
+import { useAppStore } from '../../store/useAppStore';
+import { useMockBluetooth } from '../../src/bluetooth/mockBluetooth';
 import { useEffect } from 'react';
 import { getDictionaryByCategory } from '../../services/dictionaryService';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  withSequence,
+} from 'react-native-reanimated';
 
 
 
@@ -18,6 +26,28 @@ export default function HomeScreen() {
   const { colors } = useTheme();
   const assets = useAssets();
   const { theme } = useTheme();
+  const currentWord = useAppStore((s) => s.currentWord);
+  const history     = useAppStore((s) => s.history);
+  const todayCount = useAppStore((s) => s.todayCount);
+  const opacity = useSharedValue(1);
+  const scale   = useSharedValue(1);
+  useMockBluetooth();
+
+  useEffect(() => {
+    opacity.value = withSequence(
+      withTiming(0, { duration: 200 }),  // desvanece
+      withTiming(1, { duration: 300 }),  // reaparece
+    );
+    scale.value = withSequence(
+      withTiming(0.8, { duration: 200 }), // encoge
+      withTiming(1,   { duration: 300 }), // vuelve al tamaño normal
+    );
+  }, [currentWord]);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+    transform: [{ scale: scale.value }],
+  }));
 
   /* Lógica de prueba
     useEffect(() => {
@@ -69,19 +99,23 @@ export default function HomeScreen() {
         </View>
 
         {/* Gran tarjeta karaoke */}
-        <View style={[s.karoCard, { borderColor: colors.card.border, backgroundColor: colors.card.background, }]}>
-          <Text style={[s.karoText, { color: colors.text.primary }]}>Hola, ¿Cómo{'\n'}Estás?</Text>
-        </View>
+        <Animated.View style={[s.karoCard, animatedStyle, { borderColor: colors.card.border, backgroundColor: colors.card.background }]}>
+          <Text style={[s.karoText, { color: colors.text.primary }]}>
+            {currentWord ?? 'Esperando...'}
+          </Text>
+        </Animated.View>
 
         {/* Tarjetas inclinadas */}
         <View style={s.grid}>
           <View style={[s.gridCard, s.tiltLeft, { borderColor: colors.card.border, backgroundColor: colors.card.background }]}>
             <Text style={[s.gridLabel, { color: colors.text.secondary }]}>Gestos Recientes</Text>
-            <Text style={[s.gridSmall, { color: colors.text.secondary }]}>{'• Hola\n• Gracias\n• Lo siento'}</Text>
+            <Text style={[s.gridSmall, { color: colors.text.secondary }]}>
+              {[...history].reverse().slice(0, 3).map(w => `• ${w}`).join('\n') || 'Sin gestos aún'}
+            </Text>
           </View>
           <View style={[s.gridCard, s.tiltRight, { borderColor: colors.card.border, backgroundColor: colors.card.background }]}>
             <Text style={[s.gridLabel, { color: colors.text.secondary }]}>Gestos de Hoy</Text>
-            <Text style={[s.gridValue, { color: colors.accent }]}>12</Text>
+            <Text style={[s.gridValue, { color: colors.accent }]}>{todayCount}</Text>
           </View>
         </View>
 

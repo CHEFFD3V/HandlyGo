@@ -1,0 +1,104 @@
+[33m89d31e0[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mfeat/implementacion-zustand-ble-simulada[m[33m, [m[1;31morigin/feat/implementacion-zustand-ble-simulada[m[33m)[m modificaciones para simular consumo de batería en la función useMockBluetooth, y mostrar el nivel de batería en la pantalla de vinculación.
+[33mffb3cd4[m implementacion de la prueba bluetooth en la app
+[33mc4e9307[m[33m ([m[1;31morigin/develop[m[33m, [m[1;32mdevelop[m[33m)[m Merge branch 'main' into develop
+[33m5c741e6[m Merge pull request #35 from CHEFFD3V/feat/configuracion
+[33m0d3516f[m Merge pull request #41 from CHEFFD3V/develop
+[33m2eb2576[m Merge pull request #40 from CHEFFD3V/feat/variables-entorno
+[33m6fbe46f[m[33m ([m[1;31morigin/feat/configuracion[m[33m)[m fix/mockup-mano-cortada
+[33mdbcf5e5[m fix/contraste-colores-modo-oscuro
+[33mcad16bb[m feat: Gestión de Variables de Entorno y Protección de Secretos
+[33m6a7a287[m fix/transicion-modo-oscuro/claro, optimizacion-codigo
+[33m80b5a4c[m Merge pull request #39 from CHEFFD3V/develop
+[33m788698c[m Merge pull request #37 from CHEFFD3V/feat/maquetacion-seccion-aprendizaje
+[33mc20295b[m correccion-ñ
+[33madb9be8[m Correccion-botones-fantasma
+[33m41b47bd[m feat/Implementacion mock sensores simulados
+[33m32ec88d[m[33m ([m[1;31morigin/feat/maquetacion-seccion-aprendizaje[m[33m)[m refactor: cambio en levelId para hacer funcionar el learnData con el import LEVEL_DATA y eliminacion de la constante LEVEL_DATA
+[33md1df111[m refactor: Creacion de learnData y codificacion para mayor comodidad a la hora de escalar con el backend los niveles
+[33m6a2b277[m Merge pull request #38 from CHEFFD3V/develop
+[33m6f74d1f[m Merge pull request #36 from CHEFFD3V/feature/onboarding
+[33m1767987[m feat: eliminacion de los comentarios innecesarios
+[33mbc733dc[m feat: implementacion de la navbar en los niveles
+[33m75db0cd[m feat: arreglo del diseño de los niveles
+[33m47f6fd1[m feat: arreglo de redundancia en una constante de LessonPath
+[33m8456ec5[m feat: arreglo en el pathname de aprendizaje.tsx
+[33m020d22a[m feat: implementacion correcta del LevelId en learn
+[33mda0c152[m feat: layout de learn
+[33m6f25fc8[m feat: eliminacion de redundancias
+[33me0cc025[m Merge pull request #34 from CHEFFD3V/feature/vinculacion-pantalla
+[33mabd80a7[m feat: funciona la pantalla principal de niveles pero el acceso a los niveles no.
+[33m4f91bdc[m feat: arreglo en el tamaño de los PNG
+[33mac56075[m feat: SVG convertidos en PNG correctamente
+[33m81f7a71[m feat: arreglo en los SVG de learn
+[33m9ea1ff7[m feat: actualizacion del diseño
+[33ma52ae44[m feat: agregar DaysStudying en /services/storage y en useProgressStore
+[33maa17b14[m feat: cambio en los fondos de las imagenes y rutas puestas correctamente
+[33me61c7ad[m feat: implementacion del codigo para los componentes de learn y conversion de los logos cerebro, fuego y xp de SVG a PNG.
+[33m36aafdc[m feat: carpeta y archivos pertinentes.
+[33md1fd341[m[33m ([m[1;31morigin/feature/onboarding[m[33m)[m Feat: maquetacion onboarding
+[33m7bd2592[m Feature: maquetacion de onboarding
+[33m9b178e7[m update package lock
+[33mad50357[m Cambios configuracion
+[33m40ca8a3[m[33m ([m[1;31morigin/feature/vinculacion-pantalla[m[33m)[m Refactor: Lineas innecesarias
+[33mba56d89[m Implementada seccion de configuracion
+[33m1d9f7d0[m Feature: Maquetacion del tab de vinculacion
+[33m7294c82[m Fix: corrigiendo vulnerabilidades en estado alto
+[33m95b9cca[m Merge pull request #31 from CHEFFD3V/develop
+[33m1683963[m Merge pull request #27 from CHEFFD3V/feat/sistema-de-temas-claro/oscuro
+[33m7b1241e[m[33m ([m[1;31morigin/feat/sistema-de-temas-claro/oscuro[m[33m)[m feat: Uso de Zustand persist para mantener la preferencia del tema.
+[33madfcbfd[m fix: quitar comentarios innecesarios
+[33m708c6ab[m feat: instalacion de libreria SVG
+[33m81461f2[m fix: Arreglo de los conflictos
+[33mb486584[m Merge branch 'feat/sistema-de-temas-claro/oscuro' of https://github.com/CHEFFD3V/HandlyGo into feat/sistema-de-temas-claro/oscuro
+[33m05a6098[m Merge pull request #30 from CHEFFD3V/develop
+[33m28629d6[m[33m ([m[1;31morigin/feature/vinculacion-screen[m[33m)[m Merge pull request #29 from CHEFFD3V/feat/mapeo-pines-hardware
+[33mde36ecc[m[33m ([m[1;31morigin/feat/mapeo-pines-hardware[m[33m)[m feat: Agregar mapeo de pines del controlador ESP32
+[33m265f5db[m Merge pull request #28 from CHEFFD3V/develop
+[33m7d7c988[m Merge pull request #19 from CHEFFD3V/feat/diccionario-global-inicial
+[33m2255e79[m feat: delay en el cambio de logo con el sistema de temas
+[33m50b0c5f[m feat: implementacion del cambio de logo principal con el sistema de temas
+[33ma0e9005[m fix: se quitaron los bordes de las cards en busca del mayor parecido al diseño entregado
+[33m0b755ea[m feat: implementacion de la paleta de colores correcta.
+[33m87c3da8[m feat: implementacion de _layout raiz para controlar el safeview
+[33mbc1e705[m feat: implementacion del sistema de temas en la navbar
+[33md4a97bb[m feat: implementacion del sistema de temas en el index
+[33m001c5d6[m fix: cambio de carpeta para los archivos de  los temas y el uso de tema global (useThemeStore y theme/colors)
+[33m5b2e63d[m feat: primera ampliacion de colores para los temas
+[33m061ae6e[m feat: implementacion del onPressonPress={toggleTheme} para el cambio de tema en el layout
+[33m4155f5b[m feat: implementacion del hook useTheme.ts
+[33m2e001b7[m fix: correxion del index referente a problema con la navbar
+[33mdb0f62f[m fix: correccion del layout para la navbar
+[33m1b0741c[m feat: Creacion de archivos .ts para los temas y el uso de tema global con zustand
+[33m2ab71df[m[33m ([m[1;31morigin/feat/diccionario-global-inicial[m[33m)[m fix: resolviendo conflicto en index e instalación de dependencia #11
+[33m05bc6b8[m Merge pull request #20 from CHEFFD3V/feature/main-screen
+[33m5c00659[m[33m ([m[1;31morigin/feature/main-screen[m[33m)[m Feature: Retirando comentarios innecesarios y arreglando .json
+[33mc2e37a1[m feature: Modificacion de la barra de navegacion e inclusion de ola y logo
+[33m8456cb8[m Merge branch 'develop' of https://github.com/CHEFFD3V/HandlyGo into feat/diccionario-global-inicial
+[33me8ee4ad[m feat: construcción del diccionario global inicial #11
+[33m3e51fae[m Merge pull request #18 from CHEFFD3V/develop
+[33m2fde552[m Merge pull request #17 from CHEFFD3V/feat/implementar-motor-persistencia-local
+[33m9409b69[m feat: carga de datos al iniciar la app
+[33m17ffbf7[m feat: integración con zustand
+[33m0f97180[m feat: implementación del motor de resistencia local
+[33m548de97[m feat: instalación de zustand, carpeta /store y archivos
+[33m8aba876[m fix: actualizacion de la rama con los cambios de la main
+[33mc0c42b6[m Merge pull request #16 from CHEFFD3V/develop
+[33m6f8972c[m Merge pull request #7 from CHEFFD3V/feature/design-integration
+[33m7a3453b[m update home screen design
+[33ma3fe8e2[m fix: resolve merge conflicts
+[33m45d94e8[m feat: Maquetacion inicial de la main screen
+[33m23e34be[m Merge pull request #14 from CHEFFD3V/develop
+[33m89c0afc[m Merge pull request #6 from CHEFFD3V/revert-5-feature/design-integration
+[33m396a640[m Merge pull request #12 from CHEFFD3V/feat/Implementación-de-Flujo-de-Navegación-Inicial
+[33m990785b[m refactor: usar constante para onboarding key y agregar manejo de errores en asyncstorage"
+[33m544d398[m feat: implementacion del flujo inicial con onboarding y tabs
+[33m0e50b8b[m feat: estructura base de navegacion con expo router
+[33mb961f83[m update: apply design and documentation revisions
+[33m2a6f788[m Revert "Entrega de prototipos y assets UI/UX"
+[33m41651e6[m Merge pull request #5 from CHEFFD3V/feature/design-integration
+[33mfb523c7[m add: ui design assets
+[33m92dcc70[m add: design deliverables (ux, ui, graphic, docs)
+[33me5962b3[m Merge pull request #2 from CHEFFD3V/develop
+[33m67eb17e[m docs: Creacion de la seccion de inicio rapido para los desarrolladores
+[33m512830c[m Merge pull request #1 from CHEFFD3V/develop
+[33m60ce44d[m fea
