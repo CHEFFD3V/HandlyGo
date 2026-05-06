@@ -15,7 +15,7 @@ export default function LevelScreen() {
   const data = LEVEL_DATA[levelId ?? '1'];
 
   const handleLessonPress = (lessonId: number, isUnlocked: boolean) => {
-    if (!isUnlocked) return; // bloqueada — no navega
+    if (!isUnlocked) return;
     router.push({
       pathname: '/(tabs)/learn/lesson',
       params: { levelId, lessonId },
@@ -31,6 +31,31 @@ export default function LevelScreen() {
       </View>
     );
   }
+
+  const allCompleted = data.lessons.every((l) =>
+    completedLessons.includes(l.lessonKey)
+  );
+
+  const handleContinue = () => {
+    if (allCompleted) {
+      // Todas las lecciones completas — volver a la pantalla de niveles
+      router.push('/(tabs)/aprendizaje');
+      return;
+    }
+
+    // Encuentra la primera lección no completada
+    const nextLesson = data.lessons.find(
+      (l) => !completedLessons.includes(l.lessonKey)
+    );
+    if (!nextLesson) return;
+
+    const nextIndex = data.lessons.indexOf(nextLesson);
+    const isUnlocked =
+      nextIndex === 0 ||
+      completedLessons.includes(data.lessons[nextIndex - 1].lessonKey);
+
+    handleLessonPress(nextLesson.id, isUnlocked);
+  };
 
   return (
     <View style={[s.root, { backgroundColor: colors.background }]}>
@@ -67,23 +92,10 @@ export default function LevelScreen() {
             borderColor: colors.card.border,
           }]}
           activeOpacity={0.8}
-          onPress={() => {
-            // Encuentra la primera lección no completada
-            const nextLesson = data.lessons.find(
-              (l) => !completedLessons.includes(l.lessonKey)
-            );
-            if (!nextLesson) return;
-
-            const nextIndex = data.lessons.indexOf(nextLesson);
-            const isUnlocked =
-              nextIndex === 0 ||
-              completedLessons.includes(data.lessons[nextIndex - 1].lessonKey);
-
-            handleLessonPress(nextLesson.id, isUnlocked);
-          }}
+          onPress={handleContinue}
         >
           <Text style={[s.continueTxt, { color: colors.text.primary }]}>
-            CONTINUAR
+            {allCompleted ? 'VOLVER A NIVELES' : 'CONTINUAR'}
           </Text>
         </TouchableOpacity>
 

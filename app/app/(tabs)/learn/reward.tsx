@@ -18,30 +18,39 @@ export default function RewardScreen() {
 
   const levelData = LEVEL_DATA[levelId ?? '1'];
   const lesson = levelData?.lessons.find((l) => l.id === Number(lessonId));
+  const nextLesson = levelData?.lessons.find((l) => l.id === Number(lessonId) + 1);
+  const isLastLesson = !nextLesson;
 
-  // Se ejecuta una sola vez al montar — guarda el progreso
+  const getMessage = () => {
+    if (isLastLesson) {
+      return `¡Completaste el nivel ${levelId}! Sigue avanzando.`;
+    }
+    return `Siguiente: ${nextLesson?.title}`;
+  };
+
   const saved = useRef(false);
   useEffect(() => {
     if (!saved.current && lesson) {
-      // Marca la lección como completada usando su lessonKey único
       completeLesson(lesson.lessonKey, Number(xp));
-
-      // Si era la última lección del nivel, desbloquea el siguiente
-      const isLastLesson =
-        levelData.lessons[levelData.lessons.length - 1].id === lesson.id;
       if (isLastLesson) {
         unlockLevel(Number(levelId) + 1);
       }
-
       saved.current = true;
     }
   }, []);
 
   const handleNext = () => {
-    router.push({
-      pathname: '/(tabs)/learn/[levelId]',
-      params: { levelId },
-    });
+    if (isLastLesson) {
+      // Era la última lección — volver a la pantalla de niveles
+      router.dismissAll();
+      router.push('/(tabs)/aprendizaje');
+    } else {
+      // Hay una siguiente lección — navegar directamente a ella
+      router.push({
+        pathname: '/(tabs)/learn/lesson',
+        params: { levelId, lessonId: nextLesson!.id },
+      });
+    }
   };
 
   return (
@@ -49,7 +58,13 @@ export default function RewardScreen() {
 
       {/* ── Header ── */}
       <View style={s.header}>
-        <TouchableOpacity onPress={handleNext} style={s.backBtn}>
+        <TouchableOpacity
+          onPress={() => {
+            router.dismissAll();
+            router.push('/(tabs)/aprendizaje');
+          }}
+          style={s.backBtn}
+        >
           <Ionicons name="chevron-back-circle" size={32} color={colors.primary} />
         </TouchableOpacity>
         <Text style={[s.headerTitle, { color: colors.text.primary }]}>
@@ -66,6 +81,9 @@ export default function RewardScreen() {
           <Text style={[s.subtitle, { color: colors.text.secondary }]}>
             Has completado esta lección
           </Text>
+          <Text style={[s.message, { color: colors.primary }]}>
+            {getMessage()}
+          </Text>
         </View>
 
         {/* ── Tarjeta de XP ── */}
@@ -79,7 +97,7 @@ export default function RewardScreen() {
           </View>
         </View>
 
-        {/* ── Botón Siguiente ── */}
+        {/* ── Botón ── */}
         <TouchableOpacity
           style={[s.nextBtn, {
             backgroundColor: colors.background,
@@ -88,7 +106,9 @@ export default function RewardScreen() {
           onPress={handleNext}
           activeOpacity={0.8}
         >
-          <Text style={[s.nextTxt, { color: colors.text.primary }]}>Siguiente</Text>
+          <Text style={[s.nextTxt, { color: colors.text.primary }]}>
+            {isLastLesson ? 'Volver a niveles' : 'Siguiente lección'}
+          </Text>
         </TouchableOpacity>
 
       </View>
@@ -133,6 +153,12 @@ const s = StyleSheet.create({
   subtitle: {
     fontSize: 15,
     fontWeight: '400',
+  },
+  message: {
+    fontSize: 14,
+    fontWeight: '600',
+    textAlign: 'center',
+    marginTop: 4,
   },
   xpCard: {
     width: '100%',
