@@ -20,8 +20,7 @@ type ProgressStore = UserProgress & {
   resetStreak: () => void;
   incrementDaysStudying: () => void;
   unlockLevel: (level: number) => void;
-  completeItem: (itemId: number) => void;
-  completeLesson: (lessonId: number, xp: number) => void;
+  completeLesson: (lessonKey: string, xp: number) => void;
   resetProgress: () => void;
 };
 
@@ -88,38 +87,28 @@ export const useProgressStore = create<ProgressStore>((set, get) => ({
     });
   },
 
-  // completeItem
-  completeItem: (itemId: number) => {
-    set((state) => {
-      if (state.completedItems.includes(itemId)) return {};
-
-      const updated = [...state.completedItems, itemId];
-      saveProgress({ ...state, completedItems: updated });
-      return { completedItems: updated };
-    });
-  },
-
   // completeLesson
-  // Marca la lección como completada, suma XP, incrementa streak y días estudiando.
-  // TODO: cuando llegue el backend, el streak debe basarse en fechas (un incremento
-  // por día, no por lección).
-  completeLesson: (lessonId: number, xp: number) => {
+  // Marca la lección como completada usando su lessonKey único,
+  // suma XP, incrementa streak y días estudiando.
+  // TODO: cuando llegue el backend, el streak debe basarse en fechas
+  // (un incremento por día, no por lección).
+  completeLesson: (lessonKey: string, xp: number) => {
     set((state) => {
-      if (state.completedItems.includes(lessonId)) return {};
+      if (state.completedLessons.includes(lessonKey)) return {};
 
-      const completedItems = [...state.completedItems, lessonId];
+      const completedLessons = [...state.completedLessons, lessonKey];
       const newXp = state.xp + xp;
       const newStreak = state.streak + 1;
       const newDays = state.daysStudying + 1;
       const updated = {
         ...state,
-        completedItems,
+        completedLessons,
         xp: newXp,
         streak: newStreak,
         daysStudying: newDays,
       };
       saveProgress(updated);
-      return { completedItems, xp: newXp, streak: newStreak, daysStudying: newDays };
+      return { completedLessons, xp: newXp, streak: newStreak, daysStudying: newDays };
     });
   },
 
