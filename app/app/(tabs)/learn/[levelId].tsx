@@ -15,7 +15,7 @@ export default function LevelScreen() {
 
   const handleLessonPress = (lessonId: number) => {
     router.push({
-      pathname: '../(tabs)/learn/lesson',
+      pathname:  "/(tabs)/learn/lesson",
       params: { levelId, lessonId },
     });
   };
