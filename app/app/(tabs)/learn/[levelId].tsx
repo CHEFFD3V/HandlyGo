@@ -4,18 +4,20 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../../hooks/useTheme';
 import { LessonPath } from '../../../components/learn/LessonPath';
 import { LEVEL_DATA } from '../../../constants/learnData';
-
+import { useProgressStore } from '../../../store/useProgressStore';
 
 export default function LevelScreen() {
   const { levelId } = useLocalSearchParams<{ levelId: string }>();
   const router = useRouter();
   const { colors } = useTheme();
+  const { completedLessons } = useProgressStore();
 
   const data = LEVEL_DATA[levelId ?? '1'];
 
-  const handleLessonPress = (lessonId: number) => {
+  const handleLessonPress = (lessonId: number, isUnlocked: boolean) => {
+    if (!isUnlocked) return; // bloqueada — no navega
     router.push({
-      pathname:  "/(tabs)/learn/lesson",
+      pathname: '/(tabs)/learn/lesson',
       params: { levelId, lessonId },
     });
   };
@@ -51,7 +53,11 @@ export default function LevelScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={[s.card, { backgroundColor: colors.card.background }]}>
-          <LessonPath lessons={data.lessons} onPressLesson={handleLessonPress} />
+          <LessonPath
+            lessons={data.lessons}
+            completedLessons={completedLessons}
+            onPressLesson={handleLessonPress}
+          />
         </View>
 
         {/* ── Botón CONTINUAR ── */}
@@ -62,9 +68,18 @@ export default function LevelScreen() {
           }]}
           activeOpacity={0.8}
           onPress={() => {
-            
-            const next = data.lessons.find((l) => !l.completed);
-            if (next) handleLessonPress(next.id);
+            // Encuentra la primera lección no completada
+            const nextLesson = data.lessons.find(
+              (l) => !completedLessons.includes(l.lessonKey)
+            );
+            if (!nextLesson) return;
+
+            const nextIndex = data.lessons.indexOf(nextLesson);
+            const isUnlocked =
+              nextIndex === 0 ||
+              completedLessons.includes(data.lessons[nextIndex - 1].lessonKey);
+
+            handleLessonPress(nextLesson.id, isUnlocked);
           }}
         >
           <Text style={[s.continueTxt, { color: colors.text.primary }]}>
@@ -108,16 +123,14 @@ const s = StyleSheet.create({
     alignItems: 'center',
     paddingBottom: 20,
   },
-  
   card: {
-  width: '100%',
-  borderRadius: 20,
-  padding: 74,
-  paddingBottom: 55,
-  marginBottom: 80,
-  marginTop:36,
+    width: '100%',
+    borderRadius: 20,
+    padding: 74,
+    paddingBottom: 55,
+    marginBottom: 80,
+    marginTop: 36,
   },
-
   continueBtn: {
     width: '70%',
     paddingVertical: 16,
