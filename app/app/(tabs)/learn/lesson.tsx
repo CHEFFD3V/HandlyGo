@@ -41,16 +41,15 @@ export default function LessonScreen() {
   const hasMultipleSigns = lesson.signs.length > 1;
 
   const handleContinue = () => {
-    if (!isLast) {
-      setCurrentIndex((i) => i + 1);
-    } else {
-      // Última seña — ir a la pantalla de recompensa
-      router.replace({
-        pathname: '../(tabs)/learn/reward',
-        params: { levelId, lessonId, xp: lesson.xpReward },
-      });
-    }
-  };
+  if (!isLast) {
+    setCurrentIndex((i) => i + 1);
+  } else {
+    router.push({
+      pathname: '/(tabs)/learn/reward',
+      params: { levelId, lessonId, xp: lesson.xpReward },
+    });
+  }
+};
 
   const handleRepeat = () => {
     setCurrentIndex(currentIndex); // fuerza re-render del SignCard para reiniciar el video
