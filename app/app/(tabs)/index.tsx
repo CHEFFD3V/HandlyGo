@@ -11,6 +11,8 @@ import { useAssets } from "../../hooks/useAssets";
 import { Image } from 'expo-image';
 import { useTranslationStore } from '../../store/useTranslationStore';
 import { useMockBluetooth } from '../../src/bluetooth/mockBluetooth';
+import { useAppStore } from '../../store/useAppStore';
+
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -28,7 +30,7 @@ export default function HomeScreen() {
   const currentWord = useTranslationStore((s) => s.currentWord?.texto ?? null);
   const historyRaw = useTranslationStore((s) => s.history);
   const history = historyRaw.map((w) => w.texto);
-  const status      = useTranslationStore((s) => s.status);
+const todayCount = useAppStore((s) => s.todayCount);
 
   const translationScrollRef = useRef<ScrollView>(null);
   const lastHistoryCountRef  = useRef(history.length);
@@ -172,7 +174,7 @@ export default function HomeScreen() {
           </View>
           <View style={[s.gridCard, s.tiltRight, { borderColor: colors.card.border, backgroundColor: colors.card.background }]}>
             <Text style={[s.gridLabel, { color: colors.text.secondary }]}>Gestos de Hoy</Text>
-            <Text style={[s.gridValue, { color: colors.accent }]}>{status}</Text>
+            <Text style={[s.gridValue, { color: colors.accent }]}>{todayCount}</Text>
           </View>
         </View>
 

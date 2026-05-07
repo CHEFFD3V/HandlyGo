@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { db } from "@/services/firebaseConfig";
 import { collection, query, where, getDocs } from "firebase/firestore";
+import { useAppStore } from "./useAppStore";
 
 // ── Tipos ────────────────────────────────────────────────────────────────────
 
@@ -85,6 +86,11 @@ export const useTranslationStore = create<TranslationState>((set, get) => ({
     const { history } = get();
     const lastId = history[history.length - 1]?.id;
     const isDuplicate = lastId === word.id;
+
+      if (!isDuplicate) {
+    useAppStore.getState().incrementTodayCount(); // ← incrementa el contador
+  }
+
     set({
       currentWord: word,
       history: isDuplicate ? history : [...history, word],
