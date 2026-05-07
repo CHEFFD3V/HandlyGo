@@ -6,15 +6,11 @@ import {
   saveProgress,
 } from "@/services/storage";
 
-// TIPO DEL STORE
 type ProgressStore = UserProgress & {
-  // Estados de carga
   isLoaded: boolean;
 
-  // Acción de inicialización
   initialize: () => Promise<void>;
 
-  // Acciones: cada una guarda automáticamente después de modificar
   addXP: (amount: number) => void;
   incrementStreak: () => void;
   resetStreak: () => void;
@@ -24,29 +20,32 @@ type ProgressStore = UserProgress & {
   resetProgress: () => void;
 };
 
-// EL STORE
 export const useProgressStore = create<ProgressStore>((set, get) => ({
-  // Estado inicial
   ...defaultUser,
   isLoaded: false,
 
+  // initialize: Carga el progreso desde AsyncStorage al arrancar la app.
+  // Se puede llamar múltiples veces sin problema: el guard evita cargas redundantes,
+  // pero solo bloquea si la carga anterior tuvo éxito (isLoaded === true).
   initialize: async () => {
     if (get().isLoaded) return;
 
-    const saved = await loadProgress(); // lee del teléfono
-    set({
-      ...saved,
-      isLoaded: true,
-    });
+    try {
+      const saved = await loadProgress();
+      set({ ...saved, isLoaded: true });
+    } catch (error) {
+      // Si loadProgress lanza (no debería), arrancamos con valores por defecto
+      // y marcamos isLoaded para no quedar en loop.
+      console.error("[useProgressStore] Fallo en initialize:", error);
+      set({ ...defaultUser, isLoaded: true });
+    }
   },
 
-  // addXP
-  // Suma XP y persiste inmediatamente.
   addXP: (amount: number) => {
     set((state) => {
-      const updated = { ...state, xp: state.xp + amount };
-      saveProgress(updated);
-      return { xp: updated.xp };
+      const next = { ...state, xp: state.xp + amount };
+      saveProgress(next);
+      return { xp: next.xp };
     });
   },
 
@@ -65,8 +64,6 @@ export const useProgressStore = create<ProgressStore>((set, get) => ({
     });
   },
 
-  // incrementDaysStudying
-  // Suma un día al contador de días estudiando y persiste.
   incrementDaysStudying: () => {
     set((state) => {
       const newDays = state.daysStudying + 1;
@@ -75,8 +72,6 @@ export const useProgressStore = create<ProgressStore>((set, get) => ({
     });
   },
 
-  // unlockLevel
-  // Solo añade el nivel si no estaba ya desbloqueado.
   unlockLevel: (level: number) => {
     set((state) => {
       if (state.unlockedLevels.includes(level)) return {};
@@ -87,11 +82,8 @@ export const useProgressStore = create<ProgressStore>((set, get) => ({
     });
   },
 
-  // completeLesson
-  // Marca la lección como completada usando su lessonKey único,
-  // suma XP, incrementa streak y días estudiando.
-  // TODO: cuando llegue el backend, el streak debe basarse en fechas
-  // (un incremento por día, no por lección).
+  // completeLesson: Marca la lección como completada con su lessonKey único,
+  // suma XP, incrementa streak y días estudiando, y persiste todo en un solo write.
   completeLesson: (lessonKey: string, xp: number) => {
     set((state) => {
       if (state.completedLessons.includes(lessonKey)) return {};
@@ -100,22 +92,29 @@ export const useProgressStore = create<ProgressStore>((set, get) => ({
       const newXp = state.xp + xp;
       const newStreak = state.streak + 1;
       const newDays = state.daysStudying + 1;
-      const updated = {
-        ...state,
+
+      const updated: UserProgress = {
+        xp: newXp,
+        streak: newStreak,
+        daysStudying: newDays,
+        completedLessons,
+        unlockedLevels: state.unlockedLevels,
+        version: state.version,
+      };
+
+      saveProgress(updated);
+
+      return {
         completedLessons,
         xp: newXp,
         streak: newStreak,
         daysStudying: newDays,
       };
-      saveProgress(updated);
-      return { completedLessons, xp: newXp, streak: newStreak, daysStudying: newDays };
     });
   },
 
-  // resetProgress
-  // Vuelve al estado inicial y lo persiste.
   resetProgress: () => {
     saveProgress(defaultUser);
-    set({ ...defaultUser });
+    set({ ...defaultUser, isLoaded: true });
   },
 }));
