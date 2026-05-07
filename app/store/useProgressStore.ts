@@ -18,8 +18,9 @@ type ProgressStore = UserProgress & {
   addXP: (amount: number) => void;
   incrementStreak: () => void;
   resetStreak: () => void;
+  incrementDaysStudying: () => void;
   unlockLevel: (level: number) => void;
-  completeItem: (itemId: number) => void;
+  completeLesson: (lessonKey: string, xp: number) => void;
   resetProgress: () => void;
 };
 
@@ -34,8 +35,8 @@ export const useProgressStore = create<ProgressStore>((set, get) => ({
 
     const saved = await loadProgress(); // lee del teléfono
     set({
-      ...saved,     
-      isLoaded: true, 
+      ...saved,
+      isLoaded: true,
     });
   },
 
@@ -57,11 +58,20 @@ export const useProgressStore = create<ProgressStore>((set, get) => ({
     });
   },
 
-
   resetStreak: () => {
     set((state) => {
       saveProgress({ ...state, streak: 0 });
       return { streak: 0 };
+    });
+  },
+
+  // incrementDaysStudying
+  // Suma un día al contador de días estudiando y persiste.
+  incrementDaysStudying: () => {
+    set((state) => {
+      const newDays = state.daysStudying + 1;
+      saveProgress({ ...state, daysStudying: newDays });
+      return { daysStudying: newDays };
     });
   },
 
@@ -77,14 +87,28 @@ export const useProgressStore = create<ProgressStore>((set, get) => ({
     });
   },
 
-  // completeItem
-  completeItem: (itemId: number) => {
+  // completeLesson
+  // Marca la lección como completada usando su lessonKey único,
+  // suma XP, incrementa streak y días estudiando.
+  // TODO: cuando llegue el backend, el streak debe basarse en fechas
+  // (un incremento por día, no por lección).
+  completeLesson: (lessonKey: string, xp: number) => {
     set((state) => {
-      if (state.completedItems.includes(itemId)) return {};
+      if (state.completedLessons.includes(lessonKey)) return {};
 
-      const updated = [...state.completedItems, itemId];
-      saveProgress({ ...state, completedItems: updated });
-      return { completedItems: updated };
+      const completedLessons = [...state.completedLessons, lessonKey];
+      const newXp = state.xp + xp;
+      const newStreak = state.streak + 1;
+      const newDays = state.daysStudying + 1;
+      const updated = {
+        ...state,
+        completedLessons,
+        xp: newXp,
+        streak: newStreak,
+        daysStudying: newDays,
+      };
+      saveProgress(updated);
+      return { completedLessons, xp: newXp, streak: newStreak, daysStudying: newDays };
     });
   },
 
