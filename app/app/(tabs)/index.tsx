@@ -1,8 +1,9 @@
 import {
   View, Text, ScrollView,
-  StyleSheet,
+  StyleSheet, TouchableOpacity,
 } from 'react-native';
-import Svg, { Path } from 'react-native-svg';
+import Svg, { Path, Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
+import { useRef, useEffect } from 'react';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from "../../hooks/useTheme";
@@ -10,8 +11,6 @@ import { useAssets } from "../../hooks/useAssets";
 import { Image } from 'expo-image';
 import { useAppStore } from '../../store/useAppStore';
 import { useMockBluetooth } from '../../src/bluetooth/mockBluetooth';
-import { useEffect } from 'react';
-import { getDictionaryByCategory } from '../../services/dictionaryService';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -19,58 +18,68 @@ import Animated, {
   withSequence,
 } from 'react-native-reanimated';
 
-
+const AUTO_SCROLL_THRESHOLD = 24;
 
 export default function HomeScreen() {
   const router = useRouter();
   const { colors } = useTheme();
   const assets = useAssets();
-  const { theme } = useTheme();
   const currentWord = useAppStore((s) => s.currentWord);
   const history     = useAppStore((s) => s.history);
-  const todayCount = useAppStore((s) => s.todayCount);
+  const todayCount  = useAppStore((s) => s.todayCount);
+
+  // ── Refs para el scroll automático
+  const translationScrollRef = useRef<ScrollView>(null);
+  const lastHistoryCountRef  = useRef(history.length);
+  const shouldAutoScrollRef  = useRef(false);
+  const isNearBottomRef      = useRef(true);
+
+  // ── Animación karaoke
   const opacity = useSharedValue(1);
   const scale   = useSharedValue(1);
+
   useMockBluetooth();
+
+  const translationText = history.length > 0
+    ? history.join(' ')
+    : 'Esperando traducción...';
 
   useEffect(() => {
     opacity.value = withSequence(
-      withTiming(0, { duration: 200 }),  // desvanece
-      withTiming(1, { duration: 300 }),  // reaparece
+      withTiming(0, { duration: 200 }),
+      withTiming(1, { duration: 300 }),
     );
     scale.value = withSequence(
-      withTiming(0.8, { duration: 200 }), // encoge
-      withTiming(1,   { duration: 300 }), // vuelve al tamaño normal
+      withTiming(0.8, { duration: 200 }),
+      withTiming(1,   { duration: 300 }),
     );
   }, [currentWord]);
+
+  useEffect(() => {
+    const hasNewContent = history.length > lastHistoryCountRef.current;
+    if (hasNewContent && isNearBottomRef.current) {
+      shouldAutoScrollRef.current = true;
+    }
+    lastHistoryCountRef.current = history.length;
+  }, [history.length]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     opacity: opacity.value,
     transform: [{ scale: scale.value }],
   }));
 
-  /* Lógica de prueba
-    useEffect(() => {
-      const testFetch = async () => {
-        const items = await getDictionaryByCategory("Abecedario");
-        console.log("REVISIÓN BACKEND - Elementos encontrados:", items);
-      };
-  
-      testFetch();
-    }, []); */
-
   return (
-
     <View style={{ flex: 1 }}>
+      <ScrollView
+        style={[s.container, { backgroundColor: colors.background }]}
+        showsVerticalScrollIndicator={false}
+      >
 
-      <ScrollView style={[s.container, { backgroundColor: colors.background }]}
-        showsVerticalScrollIndicator={false}>
-
-
+        {/* ── Header ── */}
         <View style={[s.header, { backgroundColor: colors.background }]}>
           <View style={[s.logoArea, { backgroundColor: colors.background }]}>
             <Image
-              source={(assets.logoPrincipal)}
+              source={assets.logoPrincipal}
               style={s.logo}
               resizeMode="contain"
             />
@@ -86,26 +95,26 @@ export default function HomeScreen() {
                 fill={colors.wave.primary}
                 opacity={0.4}
               />
-
               <Path
                 d="M0 58 Q60 12 130 42 Q200 74 270 37 Q330 12 390 50 Q370 105 300 90 Q220 72 150 98 Q80 118 0 99 Z"
                 fill={colors.wave.secondary}
                 opacity={0.4}
               />
-
             </Svg>
-            <Text style={[s.waveText, { color: colors.waveText }]}>Observa, entiende y traduce</Text>
+            <Text style={[s.waveText, { color: colors.waveText }]}>
+              Observa, entiende y traduce
+            </Text>
           </View>
         </View>
 
-        {/* Gran tarjeta karaoke */}
+        {/* ── Tarjeta karaoke ── */}
         <Animated.View style={[s.karoCard, animatedStyle, { borderColor: colors.card.border, backgroundColor: colors.card.background }]}>
           <Text style={[s.karoText, { color: colors.text.primary }]}>
             {currentWord ?? 'Esperando...'}
           </Text>
         </Animated.View>
 
-        {/* Tarjetas inclinadas */}
+        {/* ── Tarjetas inclinadas ── */}
         <View style={s.grid}>
           <View style={[s.gridCard, s.tiltLeft, { borderColor: colors.card.border, backgroundColor: colors.card.background }]}>
             <Text style={[s.gridLabel, { color: colors.text.secondary }]}>Gestos Recientes</Text>
@@ -119,31 +128,70 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        {/* Sección de traducción */}
-        <View style={[s.translateBox, { borderColor: colors.card.border, backgroundColor: colors.translation.background, }]}>
-          <View style={s.translateContent}>
-            <Ionicons name="volume-medium-outline" size={20} color={colors.icon.primary} />
-            <Text style={[s.translateText, { color: colors.translation.text }]}>
-              "Hola, ¿cómo estás?{'\n'}me siento muy feliz hoy,{'\n'}te encuentras bien?"
-            </Text>
-          </View>
-          <View style={s.translateFooter}>
-            <Ionicons name="expand-outline" size={16} color={colors.primary} />
-          </View>
-        </View>
+<View style={[s.translateBox, { borderColor: colors.card.border, backgroundColor: colors.translation.background }]}>
+  <View style={[s.translateViewport, { flex: 1 }]}>
+    <Ionicons
+      name="volume-medium-outline"
+      size={20}
+      color={colors.icon.primary}
+      style={s.translateIcon}
+    />
+    <ScrollView
+      ref={translationScrollRef}
+      style={s.translateScroll}
+      contentContainerStyle={s.translateContent}
+      nestedScrollEnabled
+      showsVerticalScrollIndicator={false}
+      scrollEventThrottle={16}
+      onScroll={({ nativeEvent }) => {
+        const distanceFromBottom =
+          nativeEvent.contentSize.height -
+          (nativeEvent.layoutMeasurement.height + nativeEvent.contentOffset.y);
+        isNearBottomRef.current = distanceFromBottom <= AUTO_SCROLL_THRESHOLD;
+      }}
+      onContentSizeChange={() => {
+        if (!shouldAutoScrollRef.current) return;
+        translationScrollRef.current?.scrollToEnd({ animated: true });
+        shouldAutoScrollRef.current = false;
+      }}
+    >
+      <Text style={[s.translateText, { color: colors.translation.text }]}>
+        {translationText}
+      </Text>
+    </ScrollView>
+
+    <View pointerEvents="none" style={s.fadeTop}>
+      <Svg width="100%" height="100%" preserveAspectRatio="none">
+        <Defs>
+          <LinearGradient id="translateFadeTop" x1="0" y1="0" x2="0" y2="1">
+            <Stop offset="0%" stopColor={colors.translation.background} stopOpacity={1} />
+            <Stop offset="100%" stopColor={colors.translation.background} stopOpacity={0} />
+          </LinearGradient>
+        </Defs>
+        <Rect x="0" y="0" width="100%" height="100%" fill="url(#translateFadeTop)" />
+      </Svg>
+    </View>
+  </View>
+
+  <View style={s.translateFooter}>
+    <TouchableOpacity
+      onPress={() => router.push('../translation-fullscreen')}
+      accessibilityLabel="Ver traducción en pantalla completa"
+      accessibilityRole="button"
+    >
+      <Ionicons name="expand-outline" size={20} color={colors.primary} />
+    </TouchableOpacity>
+  </View>
+</View>
 
         <View style={{ height: 80 }} />
       </ScrollView>
-
-
     </View>
   );
-
 }
 
 const s = StyleSheet.create({
 
-  // ── Header
   header: {},
 
   logoArea: {
@@ -155,7 +203,6 @@ const s = StyleSheet.create({
     height: 300,
   },
 
-  // ── Ola
   waveContainer: {
     width: '100%',
     position: 'relative',
@@ -172,11 +219,9 @@ const s = StyleSheet.create({
     fontStyle: 'italic',
   },
 
-  // ── Contenido
   container: {
     flex: 1,
   },
-
 
   karoCard: {
     borderWidth: 2,
@@ -198,9 +243,7 @@ const s = StyleSheet.create({
     gap: 10,
     marginBottom: 16,
     paddingHorizontal: 16,
-
   },
-
   gridCard: {
     flex: 1,
     borderWidth: 2,
@@ -208,17 +251,9 @@ const s = StyleSheet.create({
     padding: 12,
     alignItems: 'center',
     paddingHorizontal: 16,
-
   },
-
-  tiltLeft: {
-    transform: [{ rotate: '-3deg' }],
-
-  },
-
-  tiltRight: {
-    transform: [{ rotate: '3deg' }],
-  },
+  tiltLeft:  { transform: [{ rotate: '-3deg' }] },
+  tiltRight: { transform: [{ rotate: '3deg'  }] },
 
   gridLabel: {
     fontSize: 15,
@@ -233,30 +268,57 @@ const s = StyleSheet.create({
     fontSize: 11,
     lineHeight: 18,
     textAlign: 'center',
-
-  },
-  translateBox: {
-    borderWidth: 2,
-    borderRadius: 12,
-    overflow: 'hidden',
-    marginHorizontal: 16,
   },
 
+  // ── Translate box
+translateBox: {
+  borderWidth: 2,
+  borderRadius: 12,
+  overflow: 'hidden',
+  marginHorizontal: 16,
+  height: 160,        // ← altura fija, no crece
+  maxHeight: 160,     // ← refuerza que no crezca
+},
+translateViewport: {
+  flex: 1,            // ← ocupa todo el espacio disponible
+  position: 'relative',
+},
+translateScroll: {
+  flex: 1,            // ← en vez de maxHeight/minHeight
+},
   translateContent: {
-    flexDirection: 'row',
-    padding: 16,
-    gap: 10,
+    flexGrow: 1,
+    paddingRight: 19,
+    paddingLeft: 10,
+    paddingBottom: 0,
+  },
+  translateIcon: {
+    position: 'absolute',
+    top: 130,
+    left:350,
+    zIndex: 10,
   },
   translateText: {
-    fontSize: 20,
-    lineHeight: 28,
-    flex: 1,
+    fontSize: 18,
+    lineHeight: 21,
     fontFamily: 'Poppins-Medium',
-  },
-  translateFooter: {
-    alignItems: 'flex-end',
-    paddingRight: 12,
-    paddingBottom: 8,
+    marginLeft: 13,
+    padding: 6,
+    },
+    
+  fadeTop: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 0,
   },
 
+  translateFooter: {
+    alignItems: 'flex-end',
+    paddingTop: 8,
+    paddingRight: 12,
+    paddingBottom: 8,
+    position: "absolute",
+  },
 });

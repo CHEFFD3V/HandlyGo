@@ -5,6 +5,9 @@ import { useThemeStore } from '../store/useThemeStore';
 import { useFonts } from 'expo-font';        
 import * as SplashScreen from 'expo-splash-screen'; 
 import { useEffect } from 'react';           
+import { registerSimulateGlobal } from '@/utils/simulateConsole';
+
+registerSimulateGlobal();
 
 SplashScreen.preventAutoHideAsync();         
 
