@@ -62,9 +62,13 @@ export default function LevelScreen() {
 
       {/* ── Header ── */}
       <View style={s.header}>
-        <TouchableOpacity onPress={() => router.back()} style={s.backBtn}>
-          <Ionicons name="chevron-back-circle" size={32} color={colors.primary} />
-        </TouchableOpacity>
+    <TouchableOpacity
+    onPress={() => router.push('/(tabs)/aprendizaje')}
+    style={s.backBtn}
+  >
+  <Ionicons name="chevron-back-circle" size={32} color={colors.primary} />
+</TouchableOpacity>
+
         <Text style={[s.title, { color: colors.text.primary }]}>
           <Text style={{ color: colors.primary }}>Nivel {levelId}›</Text>
           {'  '}{data.title}
