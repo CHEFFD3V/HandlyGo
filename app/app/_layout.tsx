@@ -6,8 +6,11 @@ import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen'; 
 import { useEffect } from 'react';           
 import { registerSimulateGlobal } from '@/utils/simulateConsole';
+import { registerSimulateHandGlobal } from '@/utils/simulateHand';
 
+// El orden importa: simulateHand depende de que simulate() ya esté en global
 registerSimulateGlobal();
+registerSimulateHandGlobal();
 
 SplashScreen.preventAutoHideAsync();         
 
@@ -38,16 +41,15 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <Stack
-  screenOptions={{
-    headerShown: false,
-    animation: 'slide_from_right',
-    animationDuration: 200,
-
-    contentStyle: {
-      backgroundColor: colors.background,
-    },
-  }}
-/>
+        screenOptions={{
+          headerShown: false,
+          animation: 'slide_from_right',
+          animationDuration: 200,
+          contentStyle: {
+            backgroundColor: colors.background,
+          },
+        }}
+      />
     </SafeAreaProvider>
   );
 }
