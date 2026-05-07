@@ -124,11 +124,17 @@ export default function HomeScreen() {
           <View style={s.translateContent}>
             <Ionicons name="volume-medium-outline" size={20} color={colors.icon.primary} />
             <Text style={[s.translateText, { color: colors.translation.text }]}>
-              "Hola, ¿cómo estás?{'\n'}me siento muy feliz hoy,{'\n'}te encuentras bien?"
+              {currentWord ?? ''}
             </Text>
           </View>
           <View style={s.translateFooter}>
-            <Ionicons name="expand-outline" size={16} color={colors.primary} />
+            <TouchableOpacity
+              onPress={() => router.push('../translation-fullscreen')}
+              accessibilityLabel="Ver traducción en pantalla completa"
+              accessibilityRole="button"
+            >
+              <Ionicons name="expand-outline" size={20} color={colors.primary} />
+            </TouchableOpacity>
           </View>
         </View>
 
