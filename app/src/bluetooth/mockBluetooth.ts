@@ -2,7 +2,18 @@ import { useEffect, useRef } from "react";
 import { useAppStore } from "../../store/useAppStore";
 import type { AppState } from "../../store/useAppStore";
 
-const MOCK_WORDS = ["Hola", "Gracias", "Por favor", "Adiós", "Buenos días", "Bienvenido", "Hasta luego"] as const;
+const MOCK_WORDS = [
+  "Hola Handly Mujer",
+  "Hola Handly Hombre",
+  "Como estas mujer",
+  "Como estas hombre",
+  "Buenas tardes mujer",
+  "Estoy bien gracias mujer",
+  "Lo siento mujer",
+  "Mucho gusto hombre",
+  "Mucho gusto mujer",
+  "Ten un lindo dia mujer"
+] as const;
 const EMIT_INTERVAL_MS    = 2000;  // 👈 tiempo de las palabras
 const BATTERY_INTERVAL_MS = 3000;  // 👈 tiempo de la batería
 

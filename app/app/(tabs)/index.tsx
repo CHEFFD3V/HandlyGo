@@ -18,6 +18,7 @@ import Animated, {
   withTiming,
   withSequence,
 } from 'react-native-reanimated';
+import { Audio } from 'expo-av';
 
 
 
@@ -33,6 +34,56 @@ export default function HomeScreen() {
   const scale   = useSharedValue(1);
   useMockBluetooth();
 
+  const audioMap = {
+
+  hola_handly_mujer: require('../../assets/audio/hola_handly_mujer.mp3'),
+
+  hola_handly_hombre: require('../../assets/audio/hola_handly_hombre.mp3'),
+
+  como_estas_mujer: require('../../assets/audio/como_estas_mujer.mp3'),
+
+  como_estas_hombre: require('../../assets/audio/como_estas_hombre.mp3'),
+
+  buenas_tardes_mujer: require('../../assets/audio/buenas_tardes_mujer.mp3'),
+
+  estoy_bien_gracias_mujer: require('../../assets/audio/estoy_bien_gracias_mujer.mp3'),
+
+  lo_siento_mujer: require('../../assets/audio/lo_siento_mujer.mp3'),
+
+  mucho_gusto_hombre: require('../../assets/audio/mucho_gusto_hombre.mp3'),
+
+  mucho_gusto_mujer: require('../../assets/audio/mucho_gusto_mujer.mp3'),
+
+  ten_un_lindo_dia_mujer: require('../../assets/audio/ten_un_lindo_dia_mujer.mp3'),
+
+};
+
+const playAudio = async (audioFile) => {
+
+  try {
+
+    const { sound } = await Audio.Sound.createAsync(audioFile);
+
+    await sound.playAsync();
+
+    sound.setOnPlaybackStatusUpdate((status) => {
+
+      if (status.didJustFinish) {
+
+        sound.unloadAsync();
+
+      }
+
+    });
+
+  } catch (error) {
+
+    console.log("Error reproduciendo audio:", error);
+
+  }
+
+};
+
   useEffect(() => {
     opacity.value = withSequence(
       withTiming(0, { duration: 200 }),  // desvanece
@@ -43,6 +94,40 @@ export default function HomeScreen() {
       withTiming(1,   { duration: 300 }), // vuelve al tamaño normal
     );
   }, [currentWord]);
+
+  useEffect(() => {
+
+  if (currentWord) {
+
+    const key = currentWord
+  .toLowerCase()
+  .replace(/,/g, '')
+  .replace(/\./g, '')
+  .replace(/\s+/g, '_');
+
+console.log("KEY GENERADA:", key);
+
+    const audioFile = audioMap[key as keyof typeof audioMap];
+
+    if (audioFile) {
+
+      playAudio(audioFile);
+
+    } else {
+
+      console.log("No existe audio para:", key);
+
+    }
+
+  }
+
+}, [currentWord]);
+
+useEffect(() => {
+
+  playAudio(audioMap.hola_handly_mujer);
+
+}, []);
 
   const animatedStyle = useAnimatedStyle(() => ({
     opacity: opacity.value,
