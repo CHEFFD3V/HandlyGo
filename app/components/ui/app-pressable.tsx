@@ -31,10 +31,10 @@ export function AppPressable({
         onPressIn?.(event);
       }}
       onPressOut={onPressOut}
-      style={({ pressed }) => {
-        const baseStyle = typeof style === 'function' ? style({ pressed }) : style;
+      style={(state) => {
+        const baseStyle = typeof style === 'function' ? style(state) : style;
 
-        if (disableFeedback || disabled || !pressed) {
+        if (disableFeedback || disabled || !state.pressed) {
           return baseStyle;
         }
 
