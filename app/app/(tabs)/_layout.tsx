@@ -23,6 +23,7 @@ export default function TabsLayout() {
         screenOptions={{
           headerShown: false,
           tabBarStyle: { display: 'none' },
+          animation: 'shift',
         }}
       >
         <Tabs.Screen name="index" />
@@ -48,7 +49,7 @@ export default function TabsLayout() {
 
         <TouchableOpacity
           style={s.navBtn}
-          onPress={() => router.push('../aprendizaje')}
+          onPress={() => router.replace('/aprendizaje')}
         >
           <Ionicons
             name="book-outline"
@@ -60,7 +61,7 @@ export default function TabsLayout() {
 
         <TouchableOpacity
           style={s.navBtn}
-          onPress={() => router.push('/')}
+          onPress={() => router.replace('/')}
         >
           <Ionicons
             name="home"
@@ -72,7 +73,7 @@ export default function TabsLayout() {
 
         <TouchableOpacity
           style={s.navBtn}
-          onPress={() => router.push('../vinculacion')}
+          onPress={() => router.replace('/vinculacion')}
         >
           <Ionicons
             name="link-outline"
@@ -84,7 +85,7 @@ export default function TabsLayout() {
 
         <TouchableOpacity
           style={s.navBtn}
-          onPress={() => router.push('../configuracion')}
+          onPress={() => router.replace('/configuracion')}
         >
           <Ionicons
             name="settings-outline"
