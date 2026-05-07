@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HandlyGo — Demo Controller</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
+ 
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+ 
+    :root {
+      --bg:         #0a0a0f;
+      --surface:    #13131a;
+      --border:     #2a2a3a;
+      --accent:     #7c6fff;
+      --accent-dim: rgba(124,111,255,0.15);
+      --green:      #22c55e;
+      --green-dim:  rgba(34,197,94,0.15);
+      --red:        #ef4444;
+      --red-dim:    rgba(239,68,68,0.15);
+      --yellow:     #fbbf24;
+      --yellow-dim: rgba(251,191,36,0.15);
+      --text:       #e8e6ff;
+      --muted:      #6b6a8a;
+      --mono:       'Space Mono', monospace;
+      --display:    'Syne', sans-serif;
+    }
+ 
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--mono);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px 60px;
+      gap: 28px;
+    }
+ 
+    /* ── Header ── */
+    .header { text-align: center; }
+    .header-tag { font-size: 11px; letter-spacing: 4px; color: var(--accent); text-transform: uppercase; margin-bottom: 8px; }
+    .header h1 { font-family: var(--display); font-size: clamp(26px,5vw,42px); font-weight: 800; letter-spacing: -1px; }
+    .header h1 span { color: var(--accent); }
+ 
+    /* ── Status bar ── */
+    .status-bar {
+      display: flex; align-items: center; gap: 16px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; padding: 12px 20px;
+      width: 100%; max-width: 700px;
+    }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); flex-shrink: 0; transition: background .3s; }
+    .status-dot.ok    { background: var(--green); box-shadow: 0 0 8px var(--green); }
+    .status-dot.error { background: var(--red);   box-shadow: 0 0 8px var(--red);   }
+    .status-text { font-size: 12px; color: var(--muted); flex: 1; }
+    .status-ip   { font-size: 11px; color: var(--accent); }
+ 
+    /* ── IP config ── */
+    .ip-section {
+      width: 100%; max-width: 700px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 12px; padding: 16px 20px;
+    }
+    .section-label { font-size: 10px; letter-spacing: 3px; color: var(--muted); text-transform: uppercase; margin-bottom: 10px; }
+    .ip-row { display: flex; gap: 10px; }
+    .ip-input {
+      flex: 1; background: var(--bg); border: 1px solid var(--border);
+      border-radius: 8px; color: var(--text); font-family: var(--mono);
+      font-size: 13px; padding: 10px 14px; outline: none; transition: border-color .2s;
+    }
+    .ip-input:focus { border-color: var(--accent); }
+    .ip-btn {
+      background: var(--accent-dim); border: 1px solid var(--accent); color: var(--accent);
+      font-family: var(--mono); font-size: 12px; padding: 10px 16px;
+      border-radius: 8px; cursor: pointer; transition: background .2s; white-space: nowrap;
+    }
+    .ip-btn:hover { background: rgba(124,111,255,.28); }
+ 
+    /* ── Groups ── */
+    .groups { width: 100%; max-width: 700px; display: flex; flex-direction: column; gap: 18px; }
+ 
+    .group {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 14px; padding: 18px;
+    }
+    .group-title { font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); margin-bottom: 14px; }
+ 
+    .btn-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px,1fr)); gap: 10px; }
+    .btn-grid-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+ 
+    /* ── Sign button ── */
+    .sign-btn {
+      position: relative; background: var(--bg); border: 1px solid var(--border);
+      border-radius: 10px; color: var(--text); cursor: pointer; font-family: var(--mono);
+      padding: 13px 12px 10px; text-align: left;
+      transition: border-color .15s, transform .1s, background .15s;
+      overflow: hidden; user-select: none;
+    }
+    .sign-btn:hover { border-color: var(--accent); background: var(--accent-dim); transform: translateY(-1px); }
+    .sign-btn:active { transform: translateY(1px) scale(.97); }
+    .sign-btn.sent { border-color: var(--green); background: var(--green-dim); }
+    .sign-btn .btn-word { font-family: var(--display); font-size: 14px; font-weight: 700; display: block; margin-bottom: 4px; }
+    .sign-btn .btn-id   { font-size: 10px; color: var(--muted); }
+ 
+    /* ── Estado del guante (botones grandes) ── */
+    .glove-btn {
+      position: relative; cursor: pointer; font-family: var(--mono);
+      border-radius: 12px; padding: 16px; text-align: center;
+      transition: transform .1s, opacity .15s; overflow: hidden; user-select: none;
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+    }
+    .glove-btn:active { transform: scale(.96); }
+    .glove-btn.sent { opacity: .7; }
+ 
+    .glove-btn-on  { background: var(--green-dim);  border: 1px solid var(--green); }
+    .glove-btn-off { background: var(--red-dim);    border: 1px solid var(--red);   }
+    .glove-btn-neutral { background: var(--bg);     border: 1px solid var(--border); }
+    .glove-btn-neutral:hover { border-color: var(--accent); background: var(--accent-dim); }
+ 
+    .glove-icon { font-size: 24px; line-height: 1; }
+    .glove-label { font-family: var(--display); font-size: 13px; font-weight: 700; }
+    .glove-id    { font-size: 10px; color: var(--muted); }
+ 
+    .glove-btn-on .glove-label  { color: var(--green); }
+    .glove-btn-off .glove-label { color: var(--red);   }
+ 
+    /* ── Finger grid ── */
+    .finger-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+ 
+    /* ── Log ── */
+    .log-section { width: 100%; max-width: 700px; }
+    .log-header  { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .log-title   { font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); }
+    .log-clear   { font-size: 10px; color: var(--muted); background: none; border: none; cursor: pointer; font-family: var(--mono); transition: color .2s; }
+    .log-clear:hover { color: var(--red); }
+    .log-box {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; padding: 12px 16px; height: 160px;
+      overflow-y: auto; display: flex; flex-direction: column-reverse; gap: 4px;
+    }
+    .log-entry { font-size: 11px; line-height: 1.6; color: var(--muted); }
+    .log-entry .time { color: var(--accent); margin-right: 6px; }
+    .log-entry .ok   { color: var(--green); }
+    .log-entry .warn { color: var(--yellow); }
+    .log-entry .fail { color: var(--red);   }
+  </style>
+</head>
+<body>
+ 
+  <div class="header">
+    <p class="header-tag">HandlyGo · Sistema de Demo</p>
+    <h1>Demo <span>Controller</span></h1>
+  </div>
+ 
+  <div class="status-bar">
+    <div class="status-dot" id="statusDot"></div>
+    <span class="status-text" id="statusText">Configura la IP del servidor para comenzar</span>
+    <span class="status-ip" id="statusIp">—</span>
+  </div>
+ 
+  <!-- IP -->
+  <div class="ip-section">
+    <p class="section-label">Servidor · IP Local</p>
+    <div class="ip-row">
+      <input class="ip-input" id="ipInput" type="text" placeholder="10.0.0.3" />
+      <button class="ip-btn" onclick="saveIP()">Guardar</button>
+    </div>
+  </div>
+ 
+  <div class="groups">
+ 
+    <!-- ── Estado del guante ── -->
+    <div class="group">
+      <p class="group-title">Estado del Guante</p>
+      <div class="btn-grid-2col">
+        <button class="glove-btn glove-btn-on" onclick="send(1,'Guante ON')">
+          <span class="glove-icon">🟢</span>
+          <span class="glove-label">Encender Guante</span>
+          <span class="glove-id">id · 1</span>
+        </button>
+        <button class="glove-btn glove-btn-off" onclick="send(0,'Guante OFF')">
+          <span class="glove-icon">🔴</span>
+          <span class="glove-label">Apagar Guante</span>
+          <span class="glove-id">id · 0</span>
+        </button>
+      </div>
+    </div>
+ 
+    <!-- ── Posición de la mano ── -->
+    <div class="group">
+      <p class="group-title">Posición de la Mano</p>
+      <div class="btn-grid-2col">
+        <button class="glove-btn glove-btn-neutral" onclick="send(2,'Mano cerrada')">
+          <span class="glove-icon">✊</span>
+          <span class="glove-label">Mano Cerrada</span>
+          <span class="glove-id">id · 2</span>
+        </button>
+        <button class="glove-btn glove-btn-neutral" onclick="send(3,'Mano abierta')">
+          <span class="glove-icon">🖐</span>
+          <span class="glove-label">Mano Abierta</span>
+          <span class="glove-id">id · 3</span>
+        </button>
+      </div>
+    </div>
+ 
+    <!-- ── Dedos abiertos ── -->
+    <div class="group">
+      <p class="group-title">Dedos — Abiertos</p>
+      <div class="finger-grid">
+        <button class="sign-btn" onclick="send(4,'Pulgar abierto')">
+          <span class="btn-word">👍 Pulgar</span><span class="btn-id">id · 4</span>
+        </button>
+        <button class="sign-btn" onclick="send(5,'Índice abierto')">
+          <span class="btn-word">☝️ Índice</span><span class="btn-id">id · 5</span>
+        </button>
+        <button class="sign-btn" onclick="send(6,'Medio abierto')">
+          <span class="btn-word">🖕 Medio</span><span class="btn-id">id · 6</span>
+        </button>
+        <button class="sign-btn" onclick="send(7,'Anular abierto')">
+          <span class="btn-word">💍 Anular</span><span class="btn-id">id · 7</span>
+        </button>
+        <button class="sign-btn" onclick="send(8,'Meñique abierto')">
+          <span class="btn-word">🤙 Meñique</span><span class="btn-id">id · 8</span>
+        </button>
+      </div>
+    </div>
+ 
+    <!-- ── Dedos cerrados ── -->
+    <div class="group">
+      <p class="group-title">Dedos — Cerrados</p>
+      <div class="finger-grid">
+        <button class="sign-btn" onclick="send(9,'Pulgar cerrado')">
+          <span class="btn-word">Pulgar</span><span class="btn-id">id · 9</span>
+        </button>
+        <button class="sign-btn" onclick="send(10,'Índice cerrado')">
+          <span class="btn-word">Índice</span><span class="btn-id">id · 10</span>
+        </button>
+        <button class="sign-btn" onclick="send(11,'Medio cerrado')">
+          <span class="btn-word">Medio</span><span class="btn-id">id · 11</span>
+        </button>
+        <button class="sign-btn" onclick="send(12,'Anular cerrado')">
+          <span class="btn-word">Anular</span><span class="btn-id">id · 12</span>
+        </button>
+        <button class="sign-btn" onclick="send(13,'Meñique cerrado')">
+          <span class="btn-word">Meñique</span><span class="btn-id">id · 13</span>
+        </button>
+      </div>
+    </div>
+ 
+    <!-- ── Saludos y despedidas ── -->
+    <div class="group">
+      <p class="group-title">Saludos y Despedidas</p>
+      <div class="btn-grid">
+        <button class="sign-btn" onclick="send(101,'Hola')">
+          <span class="btn-word">Hola</span><span class="btn-id">id · 101</span>
+        </button>
+        <button class="sign-btn" onclick="send(102,'Buenas tardes')">
+          <span class="btn-word">Buenas tardes</span><span class="btn-id">id · 102</span>
+        </button>
+        <button class="sign-btn" onclick="send(103,'¿Cómo estás?')">
+          <span class="btn-word">¿Cómo estás?</span><span class="btn-id">id · 103</span>
+        </button>
+        <button class="sign-btn" onclick="send(104,'Lo siento')">
+          <span class="btn-word">Lo siento</span><span class="btn-id">id · 104</span>
+        </button>
+        <button class="sign-btn" onclick="send(105,'Estoy bien, gracias')">
+          <span class="btn-word">Estoy bien, gracias</span><span class="btn-id">id · 105</span>
+        </button>
+        <button class="sign-btn" onclick="send(106,'Mucho gusto')">
+          <span class="btn-word">Mucho gusto</span><span class="btn-id">id · 106</span>
+        </button>
+        <button class="sign-btn" onclick="send(107,'Ten un lindo día')">
+          <span class="btn-word">Ten un lindo día</span><span class="btn-id">id · 107</span>
+        </button>
+      </div>
+    </div>
+ 
+    <!-- ── Números ── -->
+    <div class="group">
+      <p class="group-title">Números</p>
+      <div class="btn-grid">
+        <button class="sign-btn" onclick="send(108,'1')"><span class="btn-word">1</span><span class="btn-id">id · 108</span></button>
+        <button class="sign-btn" onclick="send(109,'2')"><span class="btn-word">2</span><span class="btn-id">id · 109</span></button>
+        <button class="sign-btn" onclick="send(110,'3')"><span class="btn-word">3</span><span class="btn-id">id · 110</span></button>
+        <button class="sign-btn" onclick="send(111,'4')"><span class="btn-word">4</span><span class="btn-id">id · 111</span></button>
+        <button class="sign-btn" onclick="send(112,'5')"><span class="btn-word">5</span><span class="btn-id">id · 112</span></button>
+        <button class="sign-btn" onclick="send(113,'6')"><span class="btn-word">6</span><span class="btn-id">id · 113</span></button>
+        <button class="sign-btn" onclick="send(114,'7')"><span class="btn-word">7</span><span class="btn-id">id · 114</span></button>
+        <button class="sign-btn" onclick="send(115,'8')"><span class="btn-word">8</span><span class="btn-id">id · 115</span></button>
+        <button class="sign-btn" onclick="send(116,'9')"><span class="btn-word">9</span><span class="btn-id">id · 116</span></button>
+        <button class="sign-btn" onclick="send(117,'10')"><span class="btn-word">10</span><span class="btn-id">id · 117</span></button>
+      </div>
+    </div>
+ 
+    <!-- ── Presentación ── -->
+    <div class="group">
+      <p class="group-title">Presentación</p>
+      <div class="btn-grid">
+        <button class="sign-btn" onclick="send(118,'¿Cuál es tu nombre?')">
+          <span class="btn-word">¿Cuál es tu nombre?</span><span class="btn-id">id · 118</span>
+        </button>
+        <button class="sign-btn" onclick="send(119,'Yo me llamo Handly')">
+          <span class="btn-word">Yo me llamo Handly</span><span class="btn-id">id · 119</span>
+        </button>
+      </div>
+    </div>
+ 
+  </div>
+ 
+  <!-- Log -->
+  <div class="log-section">
+    <div class="log-header">
+      <span class="log-title">Registro de Eventos</span>
+      <button class="log-clear" onclick="clearLog()">Limpiar</button>
+    </div>
+    <div class="log-box" id="logBox"></div>
+  </div>
+ 
+  <script>
+    let SERVER_IP = localStorage.getItem("handlygo_ip") || "";
+    let isSending = false;
+ 
+    function getBaseURL() { return `http://${SERVER_IP}:3000`; }
+ 
+    function saveIP() {
+      const val = document.getElementById("ipInput").value.trim();
+      if (!val) return;
+      SERVER_IP = val;
+      localStorage.setItem("handlygo_ip", val);
+      document.getElementById("statusIp").textContent = `${val}:3000`;
+      log(`IP guardada → ${val}:3000`, "ok");
+      setStatus("idle");
+    }
+ 
+    window.addEventListener("DOMContentLoaded", () => {
+      if (SERVER_IP) {
+        document.getElementById("ipInput").value = SERVER_IP;
+        document.getElementById("statusIp").textContent = `${SERVER_IP}:3000`;
+      }
+    });
+ 
+    function setStatus(state, msg) {
+      const dot  = document.getElementById("statusDot");
+      const text = document.getElementById("statusText");
+      dot.className = "status-dot";
+      if (state === "ok")    { dot.classList.add("ok");    text.textContent = msg || "Comando enviado ✓"; }
+      if (state === "error") { dot.classList.add("error"); text.textContent = msg || "Error al enviar"; }
+      if (state === "idle")  { text.textContent = "Servidor configurado. Listo para enviar."; }
+    }
+ 
+    async function send(id, word) {
+      if (isSending) return;
+      if (!SERVER_IP) { log("⚠️ Configura la IP antes de enviar", "warn"); return; }
+ 
+      isSending = true;
+      const btn = event.currentTarget;
+      btn.classList.add("sent");
+ 
+      try {
+        const res = await fetch(`${getBaseURL()}/command`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id }),
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        setStatus("ok");
+        log(`Enviado → id=${id}  "${word}"`, "ok");
+      } catch (err) {
+        setStatus("error", `Error: ${err.message}`);
+        log(`Error al enviar id=${id}: ${err.message}`, "fail");
+      } finally {
+        setTimeout(() => btn.classList.remove("sent"), 500);
+        isSending = false;
+      }
+    }
+ 
+    function log(msg, type = "") {
+      const box = document.getElementById("logBox");
+      const div = document.createElement("div");
+      div.className = "log-entry";
+      const now = new Date();
+      const t = `${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}:${String(now.getSeconds()).padStart(2,"0")}`;
+      div.innerHTML = `<span class="time">${t}</span><span class="${type}">${msg}</span>`;
+      box.prepend(div);
+    }
+ 
+    function clearLog() { document.getElementById("logBox").innerHTML = ""; }
+  </script>
+</body>
+</html>
