@@ -7,7 +7,7 @@ import { collection, query, where, getDocs } from "firebase/firestore";
 export type TranslationWord = {
   id: number;
   texto: string;
-  audio_cmd: string;
+  audio: string;
   category?: string;
 };
 
@@ -35,21 +35,22 @@ export const useTranslationStore = create<TranslationStore>((set, get) => ({
 
   /**
    * setWordFromId
-   * Consulta Firebase por el ID de seña, actualiza el estado
-   * y dispara el audio_cmd de vuelta al guante.
+   * Consulta Firebase por el ID de traducción, actualiza el estado
+   * y dispara el audio de vuelta al guante.
    *
+   * Flujo: simulate(id) → Firebase (translations) → Store → UI → Audio
    */
   setWordFromId: async (id: number) => {
     set({ isLoading: true, error: null });
 
     try {
-      // 1. Consultar Firestore: colección msd_dictionary, campo id == id
-      const dictionaryRef = collection(db, "msd_dictionary");
-      const q = query(dictionaryRef, where("id", "==", id));
+      // 1. Consultar Firestore: colección 'translations', campo id == id
+      const translationsRef = collection(db, "translations");
+      const q = query(translationsRef, where("id", "==", id));
       const snapshot = await getDocs(q);
 
       if (snapshot.empty) {
-        const errMsg = `[TranslationStore] No se encontró ninguna seña con id=${id}`;
+        const errMsg = `[TranslationStore] No se encontró traducción con id=${id}`;
         console.warn(errMsg);
         set({ isLoading: false, error: errMsg });
         return;
@@ -62,11 +63,11 @@ export const useTranslationStore = create<TranslationStore>((set, get) => ({
       const word: TranslationWord = {
         id: data.id ?? id,
         texto: data.texto ?? data.text ?? "Sin texto",
-        audio_cmd: data.audio_cmd ?? data.audioCmd ?? "",
+        audio: data.audio ?? data.audioCmd ?? "",
         category: data.category ?? undefined,
       };
 
-      console.log(`[TranslationStore] Seña recibida:`, word);
+      console.log(`[TranslationStore] Traducción recibida:`, word);
 
       // 3. Actualizar historial (sin duplicados consecutivos)
       const { history } = get();
@@ -80,10 +81,10 @@ export const useTranslationStore = create<TranslationStore>((set, get) => ({
         error: null,
       });
 
-      // 4. Log del audio_cmd (aquí iría la integración con la bocina del guante)
-      if (word.audio_cmd) {
-        console.log(`[TranslationStore] audio_cmd a enviar al guante: "${word.audio_cmd}"`);
-        // TODO: BLE Write(audio_cmd) → guante → bocina
+      // 4. Log del audio (aquí iría la integración con la bocina del guante)
+      if (word.audio) {
+        console.log(`[TranslationStore] Audio a enviar al guante: "${word.audio}"`);
+        // TODO: BLE Write(audio) → guante → bocina
       }
     } catch (error) {
       const errMsg = `[TranslationStore] Error consultando Firebase: ${error}`;
