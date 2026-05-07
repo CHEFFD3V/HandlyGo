@@ -88,19 +88,40 @@ export default function HomeScreen() {
             <SvgText
               fill={colors.waveText}
               fontSize="52"
-              fontWeight="bold"
+              fontWeight="700"
               fontStyle="italic"
-              letterSpacing="4"
+                lengthAdjust="spacingAndGlyphs"
+                letterSpacing="4"
+                
               dy={150}
+              fontFamily="Poppins"
             >
               <TextPath
                 xlinkHref="#waveLine"
-                startOffset="15.5%"
+                startOffset="12.6%"
                 textAnchor="middle"
               >
-                Observa, entiende y traduce
+                Observa, entiende
               </TextPath>
             </SvgText>
+
+            <SvgText
+              fill="#FFFFFF"
+              fontSize="52"
+              fontWeight="700"
+              fontStyle="italic"
+              fontFamily="Poppins-Bold"
+              dy={150}
+              >
+  <TextPath
+    xlinkHref="#waveLine"
+    startOffset="67%"
+    textAnchor="middle"
+  >
+    y traduce
+  </TextPath>
+</SvgText>
+
 
             {/* 
               Este path sigue exactamente el borde superior de la ola.
