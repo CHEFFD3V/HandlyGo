@@ -27,10 +27,10 @@ export default function HomeScreen() {
   const assets = useAssets();
   const { theme } = useTheme();
   const currentWord = useAppStore((s) => s.currentWord);
-  const history     = useAppStore((s) => s.history);
+  const history = useAppStore((s) => s.history);
   const todayCount = useAppStore((s) => s.todayCount);
   const opacity = useSharedValue(1);
-  const scale   = useSharedValue(1);
+  const scale = useSharedValue(1);
   useMockBluetooth();
 
   useEffect(() => {
@@ -40,7 +40,7 @@ export default function HomeScreen() {
     );
     scale.value = withSequence(
       withTiming(0.8, { duration: 200 }), // encoge
-      withTiming(1,   { duration: 300 }), // vuelve al tamaño normal
+      withTiming(1, { duration: 300 }), // vuelve al tamaño normal
     );
   }, [currentWord]);
 
@@ -75,64 +75,55 @@ export default function HomeScreen() {
               resizeMode="contain"
             />
           </View>
+
           <View style={s.waveContainer}>
-            <Svg viewBox="0 0 390 150" width="100%" height={200} preserveAspectRatio="none">
-              <Path
-                d="M0 25 Q60 0 130 30 Q200 62 270 25 Q330 0 390 38 Q370 95 300 80 Q220 62 150 88 Q80 108 0 82 Z"
-                fill={colors.wave.secondary}
-              />
-              <Path
-                d="M0 58 Q60 12 130 42 Q200 74 270 37 Q330 12 390 50 Q370 105 300 90 Q220 72 150 98 Q80 118 0 99 Z"
-                fill={colors.wave.primary}
-                opacity={0.4}
-              />
-
-              <Path
-                d="M0 58 Q60 12 130 42 Q200 74 270 37 Q330 12 390 50 Q370 105 300 90 Q220 72 150 98 Q80 118 0 99 Z"
-                fill={colors.wave.secondary}
-                opacity={0.4}
-              />
-
-            </Svg>
-            <Text style={[s.waveText, { color: colors.waveText }]}>Observa, entiende y traduce</Text>
-          </View>
-        </View>
-
-        {/* Gran tarjeta karaoke */}
-        <Animated.View style={[s.karoCard, animatedStyle, { borderColor: colors.card.border, backgroundColor: colors.card.background }]}>
-          <Text style={[s.karoText, { color: colors.text.primary }]}>
-            {currentWord ?? 'Esperando...'}
-          </Text>
-        </Animated.View>
-
-        {/* Tarjetas inclinadas */}
-        <View style={s.grid}>
-          <View style={[s.gridCard, s.tiltLeft, { borderColor: colors.card.border, backgroundColor: colors.card.background }]}>
-            <Text style={[s.gridLabel, { color: colors.text.secondary }]}>Gestos Recientes</Text>
-            <Text style={[s.gridSmall, { color: colors.text.secondary }]}>
-              {[...history].reverse().slice(0, 3).map(w => `• ${w}`).join('\n') || 'Sin gestos aún'}
+            <Image
+              source={assets.wave}
+              style={s.waveImage}
+              contentFit="fill"        
+            />
+            <Text style={[s.waveText, { color: colors.waveText }]}>
+              Observa, entiende y traduce
             </Text>
           </View>
-          <View style={[s.gridCard, s.tiltRight, { borderColor: colors.card.border, backgroundColor: colors.card.background }]}>
-            <Text style={[s.gridLabel, { color: colors.text.secondary }]}>Gestos de Hoy</Text>
-            <Text style={[s.gridValue, { color: colors.accent }]}>{todayCount}</Text>
-          </View>
-        </View>
+          </View>  
 
-        {/* Sección de traducción */}
-        <View style={[s.translateBox, { borderColor: colors.card.border, backgroundColor: colors.translation.background, }]}>
-          <View style={s.translateContent}>
-            <Ionicons name="volume-medium-outline" size={20} color={colors.icon.primary} />
-            <Text style={[s.translateText, { color: colors.translation.text }]}>
-              "Hola, ¿cómo estás?{'\n'}me siento muy feliz hoy,{'\n'}te encuentras bien?"
+
+          {/* Gran tarjeta karaoke */}
+          <Animated.View style={[s.karoCard, animatedStyle, { borderColor: colors.card.border, backgroundColor: colors.card.background }]}>
+            <Text style={[s.karoText, { color: colors.text.primary }]}>
+              {currentWord ?? 'Esperando...'}
             </Text>
-          </View>
-          <View style={s.translateFooter}>
-            <Ionicons name="expand-outline" size={16} color={colors.primary} />
-          </View>
-        </View>
+          </Animated.View>
 
-        <View style={{ height: 80 }} />
+          {/* Tarjetas inclinadas */}
+          <View style={s.grid}>
+            <View style={[s.gridCard, s.tiltLeft, { borderColor: colors.card.border, backgroundColor: colors.card.background }]}>
+              <Text style={[s.gridLabel, { color: colors.text.secondary }]}>Gestos Recientes</Text>
+              <Text style={[s.gridSmall, { color: colors.text.secondary }]}>
+                {[...history].reverse().slice(0, 3).map(w => `• ${w}`).join('\n') || 'Sin gestos aún'}
+              </Text>
+            </View>
+            <View style={[s.gridCard, s.tiltRight, { borderColor: colors.card.border, backgroundColor: colors.card.background }]}>
+              <Text style={[s.gridLabel, { color: colors.text.secondary }]}>Gestos de Hoy</Text>
+              <Text style={[s.gridValue, { color: colors.accent }]}>{todayCount}</Text>
+            </View>
+          </View>
+
+          {/* Sección de traducción */}
+          <View style={[s.translateBox, { borderColor: colors.card.border, backgroundColor: colors.translation.background, }]}>
+            <View style={s.translateContent}>
+              <Ionicons name="volume-medium-outline" size={20} color={colors.icon.primary} />
+              <Text style={[s.translateText, { color: colors.translation.text }]}>
+                "Hola, ¿cómo estás?{'\n'}me siento muy feliz hoy,{'\n'}te encuentras bien?"
+              </Text>
+            </View>
+            <View style={s.translateFooter}>
+              <Ionicons name="expand-outline" size={16} color={colors.primary} />
+            </View>
+          </View>
+
+          <View style={{ height: 80 }} />
       </ScrollView>
 
 
@@ -159,11 +150,17 @@ const s = StyleSheet.create({
   waveContainer: {
     width: '100%',
     position: 'relative',
-    marginTop: -110,
+    marginTop: -100,
+    marginBottom: 20,
   },
+  waveImage: {
+    width: '100%',
+    height: 130,             
+  },
+
   waveText: {
     position: 'absolute',
-    top: '32%',
+    top: '35%',              
     left: 0,
     right: 0,
     textAlign: 'center',
