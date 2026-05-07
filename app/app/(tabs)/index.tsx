@@ -151,7 +151,7 @@ const s = StyleSheet.create({
     paddingHorizontal: 24,
   },
   logo: {
-    width: 300,
+    width: 200,
     height: 300,
   },
 
@@ -251,6 +251,7 @@ const s = StyleSheet.create({
     fontSize: 20,
     lineHeight: 28,
     flex: 1,
+    fontFamily: 'Poppins-Medium',
   },
   translateFooter: {
     alignItems: 'flex-end',
