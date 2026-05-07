@@ -251,6 +251,7 @@ const s = StyleSheet.create({
     fontSize: 20,
     lineHeight: 28,
     flex: 1,
+    fontFamily: 'Poppins-Medium',
   },
   translateFooter: {
     alignItems: 'flex-end',
