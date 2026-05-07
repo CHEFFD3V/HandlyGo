@@ -2,8 +2,9 @@ import { Stack } from 'expo-router';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useTheme } from '../hooks/useTheme';
 import { useThemeStore } from '../store/useThemeStore';
+import { registerSimulateGlobal } from '@/utils/simulateConsole';
 
-
+registerSimulateGlobal();
 
 export default function RootLayout() {
   const { colors } = useTheme();
