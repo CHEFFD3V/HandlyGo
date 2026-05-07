@@ -3,7 +3,7 @@ import {
   StyleSheet, TouchableOpacity,
 } from 'react-native';
 import { useRef, useEffect } from 'react';
-import Svg, { Path } from 'react-native-svg';
+import Svg, { Defs, LinearGradient, Path, Rect, Stop } from 'react-native-svg';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from "../../hooks/useTheme";
@@ -147,37 +147,53 @@ export default function HomeScreen() {
             { borderColor: colors.card.border, backgroundColor: colors.translation.background },
           ]}
         >
-          <ScrollView
-            ref={translationScrollRef}
-            style={s.translateScroll}
-            contentContainerStyle={s.translateContent}
-            nestedScrollEnabled
-            showsVerticalScrollIndicator={false}
-            scrollEventThrottle={16}
-            onScroll={({ nativeEvent }) => {
-              const distanceFromBottom =
-                nativeEvent.contentSize.height -
-                (nativeEvent.layoutMeasurement.height + nativeEvent.contentOffset.y);
-
-              isNearBottomRef.current = distanceFromBottom <= AUTO_SCROLL_THRESHOLD;
-            }}
-            onContentSizeChange={() => {
-              if (!shouldAutoScrollRef.current) return;
-
-              translationScrollRef.current?.scrollToEnd({ animated: true });
-              shouldAutoScrollRef.current = false;
-            }}
-          >
+          <View style={s.translateViewport}>
             <Ionicons
               name="volume-medium-outline"
               size={20}
               color={colors.icon.primary}
               style={s.translateIcon}
             />
-            <Text style={[s.translateText, { color: colors.translation.text }]}>
-              {translationText}
-            </Text>
-          </ScrollView>
+
+            <ScrollView
+              ref={translationScrollRef}
+              style={s.translateScroll}
+              contentContainerStyle={s.translateContent}
+              nestedScrollEnabled
+              showsVerticalScrollIndicator={false}
+              scrollEventThrottle={16}
+              onScroll={({ nativeEvent }) => {
+                const distanceFromBottom =
+                  nativeEvent.contentSize.height -
+                  (nativeEvent.layoutMeasurement.height + nativeEvent.contentOffset.y);
+
+                isNearBottomRef.current = distanceFromBottom <= AUTO_SCROLL_THRESHOLD;
+              }}
+              onContentSizeChange={() => {
+                if (!shouldAutoScrollRef.current) return;
+
+                translationScrollRef.current?.scrollToEnd({ animated: true });
+                shouldAutoScrollRef.current = false;
+              }}
+            >
+              <Text style={[s.translateText, { color: colors.translation.text }]}>
+                {translationText}
+              </Text>
+            </ScrollView>
+
+            <View pointerEvents="none" style={s.fadeTop}>
+              <Svg width="100%" height="100%" preserveAspectRatio="none">
+                <Defs>
+                  <LinearGradient id="translateFadeTop" x1="0" y1="0" x2="0" y2="1">
+                    <Stop offset="0%" stopColor={colors.translation.background} stopOpacity={1} />
+                    <Stop offset="100%" stopColor={colors.translation.background} stopOpacity={0} />
+                  </LinearGradient>
+                </Defs>
+                <Rect x="0" y="0" width="100%" height="100%" fill="url(#translateFadeTop)" />
+              </Svg>
+            </View>
+
+          </View>
 
           <View style={s.translateFooter}>
             <Ionicons name="expand-outline" size={16} color={colors.primary} />
@@ -273,26 +289,45 @@ const s = StyleSheet.create({
     borderRadius: 12,
     overflow: 'hidden',
     marginHorizontal: 16,
+    minHeight: 160,
+  },
+  translateViewport: {
+    position: 'relative',
+    paddingBottom: 10,
   },
   translateScroll: {
     maxHeight: 180,
+    minHeight: 120,
+    paddingTop: 22,
+    paddingLeft: 44,
   },
   translateContent: {
-    flexDirection: 'row',
-    padding: 16,
-    gap: 10,
-    alignItems: 'flex-start',
+    flexGrow: 1,
+    paddingRight: 16,
+    paddingBottom: 20,
+    justifyContent: 'center',
   },
   translateIcon: {
-    marginTop: 2,
+    position: 'absolute',
+    top: 26,
+    left: 16,
+    zIndex: 1,
   },
   translateText: {
     fontSize: 20,
     lineHeight: 28,
     flex: 1,
   },
+  fadeTop: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 26,
+  },
   translateFooter: {
     alignItems: 'flex-end',
+    paddingTop: 4,
     paddingRight: 12,
     paddingBottom: 8,
   },
