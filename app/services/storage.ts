@@ -6,7 +6,7 @@ export type UserProgress = {
   streak: number;
   daysStudying: number;
   unlockedLevels: number[];
-  completedItems: number[];
+  completedLessons: string[];  // ← era completedItems: number[]
   version: number;
 };
 
@@ -16,14 +16,12 @@ export const defaultUser: UserProgress = {
   streak: 0,
   daysStudying: 0,
   unlockedLevels: [1],
-  completedItems: [],
+  completedLessons: [],        // ← era completedItems: []
   version: 1,
 };
 
 // CLAVE DE ALMACENAMIENTO
 const STORAGE_KEY = "user_progress";
-
-
 
 // loadProgress
 // Lee el progreso guardado en el teléfono.
@@ -44,7 +42,6 @@ export async function loadProgress(): Promise<UserProgress> {
 
     return parsed;
   } catch (error) {
-    // Criterio #3 y #5: manejo de errores + fallback a defaultUser
     console.error("[storage] Error al leer el progreso:", error);
     return defaultUser;
   }
@@ -57,7 +54,6 @@ export async function saveProgress(data: UserProgress): Promise<void> {
     const serialized = JSON.stringify(data);
     await AsyncStorage.setItem(STORAGE_KEY, serialized);
   } catch (error) {
-    // Criterio #3: manejo de errores
     console.error("[storage] Error al guardar el progreso:", error);
   }
 }
