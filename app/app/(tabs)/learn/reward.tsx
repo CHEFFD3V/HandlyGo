@@ -48,16 +48,20 @@ export default function RewardScreen() {
   };
 
   const handleNext = () => {
-    if (isLastLesson) {
-      router.dismissAll();
-      router.push('/(tabs)/aprendizaje');
-    } else {
-      router.push({
-        pathname: '/(tabs)/learn/lesson',
-        params: { levelId, lessonId: nextLesson!.id },
-      });
-    }
-  };
+  if (isLastLesson) {
+    // Era la última lección del nivel — volver al nivel actual
+    router.dismissAll();
+    router.push({
+      pathname: '/(tabs)/learn/[levelId]',
+      params: { levelId },
+    });
+  } else {
+    router.push({
+      pathname: '/(tabs)/learn/lesson',
+      params: { levelId, lessonId: nextLesson!.id },
+    });
+  }
+};
 
   return (
     <View style={[s.root, { backgroundColor: colors.background }]}>
@@ -107,21 +111,21 @@ export default function RewardScreen() {
           activeOpacity={0.8}
         >
           <Text style={[s.nextTxt, { color: colors.text.primary }]}>
-            {isLastLesson ? 'Volver a niveles' : 'Siguiente lección'}
+           {isLastLesson ? 'Ver nivel completado' : 'Siguiente lección'}
           </Text>
         </TouchableOpacity>
 
         {/* ── Botón secundario: volver al nivel (solo si no es la última lección) ── */}
         {!isLastLesson && (
-          <TouchableOpacity
+            <TouchableOpacity
             onPress={handleGoToLevel}
             activeOpacity={0.7}
-          >
+        >
             <Text style={[s.skipTxt, { color: colors.text.secondary }]}>
-              Volver a niveles
+                Volver al nivel
             </Text>
-          </TouchableOpacity>
-        )}
+            </TouchableOpacity>
+)}
 
       </View>
     </View>
