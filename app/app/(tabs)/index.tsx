@@ -26,9 +26,9 @@ export default function HomeScreen() {
   const { colors } = useTheme();
   const assets = useAssets();
   const currentWord = useTranslationStore((s) => s.currentWord?.texto ?? null);
-  const history     = useTranslationStore((s) => s.history.map((w) => w.texto));
+  const historyRaw = useTranslationStore((s) => s.history);
+  const history = historyRaw.map((w) => w.texto);
   const status      = useTranslationStore((s) => s.status);
-  const clearHistory = useTranslationStore((s) => s.clearHistory);
 
   const translationScrollRef = useRef<ScrollView>(null);
   const lastHistoryCountRef  = useRef(history.length);
@@ -68,21 +68,18 @@ export default function HomeScreen() {
 
   // ── Reset a "Esperando..." tras RESET_DELAY_MS sin actividad
   useEffect(() => {
-    if (currentWord === null) return; // ya está en estado inicial, no hacer nada
+  if (currentWord === null) return;
 
-    // Cancela el timer anterior si llega una nueva palabra
+  if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
+
+  resetTimerRef.current = setTimeout(() => {
+    useTranslationStore.getState().clearHistory();
+  }, RESET_DELAY_MS);
+
+  return () => {
     if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
-
-    // Arranca un nuevo timer
-    resetTimerRef.current = setTimeout(() => {
-      clearHistory(); // vuelve currentWord=null e history=[]
-    }, RESET_DELAY_MS);
-
-    // Limpia al desmontar
-    return () => {
-      if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
-    };
-  }, [currentWord]);
+  };
+}, [currentWord]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     opacity: opacity.value,
