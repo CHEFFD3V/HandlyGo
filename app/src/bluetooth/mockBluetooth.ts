@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { useAppStore } from "../../store/useAppStore";
 import type { AppState } from "../../store/useAppStore";
 
-const MOCK_WORDS = ["Hola", "Gracias", "Por favor", "Adiós", "Buenos días", "Bienvenido", "Hasta luego"] as const;
+const MOCK_WORDS = ["Hola", "señor", "Por favor", "me", "puedes", "dar", "la","hora","?"] as const;
 const EMIT_INTERVAL_MS    = 2000;  // 👈 tiempo de las palabras
 const BATTERY_INTERVAL_MS = 3000;  // 👈 tiempo de la batería
 
