@@ -14,15 +14,12 @@ import { useAppStore } from '../store/useAppStore';
 export default function TranslationFullscreen() {
   const router = useRouter();
   const { colors } = useTheme();
-  const currentWord = useAppStore((s) => s.currentWord);
-  const history = useAppStore((s) => s.history);
+  const translationText = useAppStore((s) => s.translationText);
+  const displayText = translationText || '';
+  
 
   // Build the full translated sentence from history (last 10 words)
-  const recentWords = history.slice(-10);
-  const displayText =
-    recentWords.length > 0
-      ? recentWords.join(' ')
-      : currentWord ?? 'Sin traducción aún...';
+
 
   return (
     <SafeAreaView

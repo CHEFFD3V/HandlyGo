@@ -31,6 +31,7 @@ export default function HomeScreen() {
   const todayCount = useAppStore((s) => s.todayCount);
   const opacity = useSharedValue(1);
   const scale   = useSharedValue(1);
+  const translationText = useAppStore((s) => s.translationText);
   useMockBluetooth();
 
   useEffect(() => {
@@ -124,7 +125,7 @@ export default function HomeScreen() {
           <View style={s.translateContent}>
             <Ionicons name="volume-medium-outline" size={20} color={colors.icon.primary} />
             <Text style={[s.translateText, { color: colors.translation.text }]}>
-              {currentWord ?? ''}
+              {translationText}
             </Text>
           </View>
           <View style={s.translateFooter}>

@@ -9,6 +9,7 @@ export type AppState = {
   history: string[];
   battery: number; 
   todayCount: number;  
+  translationText: string;
   
 
   setConnected: (value: boolean) => void;
@@ -18,6 +19,7 @@ export type AppState = {
   clearHistory: () => void;
   setBattery: (value: number) => void; 
   incrementTodayCount: () => void; 
+
 };
 
 export const useAppStore = create<AppState>((set) => ({
@@ -26,7 +28,8 @@ export const useAppStore = create<AppState>((set) => ({
   currentWord: null,
   history: [],
    battery: INITIAL_BATTERY,
-   todayCount: 0,   // valor inicial de batería
+   todayCount: 0,  
+   translationText: '', 
 
   setConnected: (value) =>
     set((state) => ({
@@ -44,18 +47,27 @@ export const useAppStore = create<AppState>((set) => ({
   stopTranslating: () => set({ isTranslating: false }),
 
   setWord: (word) =>
-    set((state) => {
-      const isDuplicate = state.history[state.history.length - 1] === word;
-      return  {
-        currentWord: word,
-        history: isDuplicate ? state.history : [...state.history, word],
-        todayCount: isDuplicate ? state.todayCount : state.todayCount + 1, 
-      };
-    }),
+  set((state) => {
+    const isDuplicate = state.history[state.history.length - 1] === word;
+    const updatedHistory = isDuplicate ? state.history : [...state.history, word];
+    const accumulated = isDuplicate
+      ? state.translationText
+      : state.translationText
+        ? `${state.translationText} ${word}`
+        : word;
+    return {
+      currentWord: word,                          // solo la palabra actual
+      translationText: accumulated,               // párrafo acumulado
+      history: updatedHistory,
+      todayCount: isDuplicate ? state.todayCount : state.todayCount + 1,
+    };
+  }),
+
       
 
-  clearHistory: () => set({ history: [], currentWord: null }),
+  clearHistory: () => set({ history: [], currentWord: null, translationText: '' }),
   setBattery: (value) => set({ battery: value }),
   incrementTodayCount: () =>
     set((state) => ({ todayCount: state.todayCount + 1 })),
+  
 }));
