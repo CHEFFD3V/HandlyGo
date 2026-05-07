@@ -19,6 +19,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 const AUTO_SCROLL_THRESHOLD = 24;
+const RESET_DELAY_MS = 5000; // ← cambia este valor para ajustar el tiempo de espera
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -27,11 +28,13 @@ export default function HomeScreen() {
   const currentWord = useAppStore((s) => s.currentWord);
   const history     = useAppStore((s) => s.history);
   const todayCount  = useAppStore((s) => s.todayCount);
+  const clearHistory = useAppStore((s) => s.clearHistory);
 
   const translationScrollRef = useRef<ScrollView>(null);
   const lastHistoryCountRef  = useRef(history.length);
   const shouldAutoScrollRef  = useRef(false);
   const isNearBottomRef      = useRef(true);
+  const resetTimerRef        = useRef<ReturnType<typeof setTimeout> | null>(null); // ← timer de reset
 
   const opacity = useSharedValue(1);
   const scale   = useSharedValue(1);
@@ -42,6 +45,7 @@ export default function HomeScreen() {
     ? history.join(' ')
     : 'Esperando traducción...';
 
+  // ── Animación karaoke al cambiar palabra
   useEffect(() => {
     opacity.value = withSequence(
       withTiming(0, { duration: 200 }),
@@ -53,6 +57,7 @@ export default function HomeScreen() {
     );
   }, [currentWord]);
 
+  // ── Auto-scroll al llegar nueva palabra
   useEffect(() => {
     const hasNewContent = history.length > lastHistoryCountRef.current;
     if (hasNewContent && isNearBottomRef.current) {
@@ -60,6 +65,24 @@ export default function HomeScreen() {
     }
     lastHistoryCountRef.current = history.length;
   }, [history.length]);
+
+  // ── Reset a "Esperando..." tras RESET_DELAY_MS sin actividad
+  useEffect(() => {
+    if (currentWord === null) return; // ya está en estado inicial, no hacer nada
+
+    // Cancela el timer anterior si llega una nueva palabra
+    if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
+
+    // Arranca un nuevo timer
+    resetTimerRef.current = setTimeout(() => {
+      clearHistory(); // vuelve currentWord=null e history=[]
+    }, RESET_DELAY_MS);
+
+    // Limpia al desmontar
+    return () => {
+      if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
+    };
+  }, [currentWord]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     opacity: opacity.value,
@@ -82,7 +105,7 @@ export default function HomeScreen() {
           />
         </View>
 
-         {/* Ola — bloque propio en el flujo, nada se superpone */}
+        {/* Ola */}
         <View style={s.waveArea}>
           <Svg
             viewBox="0 0 1024 504"
@@ -90,41 +113,30 @@ export default function HomeScreen() {
             height={180}
             preserveAspectRatio="none"
           >
-            {/* Capa trasera */}
             <Path
               d="M 220 25.632 C 155.142 30.422, 101.295 45.464, 51.500 72.704 C 37.660 80.276, 17.739 93.208, 7.250 101.431 L 0 107.114 0 219.057 C 0 280.626, 0.162 331, 0.360 331 C 0.558 331, 6.853 328.051, 14.349 324.446 C 55.937 304.448, 103.706 292.249, 157.347 287.928 C 174.164 286.574, 222.363 287.192, 238.500 288.968 C 283.640 293.938, 323.579 302.636, 367 316.954 C 414.420 332.591, 448.084 347.513, 511.500 381.004 C 594.978 425.091, 670.407 448.300, 748.961 454.070 C 766.990 455.395, 807.633 454.833, 824.500 453.027 C 861.016 449.117, 901.218 439.077, 935 425.429 C 960.075 415.300, 992.121 397.250, 1012.500 381.779 L 1023.500 373.429 1024.112 348.964 C 1024.449 335.509, 1024.684 275.225, 1024.633 215 C 1024.582 154.775, 1024.411 115.264, 1024.251 127.197 L 1023.961 148.894 1011.731 154.830 C 902.616 207.793, 762.967 206.256, 620.500 150.524 C 590.458 138.772, 550.213 120, 524.766 105.870 C 511.001 98.227, 476.015 80.880, 462.500 74.997 C 401.284 48.350, 343.805 32.801, 285 26.981 C 273.842 25.876, 229.227 24.951, 220 25.632 M 0.483 219 C 0.483 280.875, 0.603 306.188, 0.750 275.250 C 0.897 244.313, 0.897 193.688, 0.750 162.750 C 0.603 131.813, 0.483 157.125, 0.483 219"
               fill={colors.wave.secondary}
               opacity={0.6}
               transform="translate(0, 16)"
             />
-            {/* Capa frontal */}
             <Path
-              d="M 220 25.632 
-              C 155.142 30.422, 101.295 45.464, 51.500 72.704 C 37.660 80.276, 17.739 93.208, 7.250 101.431 L 0 107.114 0 219.057 C 0 280.626, 0.162 331, 0.360 331 C 0.558 331, 6.853 328.051, 14.349 324.446 C 55.937 304.448, 103.706 292.249, 157.347 287.928 C 174.164 286.574, 222.363 287.192, 238.500 288.968 C 283.640 293.938, 323.579 302.636, 367 316.954 C 414.420 332.591, 448.084 347.513, 511.500 381.004 C 594.978 425.091, 670.407 448.300, 748.961 454.070 C 766.990 455.395, 807.633 454.833, 824.500 453.027 C 861.016 449.117, 901.218 439.077, 935 425.429 C 960.075 415.300, 992.121 397.250, 1012.500 381.779 L 1023.500 373.429 1024.112 348.964 C 1024.449 335.509, 1024.684 275.225, 1024.633 215 C 1024.582 154.775, 1024.411 115.264, 1024.251 127.197 L 1023.961 148.894 1011.731 154.830 C 902.616 207.793, 762.967 206.256, 620.500 150.524 C 590.458 138.772, 550.213 120, 524.766 105.870 C 511.001 98.227, 476.015 80.880, 462.500 74.997 C 401.284 48.350, 343.805 32.801, 285 26.981 C 273.842 25.876, 229.227 24.951, 220 25.632 M 0.483 219 C 0.483 280.875, 0.603 306.188, 0.750 275.250 C 0.897 244.313, 0.897 193.688, 0.750 162.750 C 0.603 131.813, 0.483 157.125, 0.483 219"
+              d="M 220 25.632 C 155.142 30.422, 101.295 45.464, 51.500 72.704 C 37.660 80.276, 17.739 93.208, 7.250 101.431 L 0 107.114 0 219.057 C 0 280.626, 0.162 331, 0.360 331 C 0.558 331, 6.853 328.051, 14.349 324.446 C 55.937 304.448, 103.706 292.249, 157.347 287.928 C 174.164 286.574, 222.363 287.192, 238.500 288.968 C 283.640 293.938, 323.579 302.636, 367 316.954 C 414.420 332.591, 448.084 347.513, 511.500 381.004 C 594.978 425.091, 670.407 448.300, 748.961 454.070 C 766.990 455.395, 807.633 454.833, 824.500 453.027 C 861.016 449.117, 901.218 439.077, 935 425.429 C 960.075 415.300, 992.121 397.250, 1012.500 381.779 L 1023.500 373.429 1024.112 348.964 C 1024.449 335.509, 1024.684 275.225, 1024.633 215 C 1024.582 154.775, 1024.411 115.264, 1024.251 127.197 L 1023.961 148.894 1011.731 154.830 C 902.616 207.793, 762.967 206.256, 620.500 150.524 C 590.458 138.772, 550.213 120, 524.766 105.870 C 511.001 98.227, 476.015 80.880, 462.500 74.997 C 401.284 48.350, 343.805 32.801, 285 26.981 C 273.842 25.876, 229.227 24.951, 220 25.632 M 0.483 219 C 0.483 280.875, 0.603 306.188, 0.750 275.250 C 0.897 244.313, 0.897 193.688, 0.750 162.750 C 0.603 131.813, 0.483 157.125, 0.483 219"
               fill={colors.wave.primary}
             />
-
-            {/* Texto curvado — sigue el borde superior de la ola */}
             <SvgText
               fill={colors.waveText}
               fontSize="52"
               fontWeight="700"
               fontStyle="italic"
-                lengthAdjust="spacingAndGlyphs"
-                letterSpacing="4"
-                
+              lengthAdjust="spacingAndGlyphs"
+              letterSpacing="4"
               dy={150}
               fontFamily="Poppins"
             >
-              <TextPath
-                xlinkHref="#waveLine"
-                startOffset="12.6%"
-                textAnchor="middle"
-              >
+              <TextPath xlinkHref="#waveLine" startOffset="12.6%" textAnchor="middle">
                 Observa, entiende
               </TextPath>
             </SvgText>
-
             <SvgText
               fill="#FFFFFF"
               fontSize="52"
@@ -132,24 +144,11 @@ export default function HomeScreen() {
               fontStyle="italic"
               fontFamily="Poppins-Bold"
               dy={150}
-              >
-  <TextPath
-    xlinkHref="#waveLine"
-    startOffset="67%"
-    textAnchor="middle"
-  >
-    y traduce
-  </TextPath>
-</SvgText>
-
-
-            {/* 
-              Este path sigue exactamente el borde superior de la ola.
-              Extraído directamente del path original:
-              M 220 25 → sube desde izquierda
-              C 155 30, 101 45, 51 72 → curva hacia arriba a la derecha
-              luego continúa hacia la derecha subiendo
-            */}
+            >
+              <TextPath xlinkHref="#waveLine" startOffset="67%" textAnchor="middle">
+                y traduce
+              </TextPath>
+            </SvgText>
             <Path
               id="waveLine"
               d="M 0 20 C 120 80, 280 40, 462 75 C 530 88, 590 120, 680 148 C 780 178, 900 185, 1024 152"
@@ -332,9 +331,9 @@ const s = StyleSheet.create({
   },
   translateContent: {
     flexGrow: 1,
-    paddingRight: 19,
-    paddingLeft: 10,
-    paddingBottom: 0,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    alignItems: 'center',   // ← centra el texto horizontalmente
   },
   translateIcon: {
     position: 'absolute',
@@ -344,10 +343,9 @@ const s = StyleSheet.create({
   },
   translateText: {
     fontSize: 18,
-    lineHeight: 21,
+    lineHeight: 24,
     fontFamily: 'Poppins-Medium',
-    marginLeft: 13,
-    padding: 6,
+    textAlign: 'center',    // ← centra el texto
   },
   fadeTop: {
     position: 'absolute',
