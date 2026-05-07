@@ -1,6 +1,7 @@
-import { Pressable, StyleSheet, Switch, Text, View } from 'react-native';
+import { StyleSheet, Switch, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../hooks/useTheme';
+import { AppPressable } from './ui/app-pressable';
  
 // ─── Types ───────────────────────────────────────────────────────────────────
  
@@ -105,31 +106,18 @@ const barStyles = StyleSheet.create({
 export function SettingItem(props: SettingItemProps) {
   const { colors } = useTheme();
   const isAction = props.type === 'action';
-  const Container = isAction ? Pressable : View;
+  const Container = isAction ? AppPressable : View;
  
   return (
     <Container
       {...(isAction ? { onPress: props.onPress } : {})}
-      {...(isAction
-        ? {
-            style: ({ pressed }: { pressed: boolean }) => [
-              styles.item,
-              {
-                backgroundColor: colors.card.background,
-                borderColor: colors.card.border,
-                opacity: pressed ? 0.82 : 1,
-              },
-            ],
-          }
-        : {
-            style: [
-              styles.item,
-              {
-                backgroundColor: colors.card.background,
-                borderColor: colors.card.border,
-              },
-            ],
-          })}
+      style={[
+        styles.item,
+        {
+          backgroundColor: colors.card.background,
+          borderColor: colors.card.border,
+        },
+      ]}
     >
       <View style={[styles.iconWrap, { backgroundColor: colors.primary + '18' }]}>
         <Ionicons name={props.icon} size={20} color={colors.primary} />

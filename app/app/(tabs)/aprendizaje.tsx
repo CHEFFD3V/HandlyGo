@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import { useTheme } from '../../hooks/useTheme';
 import { useProgressStore } from '../../store/useProgressStore';
@@ -6,6 +6,7 @@ import { useEffect } from 'react';
 import { useAssets } from '../../hooks/useAssets';
 import { useRouter } from 'expo-router';
 import { ProgressFooter } from '../../components/learn/ProgressFooter';
+import { AppPressable } from '../../components/ui/app-pressable';
 
 const LEVELS = [
   { id: 1, title: 'Letras y abecedario' },
@@ -64,9 +65,9 @@ export default function AprendizajeScreen() {
           const isUnlocked = unlockedLevels.includes(level.id) || level.id === 1;
 
           return (
-            <TouchableOpacity
+            <AppPressable
               key={level.id}
-              activeOpacity={isUnlocked ? 0.75 : 1}
+              disableFeedback={!isUnlocked}
               disabled={!isUnlocked}
               onPress={() =>
                 router.push({
@@ -89,7 +90,7 @@ export default function AprendizajeScreen() {
               <Text style={[s.cardTitle, { color: colors.text.secondary }]}>
                 {level.title}
               </Text>
-            </TouchableOpacity>
+            </AppPressable>
           );
         })}
 

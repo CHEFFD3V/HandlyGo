@@ -1,7 +1,8 @@
-import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
+import { View, Text, StyleSheet, Image } from "react-native";
 import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useAssets } from "../../hooks/useAssets";
+import { AppPressable } from "../../components/ui/app-pressable";
 
 const ONBOARDING_KEY = "onboardingComplete";
 
@@ -42,13 +43,14 @@ export default function Onboarding() {
       </View>
 
       <View style={s.semiCircle}>
-        <TouchableOpacity
+        <AppPressable
           style={s.btn}
           onPress={handleContinue}
-          activeOpacity={0.8}
+          pressedScale={0.92}
+          pressedOpacity={0.82}
         >
           <Text style={s.btnText}>CONTINUAR</Text>
-        </TouchableOpacity>
+        </AppPressable>
       </View>
 
 

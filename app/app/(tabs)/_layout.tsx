@@ -1,7 +1,8 @@
-import { View, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { Tabs, useRouter, usePathname } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../hooks/useTheme';
+import { AppPressable } from '../../components/ui/app-pressable';
 
 
 export default function TabsLayout() {
@@ -38,16 +39,16 @@ export default function TabsLayout() {
       <View style={[s.navbar, { backgroundColor: colors.tabBar.background }]}>
         
 
-        <TouchableOpacity style={s.navBtn} onPress={toggleTheme}>
+        <AppPressable style={s.navBtn} onPress={toggleTheme}>
           <Ionicons
             name="moon-outline"
             size={22}
             color={colors.tabBar.inactive}
           />
-        </TouchableOpacity>
+        </AppPressable>
 
 
-        <TouchableOpacity
+        <AppPressable
           style={s.navBtn}
           onPress={() => router.replace('/aprendizaje')}
         >
@@ -56,10 +57,10 @@ export default function TabsLayout() {
             size={22}
             color={getColor('/aprendizaje')}
           />
-        </TouchableOpacity>
+        </AppPressable>
 
 
-        <TouchableOpacity
+        <AppPressable
           style={s.navBtn}
           onPress={() => router.replace('/')}
         >
@@ -68,10 +69,10 @@ export default function TabsLayout() {
             size={26}
             color={getColor('/')}
           />
-        </TouchableOpacity>
+        </AppPressable>
 
 
-        <TouchableOpacity
+        <AppPressable
           style={s.navBtn}
           onPress={() => router.replace('/vinculacion')}
         >
@@ -80,10 +81,10 @@ export default function TabsLayout() {
             size={22}
             color={getColor('/vinculacion')}
           />
-        </TouchableOpacity>
+        </AppPressable>
 
 
-        <TouchableOpacity
+        <AppPressable
           style={s.navBtn}
           onPress={() => router.replace('/configuracion')}
         >
@@ -92,7 +93,7 @@ export default function TabsLayout() {
             size={22}
             color={getColor('/configuracion')}
           />
-        </TouchableOpacity>
+        </AppPressable>
 
       </View>
     </View>

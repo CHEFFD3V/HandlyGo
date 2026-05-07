@@ -1,10 +1,11 @@
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../../hooks/useTheme';
 import { LessonPath } from '../../../components/learn/LessonPath';
 import { LEVEL_DATA } from '../../../constants/learnData';
 import { useProgressStore } from '../../../store/useProgressStore';
+import { AppPressable } from '../../../components/ui/app-pressable';
 
 export default function LevelScreen() {
   const { levelId } = useLocalSearchParams<{ levelId: string }>();
@@ -62,12 +63,12 @@ export default function LevelScreen() {
 
       {/* ── Header ── */}
       <View style={s.header}>
-    <TouchableOpacity
+    <AppPressable
     onPress={() => router.push('/(tabs)/aprendizaje')}
     style={s.backBtn}
   >
   <Ionicons name="chevron-back-circle" size={32} color={colors.primary} />
-</TouchableOpacity>
+</AppPressable>
 
         <Text style={[s.title, { color: colors.text.primary }]}>
           <Text style={{ color: colors.primary }}>Nivel {levelId}›</Text>
@@ -90,18 +91,19 @@ export default function LevelScreen() {
         </View>
 
         {/* ── Botón CONTINUAR ── */}
-        <TouchableOpacity
+        <AppPressable
           style={[s.continueBtn, {
             backgroundColor: colors.background,
             borderColor: colors.card.border,
           }]}
-          activeOpacity={0.8}
+          pressedScale={0.92}
+          pressedOpacity={0.82}
           onPress={handleContinue}
         >
           <Text style={[s.continueTxt, { color: colors.text.primary }]}>
             {allCompleted ? 'VOLVER A NIVELES' : 'CONTINUAR'}
           </Text>
-        </TouchableOpacity>
+        </AppPressable>
 
         <View style={{ height: 60 }} />
       </ScrollView>

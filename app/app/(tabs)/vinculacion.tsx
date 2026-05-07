@@ -1,11 +1,12 @@
 import {
-  View, Text, ScrollView, StyleSheet, TouchableOpacity,
+  View, Text, ScrollView, StyleSheet,
 } from 'react-native';
 import { Image } from 'expo-image';
 import { useAppStore } from '../../store/useAppStore';
 import { useMockBluetooth } from '../../src/bluetooth/mockBluetooth';
 import { useTheme } from '../../hooks/useTheme';
 import { useAssets } from '../../hooks/useAssets';
+import { AppPressable } from '../../components/ui/app-pressable';
 
 // ── Estado simulado — reemplazar con BLE real en sprint futuro ──
 
@@ -80,9 +81,10 @@ export default function VinculacionScreen() {
         </View>
 
         {/* BOTÓN BUSCAR GUANTE */}
-        <TouchableOpacity
+        <AppPressable
           style={[s.searchBtn, { backgroundColor: colors.primary }]}
-          activeOpacity={0.75}
+          pressedScale={0.92}
+          pressedOpacity={0.82}
           // onPress={() => { /* lógica BLE futura aquí */ }}
           onPress={() => {
             if (isConnected) {
@@ -97,7 +99,7 @@ export default function VinculacionScreen() {
           <Text style={[s.searchBtnText, { color: colors.text.inverse }]}>
             Buscar Guante
           </Text>
-        </TouchableOpacity>
+        </AppPressable>
 
         {/* BATERÍA */}
         <View style={s.batteryWrapper}>

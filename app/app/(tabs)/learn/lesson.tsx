@@ -2,7 +2,6 @@ import {
   View,
   Text,
   StyleSheet,
-  TouchableOpacity,
   ScrollView,
   Dimensions,
 } from 'react-native';
@@ -12,6 +11,7 @@ import { useState, useRef } from 'react';
 import { useTheme } from '../../../hooks/useTheme';
 import { LEVEL_DATA } from '../../../constants/learnData';
 import { SignCard } from '../../../components/learn/SignCard';
+import { AppPressable } from '../../../components/ui/app-pressable';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -60,7 +60,7 @@ export default function LessonScreen() {
 
       {/* ── Header ── */}
       <View style={s.header}>
-        <TouchableOpacity
+        <AppPressable
         onPress={() =>
         router.push({
         pathname: '/(tabs)/learn/[levelId]',
@@ -70,7 +70,7 @@ export default function LessonScreen() {
   style={s.backBtn}
 >
   <Ionicons name="chevron-back-circle" size={32} color={colors.primary} />
-</TouchableOpacity>
+</AppPressable>
         <Text style={[s.headerTitle, { color: colors.text.primary }]}>
           {lesson.title}
         </Text>
@@ -109,40 +109,39 @@ export default function LessonScreen() {
 
         {/* ── Navegación anterior (solo si hay múltiples señas) ── */}
         {hasMultipleSigns && !isFirst && (
-          <TouchableOpacity
+          <AppPressable
             style={[s.prevBtn, { borderColor: colors.card.border }]}
             onPress={() => setCurrentIndex((i) => i - 1)}
-            activeOpacity={0.7}
           >
             <Ionicons name="chevron-back" size={18} color={colors.text.secondary} />
             <Text style={[s.prevTxt, { color: colors.text.secondary }]}>Anterior</Text>
-          </TouchableOpacity>
+          </AppPressable>
         )}
 
         {/* ── Botones principales ── */}
         <View style={s.btnGroup}>
-          <TouchableOpacity
+          <AppPressable
             style={[s.btnSecondary, {
               backgroundColor: colors.card.background,
               borderColor: colors.card.border,
             }]}
             onPress={handleRepeat}
-            activeOpacity={0.8}
           >
             <Text style={[s.btnSecondaryTxt, { color: colors.text.primary }]}>
               Repetir lección
             </Text>
-          </TouchableOpacity>
+          </AppPressable>
 
-          <TouchableOpacity
+          <AppPressable
             style={[s.btnPrimary, { backgroundColor: colors.card.background, borderColor: colors.card.border }]}
             onPress={handleContinue}
-            activeOpacity={0.8}
+            pressedScale={0.92}
+            pressedOpacity={0.82}
           >
             <Text style={[s.btnPrimaryTxt, { color: colors.text.primary }]}>
               {isLast ? 'Finalizar' : 'Continuar'}
             </Text>
-          </TouchableOpacity>
+          </AppPressable>
         </View>
 
         <View style={{ height: 60 }} />

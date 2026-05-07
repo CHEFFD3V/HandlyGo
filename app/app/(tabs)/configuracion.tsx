@@ -10,11 +10,11 @@ import {
   StyleSheet,
   Text,
   TextInput,
-  TouchableOpacity,
   View,
 } from 'react-native';
 import { Image } from 'expo-image';
 import { useTheme } from '../../hooks/useTheme';
+import { AppPressable } from '../../components/ui/app-pressable';
 
 // ─── Assets ──────────────────────────────────────────────────────────────────
 const LIGHT_HEADER_PNG = require('../../assets/images/graphic/iconos_claros/graphic/configuracion.png');
@@ -152,13 +152,14 @@ function ActionButton({ label, color, onPress, C }: {
   C: ColorMap;
 }) {
   return (
-    <TouchableOpacity
+    <AppPressable
       onPress={onPress}
-      activeOpacity={0.82}
+      pressedScale={0.92}
+      pressedOpacity={0.82}
       style={[styles.actionBtn, { backgroundColor: color }]}
     >
       <Text style={[styles.actionBtnText, { color: C.textInverse }]}>{label}</Text>
-    </TouchableOpacity>
+    </AppPressable>
   );
 }
 
@@ -561,18 +562,20 @@ function SettingsModal({
       })}
 
       <View style={styles.settingsActions}>
-        <TouchableOpacity
+        <AppPressable
           onPress={onCancelar}
           style={[styles.cancelBtn, { borderColor: C.modalBorder }]}
         >
           <Text style={[styles.cancelBtnText, { color: C.textMuted }]}>Cancelar</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
+        </AppPressable>
+        <AppPressable
           onPress={onGuardar}
+          pressedScale={0.92}
+          pressedOpacity={0.82}
           style={[styles.saveBtn, { backgroundColor: C.accent }]}
         >
           <Text style={styles.saveBtnText}>Guardar ajustes</Text>
-        </TouchableOpacity>
+        </AppPressable>
       </View>
     </>
   );
@@ -768,7 +771,7 @@ export default function ConfiguracionScreen() {
             {DEDOS.map((dedo, index) => {
               const state = getFingerUiState(dedo);
               return (
-                <Pressable
+                <AppPressable
                   key={dedo}
                   onPress={() => setSelectedFinger(dedo)}
                   style={[
@@ -786,12 +789,14 @@ export default function ConfiguracionScreen() {
                   ]}
                 >
                   <Text style={[styles.fingerBtnText, { color: C.textInverse }]}>{dedo}</Text>
-                </Pressable>
+                </AppPressable>
               );
             })}
 
-            <Pressable
+            <AppPressable
               onPress={iniciarCalibracion}
+              pressedScale={0.92}
+              pressedOpacity={0.82}
               style={[
                 styles.calibrateBtnRebuilt,
                 {
@@ -801,7 +806,7 @@ export default function ConfiguracionScreen() {
               ]}
             >
               <Text style={[styles.calibrateBtnRebuiltText, { color: C.accent }]}>Calibrar</Text>
-            </Pressable>
+            </AppPressable>
           </View>
         </View>
       </ScrollView>

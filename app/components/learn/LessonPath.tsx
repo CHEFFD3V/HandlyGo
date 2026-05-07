@@ -1,8 +1,9 @@
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import { useState } from 'react';
 import { useTheme } from '../../hooks/useTheme';
 import type { Lesson } from '../../constants/learnData';
+import { AppPressable } from '../ui/app-pressable';
 
 type Props = {
   lessons: Lesson[];
@@ -77,10 +78,10 @@ export function LessonPath({ lessons, completedLessons, onPressLesson }: Props) 
           : '#CBD5E1';      // gris — bloqueada
 
         return (
-          <TouchableOpacity
+          <AppPressable
             key={lesson.id}
             onPress={() => onPressLesson(lesson.id, isUnlocked)}
-            activeOpacity={isUnlocked ? 0.7 : 1}
+            disableFeedback={!isUnlocked}
             style={[s.nodeWrapper, { top: y - CIRCLE_RADIUS, left: x - CIRCLE_RADIUS }]}
           >
             <View style={[s.circle, { backgroundColor: circleBg }]}>
@@ -102,7 +103,7 @@ export function LessonPath({ lessons, completedLessons, onPressLesson }: Props) 
                 {lesson.title}
               </Text>
             </View>
-          </TouchableOpacity>
+          </AppPressable>
         );
       })}
 

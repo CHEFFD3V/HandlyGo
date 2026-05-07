@@ -1,10 +1,11 @@
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useRef } from 'react';
 import { useTheme } from '../../../hooks/useTheme';
 import { useProgressStore } from '../../../store/useProgressStore';
 import { LEVEL_DATA } from '../../../constants/learnData';
+import { AppPressable } from '../../../components/ui/app-pressable';
 
 export default function RewardScreen() {
   const { levelId, lessonId, xp } = useLocalSearchParams<{
@@ -68,9 +69,9 @@ export default function RewardScreen() {
 
       {/* ── Header ── */}
       <View style={s.header}>
-        <TouchableOpacity onPress={handleGoToLevel} style={s.backBtn}>
+        <AppPressable onPress={handleGoToLevel} style={s.backBtn}>
           <Ionicons name="chevron-back-circle" size={32} color={colors.primary} />
-        </TouchableOpacity>
+        </AppPressable>
         <Text style={[s.headerTitle, { color: colors.text.primary }]}>
           Recompensa de XP
         </Text>
@@ -102,29 +103,29 @@ export default function RewardScreen() {
         </View>
 
         {/* ── Botón principal ── */}
-        <TouchableOpacity
+        <AppPressable
           style={[s.nextBtn, {
             backgroundColor: colors.background,
             borderColor: colors.card.border,
           }]}
           onPress={handleNext}
-          activeOpacity={0.8}
+          pressedScale={0.92}
+          pressedOpacity={0.82}
         >
           <Text style={[s.nextTxt, { color: colors.text.primary }]}>
            {isLastLesson ? 'Ver nivel completado' : 'Siguiente lección'}
           </Text>
-        </TouchableOpacity>
+        </AppPressable>
 
         {/* ── Botón secundario: volver al nivel (solo si no es la última lección) ── */}
         {!isLastLesson && (
-            <TouchableOpacity
+            <AppPressable
             onPress={handleGoToLevel}
-            activeOpacity={0.7}
         >
             <Text style={[s.skipTxt, { color: colors.text.secondary }]}>
                 Volver al nivel
             </Text>
-            </TouchableOpacity>
+            </AppPressable>
 )}
 
       </View>

@@ -1,6 +1,6 @@
 import {
   View, Text, ScrollView,
-  StyleSheet, TouchableOpacity,
+  StyleSheet,
 } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import { useRouter } from 'expo-router';
