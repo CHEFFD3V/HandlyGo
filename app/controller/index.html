@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HandlyGo — Demo Controller</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
+ 
+  <style>
+    /* ── Reset & Variables ─────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+ 
+    :root {
+      --bg:         #0a0a0f;
+      --surface:    #13131a;
+      --border:     #2a2a3a;
+      --accent:     #7c6fff;
+      --accent-dim: rgba(124, 111, 255, 0.15);
+      --green:      #00e5a0;
+      --red:        #ff4d6a;
+      --yellow:     #ffd166;
+      --text:       #e8e6ff;
+      --muted:      #6b6a8a;
+      --mono:       'Space Mono', monospace;
+      --display:    'Syne', sans-serif;
+    }
+ 
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--mono);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px 60px;
+      gap: 32px;
+    }
+ 
+    /* ── Header ────────────────────────────────────────────────────────────── */
+    .header {
+      text-align: center;
+    }
+ 
+    .header-tag {
+      font-size: 11px;
+      letter-spacing: 4px;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+ 
+    .header h1 {
+      font-family: var(--display);
+      font-size: clamp(28px, 5vw, 44px);
+      font-weight: 800;
+      letter-spacing: -1px;
+      line-height: 1;
+    }
+ 
+    .header h1 span {
+      color: var(--accent);
+    }
+ 
+    /* ── Status bar ────────────────────────────────────────────────────────── */
+    .status-bar {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 20px;
+      width: 100%;
+      max-width: 640px;
+    }
+ 
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--muted);
+      flex-shrink: 0;
+      transition: background 0.3s;
+    }
+ 
+    .status-dot.ok    { background: var(--green); box-shadow: 0 0 8px var(--green); }
+    .status-dot.error { background: var(--red);   box-shadow: 0 0 8px var(--red); }
+ 
+    .status-text {
+      font-size: 12px;
+      color: var(--muted);
+      flex: 1;
+    }
+ 
+    .status-ip {
+      font-size: 11px;
+      color: var(--accent);
+    }
+ 
+    /* ── IP config ─────────────────────────────────────────────────────────── */
+    .ip-section {
+      width: 100%;
+      max-width: 640px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 20px;
+    }
+ 
+    .ip-label {
+      font-size: 11px;
+      letter-spacing: 2px;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+ 
+    .ip-row {
+      display: flex;
+      gap: 10px;
+    }
+ 
+    .ip-input {
+      flex: 1;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 13px;
+      padding: 10px 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+ 
+    .ip-input:focus {
+      border-color: var(--accent);
+    }
+ 
+    .ip-btn {
+      background: var(--accent-dim);
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      font-family: var(--mono);
+      font-size: 12px;
+      padding: 10px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s;
+      white-space: nowrap;
+    }
+ 
+    .ip-btn:hover { background: rgba(124,111,255,0.28); }
+ 
+    /* ── Grupos de botones ─────────────────────────────────────────────────── */
+    .groups {
+      width: 100%;
+      max-width: 640px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+ 
+    .group {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px;
+    }
+ 
+    .group-title {
+      font-size: 10px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 14px;
+    }
+ 
+    .btn-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 10px;
+    }
+ 
+    /* ── Sign button ───────────────────────────────────────────────────────── */
+    .sign-btn {
+      position: relative;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      cursor: pointer;
+      font-family: var(--mono);
+      padding: 14px 12px 10px;
+      text-align: left;
+      transition: border-color 0.15s, transform 0.1s, background 0.15s;
+      overflow: hidden;
+      user-select: none;
+    }
+ 
+    .sign-btn:hover {
+      border-color: var(--accent);
+      background: var(--accent-dim);
+      transform: translateY(-1px);
+    }
+ 
+    .sign-btn:active {
+      transform: translateY(1px) scale(0.97);
+    }
+ 
+    .sign-btn.sent {
+      border-color: var(--green);
+      background: rgba(0, 229, 160, 0.08);
+    }
+ 
+    .sign-btn .btn-word {
+      font-family: var(--display);
+      font-size: 15px;
+      font-weight: 700;
+      display: block;
+      margin-bottom: 4px;
+    }
+ 
+    .sign-btn .btn-id {
+      font-size: 10px;
+      color: var(--muted);
+    }
+ 
+    .sign-btn .ripple {
+      position: absolute;
+      inset: 0;
+      background: rgba(124,111,255,0.12);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+ 
+    .sign-btn.sent .ripple {
+      opacity: 1;
+    }
+ 
+    /* ── Log ───────────────────────────────────────────────────────────────── */
+    .log-section {
+      width: 100%;
+      max-width: 640px;
+    }
+ 
+    .log-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+ 
+    .log-title {
+      font-size: 10px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+ 
+    .log-clear {
+      font-size: 10px;
+      color: var(--muted);
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-family: var(--mono);
+      transition: color 0.2s;
+    }
+ 
+    .log-clear:hover { color: var(--red); }
+ 
+    .log-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      height: 140px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column-reverse;
+      gap: 4px;
+    }
+ 
+    .log-entry {
+      font-size: 11px;
+      line-height: 1.6;
+      color: var(--muted);
+    }
+ 
+    .log-entry .time  { color: var(--accent); margin-right: 6px; }
+    .log-entry .ok    { color: var(--green); }
+    .log-entry .fail  { color: var(--red); }
+    .log-entry .word  { color: var(--text); }
+  </style>
+</head>
+<body>
+ 
+  <!-- Header -->
+  <div class="header">
+    <p class="header-tag">HandlyGo · Sistema de Demo</p>
+    <h1>Demo <span>Controller</span></h1>
+  </div>
+ 
+  <!-- Status bar -->
+  <div class="status-bar">
+    <div class="status-dot" id="statusDot"></div>
+    <span class="status-text" id="statusText">Configura la IP del servidor para comenzar</span>
+    <span class="status-ip" id="statusIp">—</span>
+  </div>
+ 
+  <!-- IP config -->
+  <div class="ip-section">
+    <p class="ip-label">Servidor · IP Local</p>
+    <div class="ip-row">
+      <input
+        class="ip-input"
+        id="ipInput"
+        type="text"
+        placeholder="192.168.1.5"
+        value=""
+      />
+      <button class="ip-btn" onclick="saveIP()">Guardar</button>
+    </div>
+  </div>
+ 
+  <!-- Buttons -->
+  <div class="groups">
+ 
+    <div class="group">
+      <p class="group-title">Saludos</p>
+      <div class="btn-grid">
+        <button class="sign-btn" onclick="send(101, 'Hola')">
+          <div class="ripple"></div>
+          <span class="btn-word">Hola</span>
+          <span class="btn-id">id · 101</span>
+        </button>
+        <button class="sign-btn" onclick="send(102, 'Gracias')">
+          <div class="ripple"></div>
+          <span class="btn-word">Gracias</span>
+          <span class="btn-id">id · 102</span>
+        </button>
+        <button class="sign-btn" onclick="send(103, 'Por favor')">
+          <div class="ripple"></div>
+          <span class="btn-word">Por favor</span>
+          <span class="btn-id">id · 103</span>
+        </button>
+        <button class="sign-btn" onclick="send(106, '¿Cómo estás?')">
+          <div class="ripple"></div>
+          <span class="btn-word">¿Cómo estás?</span>
+          <span class="btn-id">id · 106</span>
+        </button>
+      </div>
+    </div>
+ 
+    <div class="group">
+      <p class="group-title">Respuestas</p>
+      <div class="btn-grid">
+        <button class="sign-btn" onclick="send(104, 'Sí')">
+          <div class="ripple"></div>
+          <span class="btn-word">Sí</span>
+          <span class="btn-id">id · 104</span>
+        </button>
+        <button class="sign-btn" onclick="send(105, 'No')">
+          <div class="ripple"></div>
+          <span class="btn-word">No</span>
+          <span class="btn-id">id · 105</span>
+        </button>
+        <button class="sign-btn" onclick="send(107, 'Bien')">
+          <div class="ripple"></div>
+          <span class="btn-word">Bien</span>
+          <span class="btn-id">id · 107</span>
+        </button>
+        <button class="sign-btn" onclick="send(108, 'Ayuda')">
+          <div class="ripple"></div>
+          <span class="btn-word">Ayuda</span>
+          <span class="btn-id">id · 108</span>
+        </button>
+      </div>
+    </div>
+ 
+  </div>
+ 
+  <!-- Log -->
+  <div class="log-section">
+    <div class="log-header">
+      <span class="log-title">Registro de Eventos</span>
+      <button class="log-clear" onclick="clearLog()">Limpiar</button>
+    </div>
+    <div class="log-box" id="logBox"></div>
+  </div>
+ 
+  <script>
+    // ── Config ──────────────────────────────────────────────────────────────
+    let SERVER_IP = localStorage.getItem("handlygo_ip") || "";
+ 
+    function getBaseURL() {
+      return `http://${SERVER_IP}:3000`;
+    }
+ 
+    function saveIP() {
+      const val = document.getElementById("ipInput").value.trim();
+      if (!val) return;
+      SERVER_IP = val;
+      localStorage.setItem("handlygo_ip", val);
+      document.getElementById("statusIp").textContent = `${val}:3000`;
+      log(`IP guardada → ${val}:3000`, "ok");
+      setStatus("idle");
+    }
+ 
+    // Cargar IP guardada al inicio
+    window.addEventListener("DOMContentLoaded", () => {
+      if (SERVER_IP) {
+        document.getElementById("ipInput").value = SERVER_IP;
+        document.getElementById("statusIp").textContent = `${SERVER_IP}:3000`;
+      }
+    });
+ 
+    // ── Estado UI ───────────────────────────────────────────────────────────
+    let isSending = false;
+ 
+    function setStatus(state, msg) {
+      const dot  = document.getElementById("statusDot");
+      const text = document.getElementById("statusText");
+      dot.className = "status-dot";
+      if (state === "ok")    { dot.classList.add("ok");    text.textContent = msg || "Comando enviado ✓"; }
+      if (state === "error") { dot.classList.add("error"); text.textContent = msg || "Error al enviar"; }
+      if (state === "idle")  { text.textContent = "Servidor configurado. Listo para enviar."; }
+    }
+ 
+    // ── Send ────────────────────────────────────────────────────────────────
+    async function send(id, word) {
+      if (isSending) return;           // evitar envíos simultáneos
+      if (!SERVER_IP) {
+        log("⚠️ Configura la IP antes de enviar", "fail");
+        return;
+      }
+ 
+      isSending = true;
+      const btn = event.currentTarget;
+      btn.classList.add("sent");
+ 
+      try {
+        const res = await fetch(`${getBaseURL()}/command`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id }),
+        });
+ 
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+ 
+        setStatus("ok");
+        log(`Enviado → id=${id}  palabra="${word}"`, "ok");
+      } catch (err) {
+        setStatus("error", `Error: ${err.message}`);
+        log(`Error al enviar id=${id}: ${err.message}`, "fail");
+      } finally {
+        setTimeout(() => { btn.classList.remove("sent"); }, 600);
+        isSending = false;
+      }
+    }
+ 
+    // ── Log ─────────────────────────────────────────────────────────────────
+    function log(msg, type = "") {
+      const box   = document.getElementById("logBox");
+      const entry = document.createElement("div");
+      entry.className = "log-entry";
+ 
+      const now = new Date();
+      const time = `${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}:${String(now.getSeconds()).padStart(2,"0")}`;
+ 
+      entry.innerHTML = `<span class="time">${time}</span><span class="${type}">${msg}</span>`;
+      box.prepend(entry);
+    }
+ 
+    function clearLog() {
+      document.getElementById("logBox").innerHTML = "";
+    }
+  </script>
+</body>
+</html>
