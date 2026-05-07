@@ -1,3 +1,4 @@
+
 /**
  * useMockBluetooth
  * ─────────────────────────────────────────────────────────────────────────────
@@ -11,25 +12,25 @@
  * NOTA: El mock de palabras automáticas fue ELIMINADO.
  * Las palabras ahora vienen del Demo Controller (index.html → server.js → simulate(id)).
  */
- 
+ 
 import { useEffect, useRef } from "react";
 import { useAppStore } from "../../store/useAppStore";
-import { useTranslationStore } from "../../store/useTranslationStore";
 import type { AppState } from "../../store/useAppStore";
- 
-const BATTERY_INTERVAL_MS = 3000;
- 
+ 
+// 4 horas = 14,400s → 100 pasos de 1% → 1 paso cada 144s
+const BATTERY_INTERVAL_MS = 144_000;
+ 
 export function useMockBluetooth() {
   const isTranslating = useAppStore((state: AppState) => state.isTranslating);
   const setBattery    = useAppStore((state: AppState) => state.setBattery);
- 
+ 
   useEffect(() => {
     if (!isTranslating) return;
- 
+ 
     // Simula descarga de batería mientras está traduciendo
     const batteryInterval = setInterval(() => {
       const currentBattery = useAppStore.getState().battery;
- 
+ 
       if (currentBattery <= 0) {
         clearInterval(batteryInterval);
         useAppStore.getState().stopTranslating();
@@ -37,10 +38,10 @@ export function useMockBluetooth() {
         console.log("[MockBluetooth] Batería agotada — guante desconectado.");
         return;
       }
- 
-      setBattery(currentBattery - 5);
+ 
+      setBattery(currentBattery - 1);
     }, BATTERY_INTERVAL_MS);
- 
+ 
     return () => {
       clearInterval(batteryInterval);
     };

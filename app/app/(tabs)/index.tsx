@@ -75,8 +75,8 @@ const todayCount = useAppStore((s) => s.todayCount);
   if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
 
   resetTimerRef.current = setTimeout(() => {
-    useTranslationStore.getState().clearHistory();
-  }, RESET_DELAY_MS);
+  useTranslationStore.getState().clearCurrent(); // ← solo limpia la palabra actual
+}, RESET_DELAY_MS);
 
   return () => {
     if (resetTimerRef.current) clearTimeout(resetTimerRef.current);

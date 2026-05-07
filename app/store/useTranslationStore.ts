@@ -87,6 +87,7 @@ export const useTranslationStore = create<TranslationState>((set, get) => ({
     const lastId = history[history.length - 1]?.id;
     const isDuplicate = lastId === word.id;
 
+    console.log(`[debug] isDuplicate=${isDuplicate} lastId=${lastId} wordId=${word.id}`);
       if (!isDuplicate) {
     useAppStore.getState().incrementTodayCount(); // ← incrementa el contador
   }
