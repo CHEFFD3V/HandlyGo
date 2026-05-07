@@ -9,7 +9,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from "../../hooks/useTheme";
 import { useAssets } from "../../hooks/useAssets";
 import { Image } from 'expo-image';
-import { useAppStore } from '../../store/useAppStore';
+import { useTranslationStore } from '../../store/useTranslationStore';
 import { useMockBluetooth } from '../../src/bluetooth/mockBluetooth';
 import Animated, {
   useSharedValue,
@@ -25,10 +25,10 @@ export default function HomeScreen() {
   const router = useRouter();
   const { colors } = useTheme();
   const assets = useAssets();
-  const currentWord = useAppStore((s) => s.currentWord);
-  const history     = useAppStore((s) => s.history);
-  const todayCount  = useAppStore((s) => s.todayCount);
-  const clearHistory = useAppStore((s) => s.clearHistory);
+  const currentWord = useTranslationStore((s) => s.currentWord?.texto ?? null);
+  const history     = useTranslationStore((s) => s.history.map((w) => w.texto));
+  const status      = useTranslationStore((s) => s.status);
+  const clearHistory = useTranslationStore((s) => s.clearHistory);
 
   const translationScrollRef = useRef<ScrollView>(null);
   const lastHistoryCountRef  = useRef(history.length);
@@ -175,7 +175,7 @@ export default function HomeScreen() {
           </View>
           <View style={[s.gridCard, s.tiltRight, { borderColor: colors.card.border, backgroundColor: colors.card.background }]}>
             <Text style={[s.gridLabel, { color: colors.text.secondary }]}>Gestos de Hoy</Text>
-            <Text style={[s.gridValue, { color: colors.accent }]}>{todayCount}</Text>
+            <Text style={[s.gridValue, { color: colors.accent }]}>{status}</Text>
           </View>
         </View>
 
