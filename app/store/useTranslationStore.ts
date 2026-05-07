@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { db } from "@/services/firebaseConfig";
 import { collection, query, where, getDocs } from "firebase/firestore";
+import { useAppStore } from "./useAppStore";
 
 // ── Tipos ────────────────────────────────────────────────────────────────────
 
@@ -11,89 +12,94 @@ export type TranslationWord = {
   category?: string;
 };
 
-type TranslationStore = {
-  // Estado
+type FetchStatus = "idle" | "loading" | "error";
+
+type TranslationState = {
   currentWord: TranslationWord | null;
   history: TranslationWord[];
-  isLoading: boolean;
+  status: FetchStatus;
   error: string | null;
 
-  // Acciones
   setWordFromId: (id: number) => Promise<void>;
+  setWordDirect: (word: TranslationWord) => void;  // ← nuevo
   clearCurrent: () => void;
   clearHistory: () => void;
 };
 
 // ── Store ────────────────────────────────────────────────────────────────────
 
-export const useTranslationStore = create<TranslationStore>((set, get) => ({
-  // Estado inicial
+export const useTranslationStore = create<TranslationState>((set, get) => ({
   currentWord: null,
   history: [],
-  isLoading: false,
+  status: "idle",
   error: null,
 
-  /**
-   * setWordFromId
-   * Consulta Firebase por el ID de traducción, actualiza el estado
-   * y dispara el audio de vuelta al guante.
-   *
-   * Flujo: simulate(id) → Firebase (translations) → Store → UI → Audio
-   */
+  // ── setWordFromId (Firebase) ────────────────────────────────────────────────
   setWordFromId: async (id: number) => {
-    set({ isLoading: true, error: null });
+    set({ status: "loading", error: null });
 
     try {
-      // 1. Consultar Firestore: colección 'translations', campo id == id
       const translationsRef = collection(db, "translations");
       const q = query(translationsRef, where("id", "==", id));
       const snapshot = await getDocs(q);
 
       if (snapshot.empty) {
-        const errMsg = `[TranslationStore] No se encontró traducción con id=${id}`;
-        console.warn(errMsg);
-        set({ isLoading: false, error: errMsg });
+        const msg = `[TranslationStore] Sin resultado para id=${id}`;
+        console.warn(msg);
+        set({ status: "error", error: msg });
         return;
       }
 
-      // 2. Mapear el primer documento encontrado
       const doc = snapshot.docs[0];
       const data = doc.data();
 
       const word: TranslationWord = {
-        id: data.id ?? id,
-        texto: data.texto ?? data.text ?? "Sin texto",
-        audio: data.audio ?? data.audioCmd ?? "",
+        id:       data.id       ?? id,
+        texto:    data.texto    ?? data.text    ?? "Sin texto",
+        audio:    data.audio    ?? data.audioCmd ?? "",
         category: data.category ?? undefined,
       };
 
-      console.log(`[TranslationStore] Traducción recibida:`, word);
-
-      // 3. Actualizar historial (sin duplicados consecutivos)
       const { history } = get();
-      const lastEntry = history[history.length - 1];
-      const isDuplicate = lastEntry?.id === word.id;
+      const lastId = history[history.length - 1]?.id;
+      const isDuplicate = lastId === word.id;
 
       set({
         currentWord: word,
         history: isDuplicate ? history : [...history, word],
-        isLoading: false,
+        status: "idle",
         error: null,
       });
 
-      // 4. Log del audio (aquí iría la integración con la bocina del guante)
       if (word.audio) {
-        console.log(`[TranslationStore] Audio a enviar al guante: "${word.audio}"`);
-        // TODO: BLE Write(audio) → guante → bocina
+        console.log(`[TranslationStore] Audio cmd: "${word.audio}"`);
       }
-    } catch (error) {
-      const errMsg = `[TranslationStore] Error consultando Firebase: ${error}`;
-      console.error(errMsg);
-      set({ isLoading: false, error: errMsg });
+    } catch (err) {
+      const msg = `[TranslationStore] Error Firebase: ${err}`;
+      console.error(msg);
+      set({ status: "error", error: msg });
     }
   },
 
-  clearCurrent: () => set({ currentWord: null }),
+  // ── setWordDirect (mock / sin Firebase) ────────────────────────────────────
+  setWordDirect: (word: TranslationWord) => {
+    const { history } = get();
+    const lastId = history[history.length - 1]?.id;
+    const isDuplicate = lastId === word.id;
 
+      if (!isDuplicate) {
+    useAppStore.getState().incrementTodayCount(); // ← incrementa el contador
+  }
+
+    set({
+      currentWord: word,
+      history: isDuplicate ? history : [...history, word],
+      status: "idle",
+      error: null,
+    });
+  },
+
+  // ── Helpers ─────────────────────────────────────────────────────────────────
+  clearCurrent: () => set({ currentWord: null }),
   clearHistory: () => set({ history: [], currentWord: null }),
 }));

@@ -9,13 +9,14 @@ import {
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../hooks/useTheme';
-import { useAppStore } from '../store/useAppStore';
+import { useTranslationStore } from '../store/useTranslationStore';
 
 export default function TranslationFullscreen() {
   const router = useRouter();
   const { colors } = useTheme();
-  const currentWord = useAppStore((s) => s.currentWord);
-  const history = useAppStore((s) => s.history);
+const currentWord = useTranslationStore((s) => s.currentWord?.texto ?? null);
+const historyRaw  = useTranslationStore((s) => s.history);
+const history     = historyRaw.map((w) => w.texto);
 
   // Build the full translated sentence from history (last 10 words)
 const displayText =

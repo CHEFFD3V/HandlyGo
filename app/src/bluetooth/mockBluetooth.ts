@@ -14,6 +14,7 @@
  
 import { useEffect, useRef } from "react";
 import { useAppStore } from "../../store/useAppStore";
+import { useTranslationStore } from "../../store/useTranslationStore";
 import type { AppState } from "../../store/useAppStore";
  
 const BATTERY_INTERVAL_MS = 3000;
