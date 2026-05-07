@@ -1,8 +1,9 @@
 import {
   View, Text, ScrollView,
-  StyleSheet,
+  StyleSheet, TouchableOpacity,
 } from 'react-native';
-import Svg, { Path, Text as SvgText, TextPath } from 'react-native-svg';
+import Svg, { Path, Defs, LinearGradient, Rect, Stop, Text as SvgText, TextPath } from 'react-native-svg';
+import { useRef, useEffect } from 'react';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from "../../hooks/useTheme";
@@ -10,7 +11,6 @@ import { useAssets } from "../../hooks/useAssets";
 import { Image } from 'expo-image';
 import { useAppStore } from '../../store/useAppStore';
 import { useMockBluetooth } from '../../src/bluetooth/mockBluetooth';
-import { useEffect } from 'react';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -18,17 +18,29 @@ import Animated, {
   withSequence,
 } from 'react-native-reanimated';
 
+const AUTO_SCROLL_THRESHOLD = 24;
+
 export default function HomeScreen() {
   const router = useRouter();
   const { colors } = useTheme();
   const assets = useAssets();
-  const { theme } = useTheme();
   const currentWord = useAppStore((s) => s.currentWord);
   const history     = useAppStore((s) => s.history);
   const todayCount  = useAppStore((s) => s.todayCount);
+
+  const translationScrollRef = useRef<ScrollView>(null);
+  const lastHistoryCountRef  = useRef(history.length);
+  const shouldAutoScrollRef  = useRef(false);
+  const isNearBottomRef      = useRef(true);
+
   const opacity = useSharedValue(1);
   const scale   = useSharedValue(1);
+
   useMockBluetooth();
+
+  const translationText = history.length > 0
+    ? history.join(' ')
+    : 'Esperando traducción...';
 
   useEffect(() => {
     opacity.value = withSequence(
@@ -40,6 +52,14 @@ export default function HomeScreen() {
       withTiming(1,   { duration: 300 }),
     );
   }, [currentWord]);
+
+  useEffect(() => {
+    const hasNewContent = history.length > lastHistoryCountRef.current;
+    if (hasNewContent && isNearBottomRef.current) {
+      shouldAutoScrollRef.current = true;
+    }
+    lastHistoryCountRef.current = history.length;
+  }, [history.length]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     opacity: opacity.value,
@@ -62,7 +82,7 @@ export default function HomeScreen() {
           />
         </View>
 
-        {/* Ola — bloque propio en el flujo, nada se superpone */}
+         {/* Ola — bloque propio en el flujo, nada se superpone */}
         <View style={s.waveArea}>
           <Svg
             viewBox="0 0 1024 504"
@@ -139,7 +159,7 @@ export default function HomeScreen() {
           </Svg>
         </View>
 
-        {/* Gran tarjeta karaoke */}
+        {/* Tarjeta karaoke */}
         <Animated.View style={[s.karoCard, animatedStyle, { borderColor: colors.card.border, backgroundColor: colors.card.background }]}>
           <Text style={[s.karoText, { color: colors.text.primary }]}>
             {currentWord ?? 'Esperando...'}
@@ -160,16 +180,60 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        {/* Sección de traducción */}
+        {/* Caja de traducción */}
         <View style={[s.translateBox, { borderColor: colors.card.border, backgroundColor: colors.translation.background }]}>
-          <View style={s.translateContent}>
-            <Ionicons name="volume-medium-outline" size={20} color={colors.icon.primary} />
-            <Text style={[s.translateText, { color: colors.translation.text }]}>
-              "Hola, ¿cómo estás?{'\n'}me siento muy feliz hoy,{'\n'}te encuentras bien?"
-            </Text>
+          <View style={s.translateViewport}>
+            <Ionicons
+              name="volume-medium-outline"
+              size={20}
+              color={colors.icon.primary}
+              style={s.translateIcon}
+            />
+            <ScrollView
+              ref={translationScrollRef}
+              style={s.translateScroll}
+              contentContainerStyle={s.translateContent}
+              nestedScrollEnabled
+              showsVerticalScrollIndicator={false}
+              scrollEventThrottle={16}
+              onScroll={({ nativeEvent }) => {
+                const distanceFromBottom =
+                  nativeEvent.contentSize.height -
+                  (nativeEvent.layoutMeasurement.height + nativeEvent.contentOffset.y);
+                isNearBottomRef.current = distanceFromBottom <= AUTO_SCROLL_THRESHOLD;
+              }}
+              onContentSizeChange={() => {
+                if (!shouldAutoScrollRef.current) return;
+                translationScrollRef.current?.scrollToEnd({ animated: true });
+                shouldAutoScrollRef.current = false;
+              }}
+            >
+              <Text style={[s.translateText, { color: colors.translation.text }]}>
+                {translationText}
+              </Text>
+            </ScrollView>
+
+            <View pointerEvents="none" style={s.fadeTop}>
+              <Svg width="100%" height="100%" preserveAspectRatio="none">
+                <Defs>
+                  <LinearGradient id="translateFadeTop" x1="0" y1="0" x2="0" y2="1">
+                    <Stop offset="0%" stopColor={colors.translation.background} stopOpacity={1} />
+                    <Stop offset="100%" stopColor={colors.translation.background} stopOpacity={0} />
+                  </LinearGradient>
+                </Defs>
+                <Rect x="0" y="0" width="100%" height="100%" fill="url(#translateFadeTop)" />
+              </Svg>
+            </View>
           </View>
+
           <View style={s.translateFooter}>
-            <Ionicons name="expand-outline" size={16} color={colors.primary} />
+            <TouchableOpacity
+              onPress={() => router.push('../translation-fullscreen')}
+              accessibilityLabel="Ver traducción en pantalla completa"
+              accessibilityRole="button"
+            >
+              <Ionicons name="expand-outline" size={20} color={colors.primary} />
+            </TouchableOpacity>
           </View>
         </View>
 
@@ -188,15 +252,14 @@ const s = StyleSheet.create({
   },
 
   logo: {
-    width: 260,
-    height: 260,
+    width: 300,
+    height: 300,
   },
 
-  // La ola tiene su propio espacio en el flujo
   waveArea: {
     width: '100%',
-    marginBottom: 24,
     marginTop: -75,
+    marginBottom: 24,
   },
 
   container: {
@@ -234,13 +297,8 @@ const s = StyleSheet.create({
     paddingHorizontal: 16,
   },
 
-  tiltLeft: {
-    transform: [{ rotate: '-3deg' }],
-  },
-
-  tiltRight: {
-    transform: [{ rotate: '3deg' }],
-  },
+  tiltLeft:  { transform: [{ rotate: '-3deg' }] },
+  tiltRight: { transform: [{ rotate: '3deg'  }] },
 
   gridLabel: {
     fontSize: 15,
@@ -262,21 +320,47 @@ const s = StyleSheet.create({
     borderRadius: 12,
     overflow: 'hidden',
     marginHorizontal: 16,
+    height: 160,
+    maxHeight: 160,
   },
-
+  translateViewport: {
+    flex: 1,
+    position: 'relative',
+  },
+  translateScroll: {
+    flex: 1,
+  },
   translateContent: {
-    flexDirection: 'row',
-    padding: 16,
-    gap: 10,
+    flexGrow: 1,
+    paddingRight: 19,
+    paddingLeft: 10,
+    paddingBottom: 0,
+  },
+  translateIcon: {
+    position: 'absolute',
+    top: 130,
+    left: 350,
+    zIndex: 10,
   },
   translateText: {
-    fontSize: 20,
-    lineHeight: 28,
-    flex: 1,
+    fontSize: 18,
+    lineHeight: 21,
+    fontFamily: 'Poppins-Medium',
+    marginLeft: 13,
+    padding: 6,
+  },
+  fadeTop: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 0,
   },
   translateFooter: {
     alignItems: 'flex-end',
+    paddingTop: 8,
     paddingRight: 12,
     paddingBottom: 8,
+    position: 'absolute',
   },
 });
