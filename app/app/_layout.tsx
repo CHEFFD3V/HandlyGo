@@ -35,13 +35,16 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <Stack
-        screenOptions={{
-          headerShown: false,
-          contentStyle: {
-            backgroundColor: colors.background,
-          },
-        }}
-      />
+  screenOptions={{
+    headerShown: false,
+    animation: 'slide_from_right',
+    animationDuration: 200,
+
+    contentStyle: {
+      backgroundColor: colors.background,
+    },
+  }}
+/>
     </SafeAreaProvider>
   );
 }
