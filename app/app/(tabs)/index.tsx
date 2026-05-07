@@ -12,6 +12,7 @@ import { Image } from 'expo-image';
 import { useTranslationStore } from '../../store/useTranslationStore';
 import { useMockBluetooth } from '../../src/bluetooth/mockBluetooth';
 import { useAppStore } from '../../store/useAppStore';
+import { useAudioPlayer } from '../../hooks/useAudioPlayer'; // ← NUEVO
 
 import Animated, {
   useSharedValue,
@@ -27,10 +28,11 @@ export default function HomeScreen() {
   const router = useRouter();
   const { colors } = useTheme();
   const assets = useAssets();
-  const currentWord = useTranslationStore((s) => s.currentWord?.texto ?? null);
+  const currentWord = useTranslationStore((s) => s.currentWord);
+  const audioUrl = currentWord?.audio ?? null; // ← campo 'audio' del store
   const historyRaw = useTranslationStore((s) => s.history);
   const history = historyRaw.map((w) => w.texto);
-const todayCount = useAppStore((s) => s.todayCount);
+  const todayCount = useAppStore((s) => s.todayCount);
 
   const translationScrollRef = useRef<ScrollView>(null);
   const lastHistoryCountRef  = useRef(history.length);
@@ -40,6 +42,9 @@ const todayCount = useAppStore((s) => s.todayCount);
 
   const opacity = useSharedValue(1);
   const scale   = useSharedValue(1);
+
+  // 🔊 Hook de audio (se activa con el URL del audio)
+  const { replay } = useAudioPlayer(audioUrl);
 
   useMockBluetooth();
 
@@ -160,7 +165,7 @@ const todayCount = useAppStore((s) => s.todayCount);
         {/* Tarjeta karaoke */}
         <Animated.View style={[s.karoCard, animatedStyle, { borderColor: colors.card.border, backgroundColor: colors.card.background }]}>
           <Text style={[s.karoText, { color: colors.text.primary }]}>
-            {currentWord ?? 'Esperando...'}
+            {currentWord?.texto ?? 'Esperando...'}
           </Text>
         </Animated.View>
 
@@ -181,12 +186,19 @@ const todayCount = useAppStore((s) => s.todayCount);
         {/* Caja de traducción */}
         <View style={[s.translateBox, { borderColor: colors.card.border, backgroundColor: colors.translation.background }]}>
           <View style={s.translateViewport}>
-            <Ionicons
-              name="volume-medium-outline"
-              size={20}
-              color={colors.icon.primary}
+            {/* 🔊 Botón de audio (ahora funcional) */}
+            <TouchableOpacity
+              onPress={() => replay()}
+              disabled={!audioUrl}
               style={s.translateIcon}
-            />
+            >
+              <Ionicons
+                name="volume-medium-outline"
+                size={20}
+                color={audioUrl ? colors.primary : '#ccc'}
+              />
+            </TouchableOpacity>
+
             <ScrollView
               ref={translationScrollRef}
               style={s.translateScroll}
@@ -336,9 +348,10 @@ const s = StyleSheet.create({
   },
   translateIcon: {
     position: 'absolute',
-    top: 130,
-    left: 350,
+    top: 8,          // ajusta según tu layout
+    right: 8,        // ajusta según tu layout
     zIndex: 10,
+    padding: 4,      // para ampliar área de toque
   },
   translateText: {
     fontSize: 18,

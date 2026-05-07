@@ -21,7 +21,7 @@ import { useEffect, useRef } from "react";
 import { useAppStore } from "@/store/useAppStore";
  
 // ── Configuración ─────────────────────────────────────────────────────────────
-const SERVER_IP   = "10.0.0.3"; // ⚠️ IP local de la PC
+const SERVER_IP   = "10.215.251.200"; // ⚠️ IP local de la PC
 const SERVER_PORT = 3000;
 const POLL_MS     = 400;
  
