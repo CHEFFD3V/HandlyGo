@@ -1,144 +1,92 @@
 /**
  * simulateHand.ts
  * ─────────────────────────────────────────────────────────────────────────────
- * Utilidad de desarrollo que permite simular el estado físico del guante
- * HandlyGo desde la consola de Expo/Metro, sin necesidad del hardware real.
+ * Utilidad de desarrollo para simular el estado físico del guante HandlyGo
+ * desde la consola de Expo/Metro, sin necesidad del hardware real.
  *
- * Expone la función global `simulateHand(state: GloveState)` que:
- *   1. Recibe el estado booleano de los 5 dedos.
- *   2. Mapea la combinación a un ID de la colección `msd_dictionary` en Firebase.
- *   3. Delega a `simulate(id)` para ejecutar el flujo completo:
- *      Consola → Firebase → Store → UI → Audio
+ * Alcance (según issue):
+ *   - Mano completamente abierta
+ *   - Mano completamente cerrada
+ *   - Cada dedo individualmente abierto o cerrado
+ *   - Estado del guante: encendido / apagado
  *
  * IMPORTANTE: Solo se registra en entornos __DEV__.
  * En producción el bundler elimina el bloque completo.
  *
  * Uso desde la consola de Expo:
  *   simulateHand({ thumb: true, index: true, middle: false, ring: false, pinky: false })
- *   simulateHandHelp()   // muestra instrucciones y tabla de combinaciones
+ *   simulateGlove(true)      // guante encendido / conectado
+ *   simulateGlove(false)     // guante apagado  / desconectado
+ *   simulateHandHelp()       // muestra instrucciones
  *
  * Convención de dedos:
  *   true  = dedo CERRADO (flexionado)
  *   false = dedo ABIERTO (extendido)
  */
 
+import { useAppStore } from "../store/useAppStore";
+
 // ── Tipo público ──────────────────────────────────────────────────────────────
 
 export type GloveState = {
-  /** Pulgar  — true = cerrado */
+  /** Pulgar  — true = cerrado, false = abierto */
   thumb: boolean;
-  /** Índice  — true = cerrado */
+  /** Índice  — true = cerrado, false = abierto */
   index: boolean;
-  /** Medio   — true = cerrado */
+  /** Medio   — true = cerrado, false = abierto */
   middle: boolean;
-  /** Anular  — true = cerrado */
+  /** Anular  — true = cerrado, false = abierto */
   ring: boolean;
-  /** Meñique — true = cerrado */
+  /** Meñique — true = cerrado, false = abierto */
   pinky: boolean;
 };
 
-// ── Tabla de mapeo: clave binaria → ID de msd_dictionary ────────────────────
-//
-// La clave se construye concatenando los 5 bits en orden:
-//   thumb | index | middle | ring | pinky
-//   "1" = cerrado, "0" = abierto
-//
-// Ejemplo: { thumb:true, index:true, middle:false, ring:false, pinky:false }
-//          → "11000" → ID 101 (letra "A" en MSD)
-//
-// Ampliar esta tabla a medida que se integren nuevas señas al diccionario.
-// Los IDs deben coincidir con el campo `id` de la colección `msd_dictionary`
-// en Firebase. Las combinaciones sin mapeo devuelven null y muestran un aviso.
-// ─────────────────────────────────────────────────────────────────────────────
+// ── Estados predefinidos de uso común ────────────────────────────────────────
 
-const GLOVE_MAP: Record<string, number> = {
-  // ── Vocales ────────────────────────────────────────────────────────────────
-  "10000": 101,  // A — pulgar cerrado, resto abierto
-  "01111": 102,  // E — índice+medio+anular+meñique cerrados, pulgar abierto
-  "00001": 103,  // I — solo meñique cerrado
-  "11110": 104,  // O — pulgar+índice+medio+anular cerrados, meñique abierto
-  "00110": 105,  // U — índice+medio cerrados (juntos), resto abierto
-
-  // ── Letras del abecedario ──────────────────────────────────────────────────
-  "11111": 106,  // Puño cerrado — B (todos los dedos cerrados)
-  "01110": 107,  // C — índice+medio+anular, forma de arco
-  "01100": 108,  // D — índice+medio extendidos
-  "00010": 109,  // F — solo anular cerrado
-  "10001": 110,  // G — pulgar+meñique
-  "11000": 111,  // H — pulgar+índice
-  "00000": 112,  // Mano abierta — L (todos abiertos)
-  "01000": 113,  // Mano apuntando — índice solo extendido
-
-  // ── Palabras básicas ───────────────────────────────────────────────────────
-  "10110": 201,  // Hola
-  "11100": 202,  // Gracias
-  "01001": 203,  // Por favor
-  "10010": 204,  // Sí
-  "01010": 205,  // No
-  "11010": 206,  // Ayuda
-  "10100": 207,  // Agua
-  "10101": 208,  // Comida
-  "00101": 209,  // Casa
-  "11001": 210,  // Familia
- 
-  // ── Frases básicas ─────────────────────────────────────────────────────────
-  "10111": 301,  // Buenos días
-  "01011": 302,  // Buenas noches
-  "11011": 303,  // ¿Cómo estás?
-  "10011": 304,  // Me llamo...
-  "01101": 305,  // No entiendo
-  "11101": 306,  // Repite por favor
+export const GLOVE_PRESETS: Record<string, GloveState> = {
+  /** Todos los dedos abiertos */
+  OPEN:   { thumb: false, index: false, middle: false, ring: false, pinky: false },
+  /** Todos los dedos cerrados — puño */
+  CLOSED: { thumb: true,  index: true,  middle: true,  ring: true,  pinky: true  },
+  /** Solo pulgar cerrado */
+  THUMB:  { thumb: true,  index: false, middle: false, ring: false, pinky: false },
+  /** Solo índice cerrado */
+  INDEX:  { thumb: false, index: true,  middle: false, ring: false, pinky: false },
+  /** Solo medio cerrado */
+  MIDDLE: { thumb: false, index: false, middle: true,  ring: false, pinky: false },
+  /** Solo anular cerrado */
+  RING:   { thumb: false, index: false, middle: false, ring: true,  pinky: false },
+  /** Solo meñique cerrado */
+  PINKY:  { thumb: false, index: false, middle: false, ring: false, pinky: true  },
 };
 
-// ── Función de mapeo ──────────────────────────────────────────────────────────
+// ── Validación del argumento ──────────────────────────────────────────────────
 
-/**
- * Convierte un GloveState en la clave binaria de 5 bits y devuelve
- * el ID del diccionario MSD correspondiente, o null si no hay mapeo.
- */
-export function mapHandToId(state: GloveState): number | null {
-  const key = [
-    state.thumb  ? "1" : "0",
-    state.index  ? "1" : "0",
-    state.middle ? "1" : "0",
-    state.ring   ? "1" : "0",
-    state.pinky  ? "1" : "0",
-  ].join("");
-
-  return GLOVE_MAP[key] ?? null;
+function isValidGloveState(state: unknown): state is GloveState {
+  if (typeof state !== "object" || state === null) return false;
+  const s = state as Record<string, unknown>;
+  return (
+    typeof s.thumb  === "boolean" &&
+    typeof s.index  === "boolean" &&
+    typeof s.middle === "boolean" &&
+    typeof s.ring   === "boolean" &&
+    typeof s.pinky  === "boolean"
+  );
 }
 
-// ── Registro de la función global ─────────────────────────────────────────────
+// ── Registro de funciones globales ────────────────────────────────────────────
 
-/**
- * registerSimulateHandGlobal
- *
- * Registra `simulateHand` y `simulateHandHelp` en el objeto global.
- * Debe llamarse una única vez desde el punto de entrada de la app
- * (app/_layout.tsx), junto a `registerSimulateGlobal`.
- *
- * En producción este bloque completo es NO-OP.
- */
 export function registerSimulateHandGlobal(): void {
   if (!__DEV__) return;
 
-  // ── simulateHand ─────────────────────────────────────────────────────────
-  (global as any).simulateHand = async (state: GloveState): Promise<void> => {
-    // Validar que el argumento sea un objeto con los 5 campos booleanos
-    if (
-      typeof state !== "object" ||
-      state === null ||
-      typeof state.thumb  !== "boolean" ||
-      typeof state.index  !== "boolean" ||
-      typeof state.middle !== "boolean" ||
-      typeof state.ring   !== "boolean" ||
-      typeof state.pinky  !== "boolean"
-    ) {
+  // ── simulateHand — posición de los dedos ─────────────────────────────────
+  (global as any).simulateHand = (state: GloveState): void => {
+    if (!isValidGloveState(state)) {
       console.warn(
-        "[simulateHand] Argumento inválido. Uso correcto:\n" +
-        "  simulateHand({ thumb: true, index: false, middle: false, ring: false, pinky: false })\n" +
-        "  Todos los campos son booleanos obligatorios.\n" +
-        "  true = dedo cerrado | false = dedo abierto"
+        "[simulateHand] Argumento inválido. Todos los campos son booleanos obligatorios.\n" +
+        "  Uso: simulateHand({ thumb: true, index: false, middle: false, ring: false, pinky: false })\n" +
+        "  true = CERRADO | false = abierto\n" +
+        "  Escribe simulateHandHelp() para ver los presets disponibles."
       );
       return;
     }
@@ -151,86 +99,86 @@ export function registerSimulateHandGlobal(): void {
       state.pinky  ? "1" : "0",
     ].join("");
 
+    const dedosCerrados = Object.entries(state).filter(([, v]) =>  v).map(([k]) => k);
+    const dedosAbiertos = Object.entries(state).filter(([, v]) => !v).map(([k]) => k);
+    const esManoAbierta = dedosCerrados.length === 0;
+    const esManoFirmada = dedosAbiertos.length === 0;
+
     console.log(
-      `[simulateHand] Estado recibido:\n` +
-      `  ├── thumb  (pulgar)  : ${state.thumb  ? "CERRADO 🤜" : "abierto"}\n` +
-      `  ├── index  (índice)  : ${state.index  ? "CERRADO 🤜" : "abierto"}\n` +
-      `  ├── middle (medio)   : ${state.middle ? "CERRADO 🤜" : "abierto"}\n` +
-      `  ├── ring   (anular)  : ${state.ring   ? "CERRADO 🤜" : "abierto"}\n` +
-      `  ├── pinky  (meñique) : ${state.pinky  ? "CERRADO 🤜" : "abierto"}\n` +
-      `  └── clave binaria    : ${key}`
+      `[simulateHand] Estado del guante simulado:\n` +
+      `  ├── thumb  (pulgar)  : ${state.thumb  ? "🤜 CERRADO" : "— abierto"}\n` +
+      `  ├── index  (índice)  : ${state.index  ? "🤜 CERRADO" : "— abierto"}\n` +
+      `  ├── middle (medio)   : ${state.middle ? "🤜 CERRADO" : "— abierto"}\n` +
+      `  ├── ring   (anular)  : ${state.ring   ? "🤜 CERRADO" : "— abierto"}\n` +
+      `  ├── pinky  (meñique) : ${state.pinky  ? "🤜 CERRADO" : "— abierto"}\n` +
+      `  ├── clave binaria    : ${key}\n` +
+      `  └── posición         : ${esManoAbierta ? "✋ MANO ABIERTA" : esManoFirmada ? "✊ MANO CERRADA" : "posición parcial"}`
     );
+  };
 
-    const id = mapHandToId(state);
-
-    if (id === null) {
+  // ── simulateGlove — estado encendido / apagado ───────────────────────────
+  (global as any).simulateGlove = (connected: boolean): void => {
+    if (typeof connected !== "boolean") {
       console.warn(
-        `[simulateHand] La combinación "${key}" no tiene mapeo en GLOVE_MAP.\n` +
-        `  → Agrega la entrada correspondiente en app/utils/simulateHand.ts\n` +
-        `  → Llama simulateHandHelp() para ver las combinaciones disponibles.`
+        "[simulateGlove] El argumento debe ser un booleano.\n" +
+        "  simulateGlove(true)   → guante encendido / conectado\n" +
+        "  simulateGlove(false)  → guante apagado  / desconectado"
       );
       return;
     }
 
-    console.log(`[simulateHand] Combinación "${key}" → ID ${id}. Delegando a simulate(${id})...`);
+    const store = useAppStore.getState();
 
-    // Delegar al simulador base que consulta Firebase y actualiza el store
-    if (typeof (global as any).simulate !== "function") {
-      console.error(
-        "[simulateHand] simulate() no está registrado en global.\n" +
-        "  Asegúrate de llamar registerSimulateGlobal() antes de registerSimulateHandGlobal()."
-      );
-      return;
+    if (connected) {
+      store.setConnected(true);
+      store.startTranslating();
+      console.log("[simulateGlove] Guante ENCENDIDO — conectado y traduciendo.");
+    } else {
+      store.stopTranslating();
+      store.setConnected(false);
+      console.log("[simulateGlove] Guante APAGADO — desconectado.");
     }
-
-    await (global as any).simulate(id);
   };
 
   // ── simulateHandHelp ──────────────────────────────────────────────────────
   (global as any).simulateHandHelp = (): void => {
     console.log(
       "\n╔══════════════════════════════════════════════════════╗\n" +
-      "║       HandlyGo — Simulador de Guante (Mano)         ║\n" +
+      "║       HandlyGo — Simulador de Guante               ║\n" +
       "╠══════════════════════════════════════════════════════╣\n" +
-      "║  simulateHand(state)   → simula posición del guante ║\n" +
-      "║  simulateHandHelp()    → muestra esta ayuda         ║\n" +
+      "║  FUNCIONES DISPONIBLES                              ║\n" +
       "║                                                      ║\n" +
-      "║  Estructura de GloveState:                          ║\n" +
-      "║  {                                                   ║\n" +
-      "║    thumb:  boolean,  // pulgar                      ║\n" +
-      "║    index:  boolean,  // índice                      ║\n" +
-      "║    middle: boolean,  // medio                       ║\n" +
-      "║    ring:   boolean,  // anular                      ║\n" +
-      "║    pinky:  boolean,  // meñique                     ║\n" +
-      "║  }                                                   ║\n" +
-      "║  true = CERRADO | false = abierto                   ║\n" +
+      "║  simulateHand(state)                                ║\n" +
+      "║    Simula la posición de los 5 dedos.               ║\n" +
+      "║    true = CERRADO | false = abierto                 ║\n" +
       "║                                                      ║\n" +
-      "║  Ejemplos:                                           ║\n" +
-      "║  simulateHand({thumb:true,  index:false,            ║\n" +
-      "║                middle:false,ring:false,pinky:false}) ║\n" +
-      "║  → Letra A (ID 101)                                 ║\n" +
+      "║  simulateGlove(connected)                           ║\n" +
+      "║    Simula el estado on/off del guante.              ║\n" +
+      "║    true  → encendido / conectado                    ║\n" +
+      "║    false → apagado  / desconectado                  ║\n" +
       "║                                                      ║\n" +
-      "║  simulateHand({thumb:false, index:true,             ║\n" +
-      "║                middle:true, ring:true, pinky:true}) ║\n" +
-      "║  → Letra E (ID 102)                                 ║\n" +
+      "╠══════════════════════════════════════════════════════╣\n" +
+      "║  EJEMPLOS                                           ║\n" +
       "║                                                      ║\n" +
+      "║  Mano abierta (todos abiertos):                     ║\n" +
       "║  simulateHand({thumb:false, index:false,            ║\n" +
-      "║                middle:false,ring:false,pinky:false}) ║\n" +
-      "║  → Mano abierta (ID 112)                            ║\n" +
-      "╠══════════════════════════════════════════════════════╣\n" +
-      "║  Combinaciones disponibles (clave → ID):            ║\n" +
-      "║  10000→101  01111→102  00001→103  11110→104         ║\n" +
-      "║  00110→105  11111→106  01110→107  01100→108         ║\n" +
-      "║  00010→109  10001→110  11000→111  00000→112         ║\n" +
-      "║  01000→113  10110→201  11100→202  01001→203         ║\n" +
-      "║  10010→204  01010→205  11010→206  10100→207         ║\n" +
-      "║  00101→209  11001→210  10111→301  01011→302         ║\n" +
-      "║  11011→303  10011→304  01101→305  11101→306         ║\n" +
+      "║    middle:false, ring:false, pinky:false})          ║\n" +
+      "║                                                      ║\n" +
+      "║  Mano cerrada / puño (todos cerrados):              ║\n" +
+      "║  simulateHand({thumb:true,  index:true,             ║\n" +
+      "║    middle:true,  ring:true,  pinky:true})           ║\n" +
+      "║                                                      ║\n" +
+      "║  Solo pulgar cerrado:                               ║\n" +
+      "║  simulateHand({thumb:true,  index:false,            ║\n" +
+      "║    middle:false, ring:false, pinky:false})          ║\n" +
+      "║                                                      ║\n" +
+      "║  Guante encendido:  simulateGlove(true)             ║\n" +
+      "║  Guante apagado:    simulateGlove(false)            ║\n" +
       "╚══════════════════════════════════════════════════════╝\n"
     );
   };
 
   console.log(
-    "[simulateHand] Simulador de guante registrado. Escribe simulateHandHelp() para más info."
+    "[simulateHand] Registrado. Funciones: simulateHand() | simulateGlove() | simulateHandHelp()"
   );
 }
