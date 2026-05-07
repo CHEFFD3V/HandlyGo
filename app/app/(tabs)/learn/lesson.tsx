@@ -60,9 +60,17 @@ export default function LessonScreen() {
 
       {/* ── Header ── */}
       <View style={s.header}>
-        <TouchableOpacity onPress={() => router.back()} style={s.backBtn}>
-          <Ionicons name="chevron-back-circle" size={32} color={colors.primary} />
-        </TouchableOpacity>
+        <TouchableOpacity
+        onPress={() =>
+        router.push({
+        pathname: '/(tabs)/learn/[levelId]',
+        params: { levelId },
+      })
+  }
+  style={s.backBtn}
+>
+  <Ionicons name="chevron-back-circle" size={32} color={colors.primary} />
+</TouchableOpacity>
         <Text style={[s.headerTitle, { color: colors.text.primary }]}>
           {lesson.title}
         </Text>

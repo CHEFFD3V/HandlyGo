@@ -39,13 +39,19 @@ export default function RewardScreen() {
     }
   }, []);
 
+  const handleGoToLevel = () => {
+    router.dismissAll();
+    router.push({
+      pathname: '/(tabs)/learn/[levelId]',
+      params: { levelId },
+    });
+  };
+
   const handleNext = () => {
     if (isLastLesson) {
-      // Era la última lección — volver a la pantalla de niveles
       router.dismissAll();
       router.push('/(tabs)/aprendizaje');
     } else {
-      // Hay una siguiente lección — navegar directamente a ella
       router.push({
         pathname: '/(tabs)/learn/lesson',
         params: { levelId, lessonId: nextLesson!.id },
@@ -58,13 +64,7 @@ export default function RewardScreen() {
 
       {/* ── Header ── */}
       <View style={s.header}>
-        <TouchableOpacity
-          onPress={() => {
-            router.dismissAll();
-            router.push('/(tabs)/aprendizaje');
-          }}
-          style={s.backBtn}
-        >
+        <TouchableOpacity onPress={handleGoToLevel} style={s.backBtn}>
           <Ionicons name="chevron-back-circle" size={32} color={colors.primary} />
         </TouchableOpacity>
         <Text style={[s.headerTitle, { color: colors.text.primary }]}>
@@ -97,7 +97,7 @@ export default function RewardScreen() {
           </View>
         </View>
 
-        {/* ── Botón ── */}
+        {/* ── Botón principal ── */}
         <TouchableOpacity
           style={[s.nextBtn, {
             backgroundColor: colors.background,
@@ -110,6 +110,18 @@ export default function RewardScreen() {
             {isLastLesson ? 'Volver a niveles' : 'Siguiente lección'}
           </Text>
         </TouchableOpacity>
+
+        {/* ── Botón secundario: volver al nivel (solo si no es la última lección) ── */}
+        {!isLastLesson && (
+          <TouchableOpacity
+            onPress={handleGoToLevel}
+            activeOpacity={0.7}
+          >
+            <Text style={[s.skipTxt, { color: colors.text.secondary }]}>
+              Volver a niveles
+            </Text>
+          </TouchableOpacity>
+        )}
 
       </View>
     </View>
@@ -202,5 +214,10 @@ const s = StyleSheet.create({
   nextTxt: {
     fontSize: 16,
     fontWeight: '700',
+  },
+  skipTxt: {
+    fontSize: 14,
+    fontWeight: '500',
+    textDecorationLine: 'underline',
   },
 });
