@@ -3,6 +3,7 @@ import { View, ActivityIndicator } from "react-native";
 import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useProgressStore } from "@/store/useProgressStore";
+import { getTranslationById } from "@/services/firebase/translations"; 
 
 const ONBOARDING_KEY = "onboardingComplete";
 
@@ -17,6 +18,9 @@ export default function Index() {
           initialize(),
           AsyncStorage.getItem(ONBOARDING_KEY),
         ]);
+
+        const testData = await getTranslationById(101);
+        console.log("Prueba traducción:", testData);
 
         if (onboardingValue === "true") {
           router.replace("/(tabs)");

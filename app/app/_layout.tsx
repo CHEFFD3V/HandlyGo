@@ -6,8 +6,11 @@ import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen'; 
 import { useEffect } from 'react';           
 import { registerSimulateGlobal } from '@/utils/simulateConsole';
+import { useDemoController } from '@/hooks/useDemoController';      
+
 
 registerSimulateGlobal();
+useDemoController({ enabled: __DEV__ });
 
 SplashScreen.preventAutoHideAsync();         
 
