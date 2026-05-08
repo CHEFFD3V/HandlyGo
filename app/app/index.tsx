@@ -4,6 +4,7 @@ import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useProgressStore } from "@/store/useProgressStore";
 import { getTranslationById } from "@/services/firebase/translations"; 
+import { getLessonById } from '../services/lessons';
 
 const ONBOARDING_KEY = "onboardingComplete";
 
@@ -21,6 +22,17 @@ export default function Index() {
 
         const testData = await getTranslationById(101);
         console.log("Prueba traducción:", testData);
+
+        const testLesson = await getLessonById(1);
+        if (testLesson) {
+          console.log("🎬 LECCIÓN 1 CARGADA #67:", {
+            Titulo: testLesson.title,
+            VideoURL: testLesson.video,
+            Nivel: testLesson.level
+          });
+        } else {
+          console.warn("⚠️ No se encontró la lección 1 en Firestore. Revisa la colección 'lessons'.");
+        }
 
         if (onboardingValue === "true") {
           router.replace("/(tabs)");
